@@ -1,0 +1,376 @@
+html * {
+    margin: 0;
+    /*padding: 0; SELECT NOT DISPLAYED CORRECTLY IN FIREFOX */
+}
+
+/* GENERAL */
+
+.spinner {
+    padding: 5px;
+    position: absolute;
+    right: 0;
+}
+
+body {
+    background: #fff;
+    color: #333;
+    font: 11px verdana, arial, helvetica, sans-serif;
+}
+#smurfLogo {
+	padding:20px;
+}
+
+a:link, a:visited, a:hover {
+    color: #666;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+h1 {
+    color: #3be;
+    font-weight: normal;
+    font-size: 16px;
+    margin: .8em 0 .3em 0;
+}
+
+ul {
+    padding-left: 15px;
+}
+
+input, select, textarea {
+    background-color: #fcfcfc;
+    border: 1px solid #ccc;
+    font: 11px verdana, arial, helvetica, sans-serif;
+    margin: 2px 0;
+    padding: 2px 4px;
+}
+select {
+   padding: 2px 2px 2px 0;
+}
+textarea {
+	width: 250px;
+	height: 150px;
+	vertical-align: top;
+}
+
+input:focus, select:focus, textarea:focus {
+    border: 1px solid #b2d1ff;
+}
+
+.body {
+  /*  float: left; */
+    margin: 0 15px 10px 15px;
+}
+
+/* NAVIGATION MENU */
+
+.nav {
+    background: #fff url(../images/skin/shadow.jpg) bottom repeat-x;
+    border: 1px solid #ccc;
+    border-style: solid none solid none;
+    margin-top: 5px;
+    padding: 7px 12px;
+}
+
+.menuButton {
+    font-size: 10px;
+    padding: 0 5px;
+}
+.menuButton a {
+    color: #333;
+    padding: 4px 6px;
+}
+.menuButton a.home {
+    background: url(../images/skin/house.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+.menuButton a.list {
+    background: url(../images/skin/database_table.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+.menuButton a.create {
+    background: url(../images/skin/database_add.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+
+/* MESSAGES AND ERRORS */
+
+.message {
+    background: #f3f8fc url(../images/skin/information.png) 8px 50% no-repeat;
+    border: 1px solid #b2d1ff;
+    color: #006dba;
+    margin: 10px 0 5px 0;
+    padding: 5px 5px 5px 30px
+}
+
+div.errors {
+    background: #fff3f3;
+    border: 1px solid red;
+    color: #cc0000;
+    margin: 10px 0 5px 0;
+    padding: 5px 0 5px 0;
+}
+div.errors ul {
+    list-style: none;
+    padding: 0;
+}
+div.errors li {
+	background: url(../images/skin/exclamation.png) 8px 0% no-repeat;
+    line-height: 16px;
+    padding-left: 30px;
+}
+
+td.errors select {
+    border: 1px solid red;
+}
+td.errors input {
+    border: 1px solid red;
+}
+td.errors textarea {
+    border: 1px solid red;
+}
+
+/* TABLES */
+
+table {
+    border: 1px solid #ccc;
+    width: 100%
+}
+tr {
+    border: 0;
+}
+td, th {
+    font: 11px verdana, arial, helvetica, sans-serif;
+    line-height: 12px;
+    padding: 5px 6px;
+    text-align: left;
+    vertical-align: top;
+}
+th {
+    background: #fff url(../images/skin/shadow.jpg);
+    color: #666;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 17px;
+    padding: 2px 6px;
+}
+th a:link, th a:visited, th a:hover {
+    color: #333;
+    display: block;
+    font-size: 10px;
+    text-decoration: none;
+    width: 100%;
+}
+th.asc a, th.desc a {
+    background-position: right;
+    background-repeat: no-repeat;
+}
+th.asc a {
+    background-image: url(../images/skin/sorted_asc.gif);
+}
+th.desc a {
+    background-image: url(../images/skin/sorted_desc.gif);
+}
+
+.odd {
+    background: #f7f7f7;
+}
+.even {
+    background: #fff;
+}
+
+/* LIST */
+
+.list table {
+    border-collapse: collapse;
+}
+.list th, .list td {
+    border-left: 1px solid #ddd;
+}
+.list th:hover, .list tr:hover {
+    background: #b2d1ff;
+}
+
+/* PAGINATION */
+
+.paginateButtons {
+    background: #fff url(../images/skin/shadow.jpg) bottom repeat-x;
+    border: 1px solid #ccc;
+    border-top: 0;
+    color: #666;
+    font-size: 10px;
+    overflow: hidden;
+    padding: 10px 3px;
+}
+.paginateButtons a {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-color: #ccc #aaa #aaa #ccc;
+    color: #666;
+    margin: 0 3px;
+    padding: 2px 6px;
+}
+.paginateButtons span {
+    padding: 2px 3px;
+}
+
+/* DIALOG */
+
+.dialog table {
+    padding: 5px 0;
+}
+
+.prop {
+    padding: 5px;
+}
+.prop .name {
+    text-align: left;
+    width: 15%;
+    white-space: nowrap;
+}
+.prop .value {
+    text-align: left;
+    width: 85%;
+}
+
+/* ACTION BUTTONS */
+
+.buttons {
+    background: #fff url(../images/skin/shadow.jpg) bottom repeat-x;
+    border: 1px solid #ccc;
+    color: #666;
+    font-size: 10px;
+    margin-top: 5px;
+    overflow: hidden;
+    padding: 0;
+}
+
+.buttons input {
+    background: #fff;
+    border: 0;
+    color: #333;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 3px;
+    overflow: visible;
+    padding: 2px 6px;
+}
+.buttons input.delete {
+    background: transparent url(../images/skin/database_delete.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+.buttons input.edit {
+    background: transparent url(../images/skin/database_edit.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+.buttons input.save {
+    background: transparent url(../images/skin/database_save.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+
+div#smurfLogo { border-bottom:2px solid #3be; }
+div.page-body { padding:20px;}
+td.details {text-align:left;}
+td.thumbnail {width:50px;}
+img {border:none;}
+.action {display:block;min-height:16px; padding:2px 0 2px 24px;background-repeat:no-repeat;float:left;}
+
+//.action-edit {background-image:url("theme/icons/actions/details-16.png"); display:block;}
+//.action-show {background-image:url("theme/icons/actions/view-in-browser-16.png"); display:block;}
+.action-show {background-image:url("theme/icons/actions/16/document-properties.png"); display:block;float:left;}
+.action-edit {background-image:url("theme/icons/actions/16/editcopy.png"); display:block;float:left;}
+.action-history {background-image:url("theme/icons/actions/16/document-history.png"); display:block;float:left;}
+.action-delete {background-image:url("theme/icons/actions/16/remove.png"); display:block;float:left;}
+
+.action-download {background-image:url("theme/icons/actions/16/document-save.png"); display:block;}
+.action-upload {background-image:url("theme/icons/actions/16/extract-archive.png"); display:block;}
+.action-checkout {background-image:url("theme/icons/actions/16/document-send.png"); display:block;}
+.action-checkin {background-image:url("theme/icons/actions/16/document-revert.png"); display:block;}
+.action-newfolder {background-image:url("theme/icons/actions/16/folder-new.png"); display:block;}
+.action-newdocument {background-image:url("theme/icons/actions/16/document-new.png"); display:block;}
+
+
+
+/* TREE LAYOUT */ 
+.tree ul { margin:0 0 0 5px; padding:0 0 0 0; list-style-type:none; }
+.tree li { display:block; min-height:18px; line-height:18px; padding:0 0 0 15px; margin:0 0 0 0; /* Background fix */ clear:both; }
+.tree li ul { display:none; }
+.tree li a, .tree li span { display:inline-block;line-height:16px;height:16px;color:black;white-space:nowrap;text-decoration:none;padding:1px 4px 1px 4px;margin:0; }
+.tree li a:focus { outline: none; }
+.tree li a input, .tree li span input { margin:0;padding:0 0;display:inline-block;height:12px !important;border:1px solid white;background:white;font-size:10px;font-family:Verdana; }
+.tree li a input:not([class="xxx"]), .tree li span input:not([class="xxx"]) { padding:1px 0; }
+/* FOR DOTS */ 
+.tree .ltr li.last { float:left; }
+.tree > ul li.last { overflow:visible; }
+/* OPEN OR CLOSE */ 
+.tree li.open ul { display:block; }
+.tree li.closed ul { display:none !important; }
+/* FOR DRAGGING */ #jstree-dragged { position:absolute; top:-10px; left:-10px; margin:0; padding:0; }
+#jstree-dragged ul ul ul { display:none; }
+#jstree-marker { padding:0; margin:0; line-height:5px; font-size:1px; overflow:hidden; height:5px; position:absolute; left:-45px; top:-30px; z-index:1000; background-color:transparent; background-repeat:no-repeat; display:none; }
+#jstree-marker.marker { width:45px; background-position:-32px top; }
+#jstree-marker.marker_plus { width:5px; background-position:right top; }
+/* BACKGROUND DOTS */ 
+.tree li li { overflow:hidden; }
+.tree > .ltr > li { display:table; }
+/* ICONS */ 
+.tree ul ins { display:inline-block; text-decoration:none; width:16px; height:16px; }
+.tree .ltr ins { margin:0 4px 0 0px; }               
+.field a { font-weight: normal; }
+.file a { font-weight: normal; }
+
+
+
+//.jstree-file a .jstree-icon { background-position:0px -19px !important; }
+//.jstree-default a .jstree-icon { background-position:0px -19px !important; }
+
+//
+
+Fix dataTable header icons
+.ui-state-default .ui-icon {
+    background-image: url("images/ui-icons_6da8d5_256x240.png");
+}
+jquery...tom.css (line 95)
+.ui-icon-carat-2-n-s {
+    background-position: -128px 0;
+}
+jquery...tom.css (line 110)
+.ui-icon {
+    background-image: url("images/ui-icons_469bdd_256x240.png");
+    height: 16px;
+    width: 16px;
+}
+
+.DataTables_sort_wrapper .ui-icon { float:right;}
+.dataTables_filter { float: right;}
+.dataTables_length { width:200px;float:left;}
+
+
+.mime-16 {display:block;min-height:16px; padding:2px 0 2px 24px;background-repeat:no-repeat;display:block;}
+.folder-16 { background-image: url("theme/icons/places/16/folder.png" ) ;}
+li.folder-16 a ins { background-image: url("theme/icons/places/16/folder.png" ) !important; background-position: 0px 0px !important; }
+
+
+#list-toolbar {float:left;clear:both;height:20px;margin-top:3px;}
+#file-list {width:100%;}
+//#list-body { float:left;clear:both;width:1200px;}
+#list-body { float:left;clear:both;}
+.home { background-image: url("theme/icons/actions/16/gohome.png" ) !important; background-position: 0px 0px !important; }
+.logout { background-image: url("theme/icons/actions/16/gnome-logout.png" ) !important; background-position: 0px 0px !important; }
+.toolbar {float:left;}
+#file-list {float:left;}
+#file-list_info {float:left;}
+#file-list_paginate {float:left;}
+
+.outer-treediv { float:left;width:250px;border:1px solid #DDD; }
+
+.treediv {float:left;width:95%;height:95%;overflow:auto;}
+
+.outer-detail-pane {float:left;widthh:900px;heighth:500px;border:1px solid #DDD;margin-left:5px;}
+
+.detail-pane" {float:left;width:100%;height:100%;overflow:auto;}            
+		
