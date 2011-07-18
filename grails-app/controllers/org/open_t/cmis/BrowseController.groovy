@@ -1,22 +1,33 @@
 package org.open_t.cmis
 import org.open_t.cmis.*;
 import grails.converters.JSON;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import java.net.*
+
 class BrowseController {
 
 	def cmisService
 	def restService
 	
 	
+	def onlineEditMimetypes =
+	[
+	   "application/vnd.ms-excel": "Excel.Sheet",
+	   "application/vnd.ms-powerpoint": "PowerPoint.Slide",
+	   "application/msword": "Word.Document",
+	   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel.Sheet",
+	   "application/vnd.openxmlformats-officedocument.presentationml.presentation": "PowerPoint.Slide",
+	   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word.Document"
+	]
+	
+
 	def beforeInterceptor = {
-			
-			if ((!restService.authenticated) || cmisService.repositories==null) {				
-				restService.login(grailsApplication.config.cmis.username,grailsApplication.config.cmis.password)				
-				restService.authenticate()
-				cmisService.repositories = new Repositories(restService)
-				cmisService.contextPath=request.contextPath
-			} 
-			
+		if ((!restService.authenticated) || cmisService.repositories==null) {
+			redirect(controller:'authenticate',action:'login')
+			return false
+		} 
 	}
+	
     
     def index = {redirect(action:browse)}
 	
@@ -38,9 +49,11 @@ class BrowseController {
 			[documents:documents,cmisEntry:cmisEntry]		
     }
 	
+	
 	def nodejson = {		
 			def documents
 			def cmisEntry
+			def theParentPath
 			if (!params.id || params.id=="") {				
 				params.id=cmisService.repositories.rootFolderId
 				if (params.rootNode && params.rootNode.length()>0) {
@@ -50,12 +63,16 @@ class BrowseController {
 				}
 
 				CmisEntry checkedOutEntry= cmisService.getEntry("checkedout")
+				theParentPath=checkedOutEntry?.path
 				
 				documents=[cmisEntry,checkedOutEntry]	            
 			} else {
 				cmisEntry=cmisService.getEntry(params.id)
 				documents=cmisService.listDescendants(cmisEntry)
+				theParentPath=cmisEntry?.path
 			}
+
+			
 			
 			
 			def doclist = { documents.collect { theDocument -> 
@@ -70,12 +87,12 @@ class BrowseController {
 						
 					[
                     //attr: [id: theDocument.objectId,title:theDocument.title,class: nodeClass,rel:nodeRel],
-                    attr: [id: theDocument.uuid,title:theDocument.title,class: nodeClass,rel:nodeRel],
+                    attr: [id: URLEncoder.encode(theDocument.uuid),title:theDocument.title,class: nodeClass,rel:nodeRel,parentPath:theParentPath],
                  	data: theDocument.title,
 					title: theDocument.title,
 					state:nodeState,
 					
-					rel:nodeRel
+					rel:nodeRel,
 				 ]
 				}
 			}		
@@ -108,7 +125,28 @@ class BrowseController {
 	   }
 	// Shows document defails in sidepane
 	def document = {
-			[entry:cmisService.getEntry(params.objectId),params:params]
+		println "params:${params}"
+
+		def cmisEntry=cmisService.getEntry(params.objectId)
+		
+		def sppPath=null
+		def sppBasePath=ConfigurationHolder.config.cmis.sppBasePath
+		
+		def sppAppProgId=onlineEditMimetypes[cmisEntry.prop.contentStreamMimeType]
+		
+		if (params.parentPath && sppBasePath && sppAppProgId) {
+			if (params.parentPath.startsWith("/Sites/")) {
+				def path=params.parentPath.replace("/Sites/","/")
+				sppPath=sppBasePath+path+"/"+cmisEntry.name
+			}			
+		}
+		def webdavPath=null
+		def webdavBasePath=ConfigurationHolder.config.cmis.webdavBasePath
+		if (params.parentPath && webdavBasePath) {
+			webdavPath=webdavBasePath+params.parentPath+"/"+cmisEntry.name
+		}
+
+			[entry:cmisEntry,params:params,sppPath:sppPath,sppAppProgId:sppAppProgId,webdavPath:webdavPath]
 	}
 	
 }

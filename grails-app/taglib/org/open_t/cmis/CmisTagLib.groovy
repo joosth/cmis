@@ -19,32 +19,41 @@
 
 package org.open_t.cmis
 import org.codehaus.groovy.grails.commons.* 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 
 class CmisTagLib {
 	def cmisService
+	def restService
 	static namespace = 'cmis'
+		
 
 	def head = { attrs ->
+	  
 	  def cmismap=[:]
 	  def rootEntry
 	  
-	  
-	  if (attrs.rootNode) {
-		  rootEntry=cmisService.getEntryById(attrs.rootNode)		 
-	  } else if (attrs.path) {
-		  rootEntry=cmisService.getEntryByPath(attrs.path)
-	  } else {
-		  rootEntry=cmisService.getEntryByPath("/")
-	  }
-	  if (attrs.username) {
-		  restService.login(attrs.username,attrs.password)				
-		  restService.authenticate()
-		  if (!cmisService.repositories) {
-			  cmisService.repositories = new Repositories(restService)
+	  if (ConfigurationHolder.config.cmis.enabled) {
+		  
+		  if (attrs.username) {
+			  cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)			  
+		  } else {
+		  	cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
 		  }
+		  
+		  if (attrs.rootNode) {
+			  rootEntry=cmisService.getEntryById(attrs.rootNode)		 
+		  } else if (attrs.path) {
+			  rootEntry=cmisService.getEntryByPath(attrs.path)
+		  } else {
+			  rootEntry=cmisService.getEntryByPath("/")
+		  }
+		  
+		 
+			
+	  
 		  cmisService.contextPath=request.contextPath
-	  }
+	  
 	  
 	  
 	  cmismap+=[rootEntry:rootEntry]
@@ -54,8 +63,7 @@ class CmisTagLib {
 		  		  <script type="text/javascript">
 	  		      var cmis={};
   				  cmis.baseUrl="${request.contextPath}";
-  				  //cmis.rootNode="${attrs.rootNode}";
-  				  cmis.rootNode="${request.cmis.rootEntry.uuid}";
+  				  cmis.rootNode="${request.cmis?.rootEntry?.uuid}";
   				  </script>"""
 	  out << html
 	  
@@ -74,9 +82,35 @@ class CmisTagLib {
 	  out << g.javascript(src:'jquery/jquery.cookie.js',contextPath:pluginContextPath)
 	  out << g.javascript(src:'jquery/jquery.hotkeys.js',contextPath:pluginContextPath)
 	  out << g.javascript(src:'jquery/jquery.jstree.js',contextPath:pluginContextPath)
+	  }
 	}
 	
-	def tree = { attrs ->
+	def uploadHead = { attrs ->
+		def html=""
+		if (cmisService.enabled) { 
+		html="""
+         <script  type="text/javascript">       
+        \$(function() {		 
+        var uploader = new qq.FileUploader({      			
+      			element: document.getElementById('file-uploader'),
+      			// path to server-side upload script
+      			action: cmis.baseUrl+'/document/fileupload',
+      			params: {      	
+      				},
+      			onComplete: function(id, fileName, responseJSON){
+  					\$("#form").append('<input type=\"hidden\" name=\"filename\" value=\""+fileName+"\" />');      			
+      			}
+   			});
+   			});
+		</script> 
+		"""
+		}
+		out << html
+		
+	}
+	
+	
+	def tree = { attrs ->	
 	def html="""<div id="outer-treediv" class="outer-treediv" >   
 		            <div id="treediv" class="treediv" >		             
 		            </div>

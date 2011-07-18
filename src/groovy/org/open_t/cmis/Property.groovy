@@ -17,14 +17,19 @@
  * along with this program.  If not, see http://www.gnu.org/licenses
  */
 package org.open_t.cmis;
-
+/*
+ * CMIS property class
+ */
 class Property {
 	def cmisEntry
 	
 	def Property(CmisEntry cmisEntry) {
 		this.cmisEntry=cmisEntry
 	}
-		
+	
+	/*
+	* Get a CMIS property by using it's name as a property
+	*/
 	def propertyMissing(String name) { 
 		if(cmisEntry.properties["cmis:${name}"]) {
 			return cmisEntry.properties["cmis:${name}"]
@@ -33,6 +38,9 @@ class Property {
 		}
 	}
 	
+	/*
+	* Set a CMIS property by using it's name in an assignment
+	*/
 	def propertyMissing(String name,value) { 
 		if(cmisEntry.properties["cmis:${name}"]) {			
 			cmisEntry.xml.object.properties.'*'.find { property -> property.@queryName == "cmis:${name}" }.'value'=value		

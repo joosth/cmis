@@ -1,5 +1,7 @@
 package org.open_t.cmis
 import org.open_t.cmis.*;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
 class AuthenticateController {
 
 	def cmisService
@@ -8,30 +10,21 @@ class AuthenticateController {
     def index = { }
     
     def login = {
-			println "We're in the login controller"
 			render(view:'login')
 	}
     
     def loginsubmit = {
-		restService.authenticator=null
-    	//println "Here we are logging in..."
-    	restService.login(params.username,params.password)    	
-    	//println "Username=${params.username},Password=${params.password}"
-    	cmisService.repositories = new Repositories(restService)
-		//println "Checkout collection: ${cmisService.repositories.collection.checkedout}"
+		cmisService.init(ConfigurationHolder.config.cmis.url,params.username,params.password)
 		session["user"]=params.username
-		flash.message="User ${session["user"]} logged in."
-		
+		flash.message="User ${session["user"]} logged in."		
 		redirect(controller:'browse',action:'browse')
     }
 	
 	
 	def logout = {
 			session["user"]=null
-			restService.authenticator=null
+			restService.authenticated=false
 			redirect(action:'login')
 	}
-    
-    
     
 }

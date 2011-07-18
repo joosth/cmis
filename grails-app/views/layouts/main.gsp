@@ -2,8 +2,7 @@
     <head>
         <title><g:layoutTitle default="CMIS" /></title>
         
-        
-        <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'cmis.css',contextPath:'')}" />      
+        <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'main.css',contextPath:'')}" />
         <link rel="stylesheet" type="text/css" href="${resource(dir:'css',file:'jquery.cluetip.css',contextPath:'')}" />
         <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'datatables.css',contextPath:'')}" />
         
@@ -29,8 +28,8 @@
         
     </head>
     <body>
-    <div id="main-toolbar" style="border:1px solid #888;background-color:#888;height:20px;">
-    	<span id="menu-toolbar">
+    <div id="main-toolbar" >
+    	<span id="menu-toolbar" >
     		<g:link title="Home|Go to the home folder" class="action home help" controller="browse" action="browse">&nbsp;</g:link>
     	</span>
     	

@@ -24,10 +24,10 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.codehaus.groovy.grails.web.context.ServletContextHolder;
 import org.springframework.context.ApplicationContext
 
-//ApplicationContext ctx = (ApplicationContext)ApplicationHolder.getApplication().getMainContext();
-//CountryServiceInt service = (CountryServiceInt) ctx.getBean("countryService");
-//String str = service.sayHello(request.getParameter.("name"));
 
+/*
+* Class representing a CMIS repository
+*/
 class Repositories {
 	def restService
 	
@@ -41,23 +41,18 @@ class Repositories {
 	
 	Repositories(def theCmisService) {
 		restService=theCmisService.restService
-		
-		
-		//baseUrl=ConfigurationHolder.config.cmis.baseUrl
 		baseUrl=theCmisService.url
-		//println "THe base url is ${baseUrl}"
 		xml=restService.get(baseUrl)
-		//println "XML=${xml}"
 		link=new Link(this)
 		collection=new Collection(this)
 		// TODO add Collections, RepositoryInfo(s) and UriTemplates
 		
-		//TODO check for mediatype, according to the standard there could be more than 1 template per type
+		// TODO check for mediatype, according to the standard there could be more than 1 template per type
 		xml.workspace.uritemplate.each { uritemplate ->			
 			// Looks silly, but without the quotes the key isn't a string and can't be looked up as expected
 			templates["${uritemplate.type}"]="${uritemplate.template.text()}"			
 		}
-		//println templates
+
 	}
 	
 	def getTitle() {
@@ -92,16 +87,12 @@ class Repositories {
 			String key=collection.collectionType.text()		
 			collections.put(key,collection.@href.text())
 		}
-		//println "The collections are ${collections}"
 		return collections
 	}
 	
 	
 	def getRootFolderId() {
-		//println "THe root folder is:${xml.workspace.repositoryInfo.rootFolderId.text()}"
-		//String id=xml.workspace.repositoryInfo.rootFolderId.text()
 		return xml.workspace.repositoryInfo.rootFolderId.text()
-		//return id
 	}
 	
 	

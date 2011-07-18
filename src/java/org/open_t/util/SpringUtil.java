@@ -1,3 +1,7 @@
+/*
+ * Helper class to get hold of a Spring bean from anywhere.
+ */
+
 package org.open_t.util;
 
 import org.springframework.context.ApplicationContext;

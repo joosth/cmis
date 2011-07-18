@@ -17,14 +17,19 @@
  * along with this program.  If not, see http://www.gnu.org/licenses
  */
 package org.open_t.cmis;
-
+/*
+ * CMIS link class
+ */
 class Link {
 	def cmisEntry
 	
 	def Link(def cmisEntry) {
 		this.cmisEntry=cmisEntry
 	}
-		
+	
+	/*
+	 * Get a link by using it's name as a property
+	 */		
 	def propertyMissing(String name) { 
 		if(cmisEntry.links["${name}"]) {
 			return cmisEntry.links["${name}"]
@@ -33,6 +38,9 @@ class Link {
 		}
 	}
 	
+	/*
+	* Set a link by using it's name in an assignment
+	*/
 	def propertyMissing(String name,value) { 
 		if(cmisEntry.links["${name}"]) {			
 			cmisEntry.xml.object.links.'*'.find { property -> property.@queryName == "${name}" }.'value'=value		

@@ -24,254 +24,197 @@ import org.springframework.web.multipart.*
 import java.io.OutputStreamWriter;
 
 import groovy.xml.*
-import java.net.*;
+
 import org.open_t.cmis.*;
 import net.sf.jmimemagic.*;
+import org.apache.http.*;
+import org.apache.http.client.*;
+import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.auth.*
+import org.apache.http.client.methods.*
+import org.apache.http.entity.*
+import org.apache.http.protocol.HttpContext
+import org.apache.http.util.EntityUtils;
+import org.springframework.web.multipart.*
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
- class MyAuthenticator extends Authenticator {
-	
-	def username
-	def password
-	 
-    public PasswordAuthentication getPasswordAuthentication() {
-        System.err.println("Feeding username ${username} and password ${password} for " + getRequestingScheme());
-        return (new PasswordAuthentication(username, password.toCharArray()));
-    }
- }
 
 
 class RestService {
-	//static scope="session"
+
     static transactional = true
+	static scope="session"
 
 	def maxBufSize=1000000
-	def cmisUserName=""
-	def cmisUserPassword=""		
-	MyAuthenticator authenticator=null
+	
+	def username
+	def password
 	
 	
-	def authenticate() {
-		
-		if (!authenticator) {
-			MyAuthenticator.setDefault(null);
-			authenticator= new MyAuthenticator();			
-		}
-		authenticator.username=cmisUserName
-		authenticator.password=cmisUserPassword
-		MyAuthenticator.setDefault(authenticator);				
-	}
 	
-	def login(username,password) {
-		cmisUserName=username
-		cmisUserPassword=password		
-	}
-	
-	def getAuthenticated() {
-		return authenticator!=null
-	}
-		
+	def authenticated=false
 
+	/* set authentication for client using the service-wide credentials */ 
+	def authenticate(def client) {
+		// If an external proxy user is defined, replace the username with that name
+		if (ConfigurationHolder.config.cmis.proxyUser) {
+			client.getCredentialsProvider().setCredentials(
+				// TODO limit scope
+				new AuthScope(null, -1),
+				new UsernamePasswordCredentials(ConfigurationHolder.config.cmis.proxyUser, ""));
+		} else {
+			client.getCredentialsProvider().setCredentials(
+			// TODO limit scope
+				new AuthScope(null, -1),
+				new UsernamePasswordCredentials(username, password));
+		}
+    	// If an remote user header is defined, add the header
+		if (ConfigurationHolder.config.cmis.remoteUserHeader) {
+			client.addRequestInterceptor(new HttpRequestInterceptor()
+				{
+					public void process(final HttpRequest request,
+										final HttpContext context) throws HttpException, IOException
+					{
+						request.addHeader(ConfigurationHolder.config.cmis.remoteUserHeader, username);
+					}
+				});
+		}			
+		authenticated=true
+	}
+	
+	/* Set credentials to be used */
+	def credentials(theUsername,thePassword) {		
+		username=theUsername
+		password=thePassword		
+	}
+	
+	/* Read from url, return slurped XML */
+	
     def read(def method,def url) {
-    	println "READ"
-    	authenticate()
-    	println "GETTING CONN to ${url}"
-    	def conn
+		def client=new DefaultHttpClient();
     	try {
-    		conn = new URL(url).openConnection()
-    	
-    	println "GOT CONN"
-    	conn.requestMethod = method
-       	
-   		conn.connect()
-   		def theContent= conn.content.text
-   		
-    	conn.disconnect()
-    	
-    	println "content: ${theContent}"
-    	
-     	def slurper = new XmlSlurper()    	
-        def response=slurper.parseText(theContent)
-    		return response    	
-    	} catch(Exception e) {
+			
+			HttpGet httpget = new HttpGet(url);
+			authenticate(client)
+			println "executing request" + httpget.getRequestLine()
+			
+			HttpResponse response = client.execute(httpget);
+			HttpEntity entity = response.getEntity();
+
+			println "----------------------------------------";
+			println (response.getStatusLine());
+			if (entity != null) {
+				System.out.println("Response content length: " + entity.getContentLength());
+			}
+        
+			if (response.statusLine.statusCode==200) {    	
+				def theContent= entity.content.text
+
+				def slurper = new XmlSlurper()    	
+				def parsedResponse=slurper.parseText(theContent)
+				return parsedResponse
+			} else {
+				return null
+			}
+		    	
+		} catch(Exception e) {
     		println "Hm. That's not good: ${e}"
     		return null
+    	} finally {
+			client.getConnectionManager().shutdown();
     	}
     }
     
-    def delete(def url) {
-    	
-    	authenticate()
-    	
-		def conn = new URL(url).openConnection()
-    	
-    	conn.requestMethod = "DELETE"
-       	
-   		conn.connect()
-   		
-    	conn.disconnect()
-    	
-    	
-    	
-     	
-    	return conn.responseCode    	
-    	
+	/* Delete to url, return status code */
+    def delete(def url) {		
+		def client=new DefaultHttpClient();
+		try {
+			authenticate(client)    	
+			HttpDelete httpdelete = new HttpDelete(url);
+			HttpResponse response = client.execute(httpdelete);
+		} finally {
+			client.getConnectionManager().shutdown();
+		}    	    	
+		return response.statusLine.statusCode==200 ? null : response.statusLine.statusCode
     }
-    
-    
-    
-    
+	/* write to URL, return slurped XML */
     def write (def method,def url,def xmlText,def mimeType="application/atom+xml") {
-		//println "The mimetype is ${mimeType}"
-		def response=""
+		def rsp
+		def client=new DefaultHttpClient();
 		try {
-			authenticate()
-			URLConnection conn = new URL(url).openConnection()
-	    	
-	    	conn.requestMethod = method
-	    	conn.setRequestProperty("Content-Type",mimeType)
-	       	
-	      	conn.doOutput = true
-	
-	      	Writer writer=new OutputStreamWriter(conn.outputStream)
-	
-			writer.write(xmlText)
-	    	writer.flush()
-	    	writer.close()	    	
-
-	    	
-	        //println "The response code is ${conn.responseCode}"
-	    	
-	    	def theResponse= conn.content.text
-	    	//println "The response content is: ${theResponse}"
-	    	
+			authenticate(client)
+			
+			def entity= new StringEntity(xmlText,mimeType,null)
+			
+			def httpwrite
+			if (method=="PUT") {
+				httpwrite = new HttpPut(url);
+			} else {
+				httpwrite = new HttpPost(url);
+			}
+			httpwrite.setEntity(entity)
+			
+			HttpResponse response = client.execute(httpwrite);
+			
+			HttpEntity resEntity = response.getEntity();
+			def theResponse=resEntity.content.text
 	    	
 	    	def slurper = new XmlSlurper()    	
-	        response=slurper.parseText(theResponse)
-	        conn.disconnect()    	
+	        rsp=slurper.parseText(theResponse)
     	} catch (Exception e) {
     		println "HTTP ${method} error ${e}"
-       	}
+       	}  finally {
+			client.getConnectionManager().shutdown();
+		} 
             
-        return response
+        return rsp
 	}
-    
-    def writeStream (def method,def url,def stream,def header,def footer,def mimeType="application/atom+xml") {
-		//println "The mimetype is ${mimeType}"
-		def response=""
-		try {
-			authenticate()
-			def conn = new URL(url).openConnection()
-	    	
-	    	conn.requestMethod = method
-	    	conn.setRequestProperty("Content-Type",mimeType)
-	       	
-	      	conn.doOutput = true
-	
-	      	Writer writer=new OutputStreamWriter(conn.outputStream)
-	
-			writer.write(header)
-	    	writer.flush()
-	    	
-    		def bufsize=100000
-			//println "The buffer size is ${bufsize}"		
-			byte[] bytes=new byte[(int)bufsize]
+    	def writeBase64WrappedFile (def method,def url,def file,def header,def footer) {
+		
+		def client=new DefaultHttpClient();
+		authenticate(client)
+		
+		def rsp
+		try {			
+			def httpwrite
+			if (method=="PUT") {		
+				httpwrite = new HttpPut(url);
+			} else {		
+				httpwrite = new HttpPost(url);
+			}
 
-            def offset=0
-            def len=1
-            while (len>0) {
-            	//print "."
-            	len=stream.read(bytes, 0, bufsize)
-            	//println "len=${len}"
-            	if (len>0)
-            		conn.outputStream.write(bytes,0,len)            
-            		offset+=bufsize
-            }    
-	    	
-			writer.write(footer)	    	
-	    	writer.close()	    	
-	    		    	
-	        //println "The response code is ${conn.responseCode}"
-	    	
-	    	def theResponse= conn.content.text
-	    	//println "The response content is: ${theResponse}"
-	    	
-	    	
-	    	def slurper = new XmlSlurper()    	
-	        response=slurper.parseText(theResponse)
-	        conn.disconnect()    	
-    	} catch (Exception e) {
-    		println "HTTP ${method} error ${e}"
-    		return null
-       	}            
-        return new CmisEntry(response)
+			FileEntity reqEntity = new Base64WrappedFileEntity(file, "application/atom+xml",header,footer);
+			
+			
+			httpwrite.setEntity(reqEntity)
+
+			HttpResponse response = client.execute(httpwrite);
+			HttpEntity resEntity = response.getEntity();
+			def theResponse=resEntity.content.text
+			
+			def slurper = new XmlSlurper()
+			rsp=slurper.parseText(theResponse)
+		} catch (Exception e) {
+			println "HTTP ${method} error ${e}"			
+  	    } finally {
+		  client.getConnectionManager().shutdown();
+		  }
+			
+		return rsp
+
 	}
-    
-    
+	    
     
     
 	def get(def url) { return read("GET",url) }
-	//def delete(def url) { return read("DELETE",url) }
 	def post(def url,def xmlText) { return write("POST",url,xmlText) }
 	def post(def url,def xmlText,def mimeType) { return write("POST",url,xmlText,mimeType) }
 	def put(def url,def xmlText) { return write("PUT",url,xmlText) }
 	def put(def url,def xmlText,mimeType) { return write("PUT",url,xmlText,mimeType) }
 	
-	
-	def writeFile (def method,def url, MultipartFile file) {
-
-		FileNameMap fileNameMap = URLConnection.getFileNameMap();
-		def mimeType = fileNameMap.getContentTypeFor(file.originalFilename)
-
-		//println "The mimetype is ${mimeType}"
+	def writeFile (def method,def url, File file) {
 		
-		
-		
-		
-//		try {
-		authenticate()
-	
-		def conn = new URL(url).openConnection()
-    	conn.doOutput = true
-      	
-    	conn.requestMethod = method
-
-    	conn.setRequestProperty("Content-Type",mimeType)
-    	
-    	InputStream is= file.getInputStream();
-		int length=file.getSize()
-		
-		//println "The file length is ${length} AAAA"
-		
-		def bufsize=length<maxBufSize ? length : maxBufSize
-		//println "The buffer size is ${bufsize}"		
-		byte[] bytes=new byte[(int)bufsize]
-
-		def offset=0
-		while (offset<length) {
-			//print "."
-            def len=is.read(bytes, 0, bufsize)            
-            conn.outputStream.write(bytes,0,len)            
-            offset+=bufsize
-		}    			
-    	
-    	conn.connect()
-        //println "The response code is ${conn.responseCode}"
-    	//println "The response content is:"
-    //	theResponse= conn.content.text
-    //	println theResponse
-
-        conn.disconnect()
-        /*
-            
-        	} catch (Exception e) {
-        		println "HTTP PUT error ${e}"
-        	}
-          */  
-        return ""
-	}
-	
-	def writeNormalFile (def method,def url, File file) {
-
+		println "Write normal file to url ${url}"
 		Magic parser = new Magic() ;
     	// getMagicMatch accepts Files or byte[],
     	// which is nice if you want to test streams
@@ -280,96 +223,75 @@ class RestService {
     		// The false means no extension hints.
     		MagicMatch match = parser.getMagicMatch(file,false);
     		mimetype=match.getMimeType();
-    		//println "Hey, we have a mimetype match: ${mimetype}"
 		} catch (Exception e) {
     		// Quietly stay at the default if we can't find it ...
     	}
 		
-		//println "The mimetype is ${mimetype}"
-		
-		
-		
-		
-//		try {
-		authenticate()
-	
-		def conn = new URL(url).openConnection()
-    	conn.doOutput = true
-      	
-    	conn.requestMethod = method
+		println "The mimetype is ${mimetype}"
 
-    	conn.setRequestProperty("Content-Type",mimetype)
-    	
+		def client=new DefaultHttpClient();
+		authenticate(client)
 		
-    	InputStream is= new FileInputStream(file)
-		int length=file.size()
-		
-		//println "The file length is ${length} AAAA"
-		
-		def bufsize=length<maxBufSize ? length : maxBufSize
-		//println "The buffer size is ${bufsize}"		
-		byte[] bytes=new byte[(int)bufsize]
-
-		def offset=0
-		while (offset<length) {
-			//print "."
-            def len=is.read(bytes, 0, bufsize)            
-            conn.outputStream.write(bytes,0,len)            
-            offset+=bufsize
-		}    			
-    	
-    	conn.connect()
-        //println "The response code is ${conn.responseCode}"
-    	//println "The response content is:"
-    //	theResponse= conn.content.text
-    //	println theResponse
-
-        conn.disconnect()
-        /*
-            
-        	} catch (Exception e) {
-        		println "HTTP PUT error ${e}"
-        	}
-          */  
-        return ""
+		def rsp=null
+		try {
+			
+			def httpwrite
+			if (method=="PUT") {
+				httpwrite = new HttpPut(url);
+			} else {
+				httpwrite = new HttpPost(url);
+			}
+			FileEntity reqEntity = new FileEntity(file, mimetype);
+			httpwrite.setEntity(reqEntity)
+			HttpResponse response = client.execute(httpwrite);			
+			rsp = response.statusLine.statusCode==200 ? null : response.statusLine.statusCode  
+						
+		} catch (Exception e) {
+			println "HTTP ${method} error ${e}"
+  	    } finally {
+		  client.getConnectionManager().shutdown();
+		}
+			
+		return rsp		
 	}
 	
 	
+	/*
+	 * Stream file from CMIS repository to client
+	 */
 	
 	def streamFile(url,fileName,response) {
 		
-		authenticate()
-    	
-		def conn = new URL(url).openConnection()
-    	
-    	conn.requestMethod = "GET"
-       	conn.setDoInput (true)
-   		conn.connect()
-   		
 		
-		//println conn.getHeaderFields()
+		
+		def client=new DefaultHttpClient();
+		
+		HttpGet httpget = new HttpGet(url);
+		authenticate(client)
+		println "executing request" + httpget.getRequestLine()
+		HttpResponse rsp = client.execute(httpget);
+		HttpEntity entity = rsp.getEntity();
+		def inputStream=entity.getContent()
 		
 		response.setHeader("Content-disposition", "attachment; filename=\"" +fileName+"\"")
 			
 		
 		def bufsize=100000
-		//println "The buffer size is ${bufsize}"		
 		byte[] bytes=new byte[(int)bufsize]
 
 		def offset=0
 		def len=1
 		while (len>0) {
-			//print "."
-            len=conn.inputStream.read(bytes, 0, bufsize)
-            //println "len=${len}"
+
+            len=inputStream.read(bytes, 0, bufsize)
+
             if (len>0)
             response.outputStream.write(bytes,0,len)            
             offset+=bufsize
 		}
    		
-   		conn.disconnect()
-    	conn.contentType
-
+		client.getConnectionManager().shutdown();
+   		
 		response.outputStream.flush()
 	}
 	

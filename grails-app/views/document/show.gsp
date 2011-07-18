@@ -19,6 +19,7 @@
    		</td>
    		
     	<td class="actions">
+
     		<g:link class="action-edit action" action="edit" params="[objectId:entry.objectId]" >Edit</g:link>    		
     		<g:if test="${entry.baseTypeId=='cmis:document'}" >
 	    		<g:link class="action-download action" controller="document" action="download" params="[objectId:entry.objectId]" >Download</g:link>    		

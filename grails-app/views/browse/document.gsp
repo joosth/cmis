@@ -2,7 +2,7 @@
  <div id="dialog" title="Show document properties" style="wwidth:600px;float:left;"> 		
 		<g:hiddenField name="objectId" value="${entry.objectId}"/>
 		<img src="${entry.thumbnailUrl}" />						
-		<table style="border:none;">
+		<table style="border:none;width:500px;">
 		    <tbody>                        
 		        <tr class="prop">
 		            <td valign="top" class="name"><g:message code="properties.name" default="Document name" />:</td>                                
@@ -70,6 +70,8 @@
 		    </tbody>
 		</table>
 </div>
+
+
 <div id="document-actions" style="float:left;background-color:#EEE;margin:10px;padding:10px;border:1px dotted #888;">
 	
 	<g:link onclick="simpleDialog(this.href);return false;" title="Show properties" class="action-show action simpleDialog" controller="document" action="props" params="[objectId:entry.prop.objectId]">Show properties</g:link><br />
@@ -80,6 +82,13 @@
  	<g:if test="${entry.hasHistory()}" >
  		<g:link onclick="simpleDialog(this.href);return false;" title="Show history" class="action-history action simpleDialog" controller="document" action="history" params="[objectId:entry.prop.objectId]">Show history</g:link><br />
 	</g:if>
+	<g:if test="${sppPath}" >
+ 		<span href="${sppPath}" title="Edit online (SPP)" sppAppProgId="${sppAppProgId}" class="action-edit-online action spp-link">Edit online (SPP)</span><br />
+	</g:if>
+	<g:if test="${webdavPath}" >
+ 		<a href="${webdavPath}" title="Edit online (WebDAV)" class="action-edit-online action" target="_blank">Edit online (WebDAV)</a><br />
+	</g:if>
+	
 	
 	<g:if test="${entry.isDocument()}" >
 		<g:link title="Download" class="action-download action simpleDialog" controller="document" action="download" params="[objectId:entry.prop.objectId]">Download</g:link><br />

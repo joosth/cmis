@@ -31,33 +31,33 @@ import groovy.xml.StreamingMarkupBuilder
 class CmisService {
     
     static transactional = true
-	//static scope="session"
-	
-
-    def restService
-    Repositories repositories
+	static scope="session"
+	def restService
+    Repositories repositories=null
     def contextPath=""
     def url=""
     def initialized=false
-    	
+    def enabled=false
+    /*
+     * Initialize this CmisService bean, remember url, username,password
+     */
     def init(theUrl,username,password) {
     	url=theUrl
-    	restService.login(username,password)
-    	restService.authenticate()
-    	 if (!repositories) {    		 
+    	restService.credentials(username,password)    	
+    	 if (!repositories) {    	
 			  repositories = new Repositories(this)
     	 }
     	initialized=true
+    	enabled=true
     }
+	
+	/*
+	 * Get the URL of a CMIS entry by ID
+	 */
     
-    def objectUrlById(id){
-    	/*if (!id.startsWith("workspace://SpacesStore/") && !id.startsWith("checkedout")) {
-    		id="workspace://SpacesStore/"+id;
-    	}
-    	*/
+    def objectUrlById(id){    	
     	if (repositories) {
 	    	String template=repositories.templates.objectbyid
-
 	    	template=template.replace("{id}", id)    	
 	    	template=template.replace("{filter}", "")
 	    	template=template.replace("{includeAllowableActions}", "false")
@@ -71,8 +71,11 @@ class CmisService {
     		return ""
     	}
     }
-    
-    def objectUrlByPath(path){
+	
+	/*
+	 * Get the URL of a CMIS entry by path
+	 */
+	def objectUrlByPath(path){
     	if (repositories) {
 	    	String template=repositories.templates.objectbypath
 	    	template=template.replace("{path}", path)    	
@@ -89,7 +92,9 @@ class CmisService {
     	}
     }
     
-    
+    /*
+     * List all descendants of the given Entry
+     */
     
     def listDescendants(def cmisEntry) {
     	
@@ -101,6 +106,9 @@ class CmisService {
 		return descendantList		
 	}
     
+	/*
+	 * List all checked out entries
+	 */
     def listCheckedOut() {    	
     	def response=restService.get("${repositories.collection.checkedout}?renditionFilter=cmis:thumbnail&orderBy=cmis:name%20ASC")    	
 		
@@ -110,6 +118,9 @@ class CmisService {
 		return checkedOutList	
     }
     
+	/*
+	 * List the version history of this entry
+	 */
     
     def listHistory(def cmisEntry) {
     	
@@ -120,6 +131,11 @@ class CmisService {
 		}
 		return historyList
 	}
+	
+	/*
+	 * Get entry by object ID
+	 * The special object ID "checkedout" returns the checked out documents collection
+	 */
     
     
     def getEntry(def objectId) {
@@ -163,6 +179,10 @@ class CmisService {
 		
 		
 	}
+	
+	/*
+	 * Get CMIS Entry by path
+	 */
     
     def getEntryByPath(path) {
     	def url=objectUrlByPath(path)    	
@@ -175,6 +195,10 @@ class CmisService {
     	}
     	
     }
+	
+	/*
+	 * Create a folder
+	 */
     
     def createFolder(parentId,name,summary) {
     	
@@ -205,7 +229,8 @@ class CmisService {
     	
     }
     
-    def createDocument(String parentId,String filename,String name,String summary) {    	    	
+    def createDocument(String parentId,String filename,String name,String summary) {	
+			
     	Magic parser = new Magic() ;
     	// getMagicMatch accepts Files or byte[],
     	// which is nice if you want to test streams
@@ -235,14 +260,14 @@ class CmisService {
     			</cmisra:object></entry>"""
 		def parentEntry=getEntry(parentId)
 		def downUrl=parentEntry.link.down
-
-		org.open_t.base64.Base64.InputStream is = new Base64.InputStream(new FileInputStream(filename),Base64.ENCODE |Base64.DO_BREAK_LINES);
-
-
-    	restService.writeStream('POST',downUrl,is,requestHeader,requestFooter)
+		
+		
+		restService.writeBase64WrappedFile ("POST",downUrl,new File(filename),requestHeader,requestFooter);
     	
     }
-    
+    /*
+     * Update a CMIS entry
+     */
     def update (cmisEntry) {
     	def entryXml=cmisEntry.xml
 	
@@ -250,7 +275,10 @@ class CmisService {
 		def xmlText=xml.toString()
 		restService.put(cmisEntry.link.edit,xmlText)
 	}
-    
+	
+	/*
+	 * Check out a CMIS entry
+	 */
     def checkout(objectId) {
     	def request="""<?xml version="1.0" encoding="utf-8"?>
 		<entry xmlns="http://www.w3.org/2005/Atom"
@@ -265,13 +293,18 @@ class CmisService {
     	return restService.post(repositories.collection.checkedout,request,"application/atom+xml;type=entry");
 
     }
-    
+    /*
+     * Get the working copy of a CMIS entry (from the entry ID)
+     */
     def workingCopy(objectId) {
 		def entry=cmisService.getEntry(objectId)
 		def pwcxml=restService.get (entry.link.'working-copy')
 		return new CmisEntry(pwcxml)	
     }
     
+	/*
+	 * Check in a CMIS Entry
+	 */
     def checkin(objectId,comment,major=false) {
     	def entry=getEntry(objectId)
 		def request="""<?xml version="1.0" encoding="utf-8"?>

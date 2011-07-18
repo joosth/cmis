@@ -2,90 +2,73 @@
 	<head>
 		<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
 		<meta name='layout' content='main' />
-		<title>Login</title>
+		<title><g:message code="login" /></title>
 <style type='text/css' media='screen'>
 
-
 #login {
-	width:300px;	
-	margin: auto;	
+	display: block; z-index: 1001; outline: 0px none; position: absolute; height: auto; width: 300px; top: 100px; left: 679px;
 }
 
-
-
-#login .inner {
-	//width:300px;
-	
-	text-align:left;
-	padding:10px;
-	border:1px solid #68A;
-	background-color:#EEF;
-	
-}
-#login .inner .fheader {
-	padding:0px;margin:6px 0px 6px 0;color:#2e3741;font-size:14px;font-weight:bold;
-}
-#login .inner .cssform p{
-	clear: left;
-	margin: 0px auto;
-	padding: 0px 0 0px 0;
-	padding-left: 105px;	
-	margin-bottom: 10px;	
-}
-#login .inner .cssform input[type='text'|type='password']{ 
-	width: 120px;
+#login  input[type='text'|type='password']{ 
+	width: 120px;	
 }
 
-
-#login .inner .cssform label{
-	font-weight: bold;
-	float: left;
-	margin-left: -105px; 
-	width: 100px;
-}
-#login .inner .login_message {color:red;}
-#login .inner .text_ {width:120px;}
-#login .inner .chk {height:12px;}
-
+#login .login_message {color:red;}
+#login .text_ {width:120px;}
+#login .chk {height:12px;}
+.layout-table {border:none;}
 </style>
-<script type='text/javascript'>
-
-(function(){
-//	document.loginform.username.focus();
-})();
-
-</script>
+        <g:javascript>
+        
+		jQuery.fn.center = function () {
+    		this.css("position","absolute");
+    		this.css("top", (($(window).height() - this.outerHeight()) / 2) + $(window).scrollTop() + "px");
+    		this.css("left", (($(window).width() - this.outerWidth()) / 2) + $(window).scrollLeft() + "px");
+    		return this;
+		}
+		
+		$(function() {					
+       		 $("#login").center();
+        	$( "#login" ).show( "slide", function() {
+        	$("#username").focus();
+        }
+        );
+		});
+		                
+        </g:javascript>
 
 
 	</head>
 	<body onload="document.loginform.username.focus();">
 	
-		<div id='login' class="dialog">
-			<div class='inner'>
+		<div id='login' class="ui-dialog ui-widget ui-widget-content ui-corner-all  ui-draggable ui-resizable">
+
 			<g:if test='${flash.message}'>
 				<div class='login_message'>${flash.message}</div>
 			</g:if>
-			<div class='fheader'>Please Login:</div>
-			<g:form name="loginform" id="loginform" action="loginsubmit" class="cssform">
-			
-				<p>
-					<label for='username'>Username</label>
-					<g:textField name="username" />
+			<div class='faheader ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix'>
+			<span id="ui-dialog-title-dialog" class="ui-dialog-title" ><g:message code="please.login" />:</span></div>
+			<g:form name="loginform" id="loginform" action="loginsubmit" >
+			<table class="layout-table">
+				<tr>
+					<td><g:message code="username" /></td>
+					<td><g:textField name="username" /></td>
 					
-				</p>
-				<p>
-					<label for='password'>Password</label>
-					<g:passwordField name="password" />
+				</tr>
+				<tr>
+					<td><g:message code="password" /></td>
+					<td><g:passwordField name="password" /></td>
 					
-				</p>
+				</tr>
 				
-				<p>
-					<input class='button submit' type='submit' value='Login &raquo;' />
-				</p>
+				<tr><td>
+					<input class='button submit' type='submit' value='${message(code:"login")} &raquo;' />
+					</td>
+				</tr>
+				</table>
 			</g:form>
 	
 		</div>
 
-</div>
 	</body>
 </html>

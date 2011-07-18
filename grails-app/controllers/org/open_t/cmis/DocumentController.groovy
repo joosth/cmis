@@ -6,6 +6,8 @@ import java.io.Reader;
 import org.open_t.cmis.*;
 import groovy.xml.StreamingMarkupBuilder
 import java.net.URLEncoder;
+import grails.converters.*
+
 class DocumentController {
 	def cmisService
 	def restService
@@ -46,6 +48,7 @@ class DocumentController {
 	
 	// Show document
 	def show = {
+		println "PARAMS:${params}"
 		[entry:cmisService.getEntry(params.objectId)]
 	}
 
@@ -63,12 +66,16 @@ class DocumentController {
 		
 		cmisService.update(cmisEntry)
 
-		render(contentType:"text/json") {
-			result(
+		def theRefreshNodes=[ "${URLEncoder.encode(params.objectId)}" ]		
+		//render(contentType:"text/json") {
+		def result = [
 					'success': true,
-					message:"Document ${cmisEntry.title} updated"
-				)
-		}
+					message:"Document ${cmisEntry.title} updated",
+					refreshNodes:theRefreshNodes
+				]
+		def res=[result:result]
+		render res as JSON	
+		//}
 	}
 
 	
@@ -196,13 +203,18 @@ class DocumentController {
 			}
 		}
 		}
+		def theRefreshNodes=[URLEncoder.encode(params.parentId)]
 		
-		render(contentType:"text/json") {
-			result(
+		def result =[
 					'success': success,
-					message:"${message}"
-				)
-		}
+					message:"${message}",
+					refreshNodes:theRefreshNodes
+				]
+		
+		
+		def res=[result:result]
+		render res as JSON
+		
 	}
 	
 	
@@ -222,18 +234,20 @@ class DocumentController {
 				success=false
 			} else {
 				def filename=session['files'].each { filename,tmpFilename ->
-					def file = new File(tmpFilename)
-					restService.writeNormalFile("PUT",entry.link.'edit-media',file);
+					def file = new File(tmpFilename)					
+					restService.writeFile("PUT",entry.link.'edit-media',file);
 					message="${entry.title} updated"
 				}
 			}
 			
 			// TODO remove uploaded files from temp
 						
+			def theRefreshNodes=[params.objectId]
 			render(contentType:"text/json") {
 				result(
 						'success': success,
-						message:"${message}"
+						message:"${message}",
+						refreshNodes:theRefreshNodes
 					)
 			}
 		}

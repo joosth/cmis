@@ -17,7 +17,9 @@
  * along with this program.  If not, see http://www.gnu.org/licenses
  */
 package org.open_t.cmis;
-
+/*
+ * CMIS Collection class
+ */
 class Collection {
 	def repositories
 	

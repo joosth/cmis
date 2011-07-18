@@ -1,0 +1,24 @@
+<plugin name='cmis' version='0.1' grailsVersion='1.3.5 &gt; *'>
+  <author>Your name</author>
+  <title>Plugin summary/headline</title>
+  <description>\
+Brief description of the plugin.
+</description>
+  <documentation>http://grails.org/plugin/cmis</documentation>
+  <resources>
+    <resource>BootStrap</resource>
+    <resource>BuildConfig</resource>
+    <resource>Config</resource>
+    <resource>DataSource</resource>
+    <resource>UrlMappings</resource>
+    <resource>org.open_t.cmis.AuthenticateController</resource>
+    <resource>org.open_t.cmis.BrowseController</resource>
+    <resource>org.open_t.cmis.DocumentController</resource>
+    <resource>org.open_t.cmis.services.CmisService</resource>
+    <resource>org.open_t.cmis.services.RestService</resource>
+    <resource>org.open_t.cmis.services.RestServiceOld</resource>
+    <resource>org.open_t.cmis.CmisTagLib</resource>
+  </resources>
+  <dependencies />
+  <behavior />
+</plugin>

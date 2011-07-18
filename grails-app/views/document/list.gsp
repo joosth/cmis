@@ -59,7 +59,6 @@
     		</div>
    		</td>
     	<td class="actions">
-    		
     		<g:link class="action-show action" action="show" params="[objectId:entry.prop.objectId]">Show properties</g:link><br />
 			<g:link class="action-show action" controller="document" action="props" class="simpleDialog" params="[objectId:entry.prop.objectId]">Edit properties</g:link>    		    		
     		<%--<g:link class="action-edit action" action="edit" params="[objectId:entry.prop.objectId]">Edit</g:link> --%>

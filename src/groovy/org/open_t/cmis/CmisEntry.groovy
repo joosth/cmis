@@ -20,12 +20,19 @@
 package org.open_t.cmis;
 import org.open_t.util.*;
 
+/*
+ * This class represents a CMIS Entry
+ * It uses propertyMissing methods to enable easy reading/writing of any CMIS property
+ */
 class CmisEntry {
 	def xml
 	def prop
 	def link
-	def cmisService
+	def cmisService	
 	
+	/*
+	 * Construct the entry using the entry XML
+	 */
 	CmisEntry(def theXml) {
 		xml=theXml
 		prop=new Property(this)
@@ -33,27 +40,46 @@ class CmisEntry {
 		cmisService=SpringUtil.getBean("cmisService")
 	}
 	
+	/*
+	 * Get the title
+	 */
 	def getTitle() {
 		xml.title.text()
 	}
 	
+	/*
+	 * Set the title
+	 */
 	def setTitle(def title) {
 		xml.title=title
 	}
 	
+	/*
+	 * Get the summary
+	 */
 	def getSummary() {
 		xml.summary.text()
 	}
 	
+	/*
+	 * Set the summary
+	 */
 	def setSummary(def summary) {
 		xml.summary=summary
 	}
 	
+	/*
+	 * Get the uuid (full object Id)
+	 */
 	
 	def getUuid() {
-		//prop.objectId.replace("workspace://SpacesStore/","")
 		prop.objectId
 	}
+	
+	/*
+	 * Get a map of properties
+	 * Key is property name, value is value
+	 */
 	
 	def getProperties() {
 		def props=[:]
@@ -64,7 +90,9 @@ class CmisEntry {
 		return props
 	}
 	
-	
+	/*
+	 * Get the entry links 
+	 */
 	def getLinks() {
 		def links=[:]
 		xml.link.each { link ->
@@ -72,8 +100,7 @@ class CmisEntry {
 			if (key=="down") {
 				if (link.@type=="application/cmistree+xml") {
 					key="down_cmistree"
-				}
-					
+				}					
 			}
 			if (key=="alternate") {
 				String renditionKind=link.@'cmisra:renditionKind'
@@ -86,11 +113,18 @@ class CmisEntry {
 		return links
 	}
 	
+	/*
+	 * Get the URL to this entry's icon
+	 */	
 	def getIconUrl() {
 		xml.icon.text()
 	}
 	
-	def getThumbnailUrl() {
+	/*
+	 * Get the URL to this entry's thumbnail rendition server up through the document controller.
+	 * If the repository doesn't provide one whe revert to a generic icon
+	 */
+	def getThumbnailUrl() {		
 		if (link.alternate_thumbnail) {
 			return "${cmisService.contextPath}/document/thumbnail?objectId=${prop.objectId}"
 		} else {
@@ -98,15 +132,24 @@ class CmisEntry {
 		}
 	}
 	
-	def getEnclosure() {
-		//println "The encosure is ${links['enclosure']}"
+	/*
+	 * Get the enclosure
+	 */
+	def getEnclosure() {		
 		return links['enclosure']
 	}
 	
+	/*
+	 * Get the object type
+	 */
 	def getType() {
 		return properties['objectTypeId']
 		
 	}
+	
+	/*
+	 * Get a property or link by it's short name by using it as a property
+	 */
 	
 	def propertyMissing(String name) { 
 		if(properties["cmis:${name}"]) {
@@ -121,6 +164,9 @@ class CmisEntry {
 		                                       
 	}
 	
+	/*
+	 * Set a property by addressing it as an assignment 
+	 */
 	def propertyMissing(String name,value) { 
 		if(properties["cmis:${name}"]) {			
 			xml.object.properties.'*'.find { property -> property.@queryName == "cmis:${name}" }.'value'=value		
@@ -131,6 +177,9 @@ class CmisEntry {
 		                                       
 	}
 	
+	/*
+	 * Get the CSS-safe type name of this entry (slashes (/) and dots (.)replaced by minus signs (-) 
+	 */
 	def getCssClassName() {
 		if (prop.baseTypeId=='cmis:folder') {
 			return "folder"
@@ -139,24 +188,39 @@ class CmisEntry {
 		}
 	}
 	
+	/*
+	 * Returns true if this entry is a folder or folder subtype
+	 */
 	def isFolder() {
 		return prop.baseTypeId=='cmis:folder'
 	}
 	
+	/*
+	* Returns true if this entry is a document or document subtype
+	*/
 	def isDocument() {
 		return prop.baseTypeId=='cmis:document'
 	}
 	
+	/*
+	 * Returns true if this entry has a version history
+	 */
 	def hasHistory() {
 		String historyLink=link.'version-history'
 		return historyLink.length()>0
 	}
 	
+	/*
+	 * Returns true is this entry is checked out (ie it has a working copy)
+	 */
 	def isCheckedOut() {
 		String pwc=link.'working-copy'
 		return pwc.length()>0
 	}
 	
+	/*
+	 * Returns true if this entry is a working copy
+	 */
 	def isPwc() {
 		String pwc=link.'via'
 		return pwc.length()>0
