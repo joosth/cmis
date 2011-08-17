@@ -34,13 +34,13 @@ class CmisTagLib {
 	  def rootEntry
 	  
 	  if (ConfigurationHolder.config.cmis.enabled) {
-		  
-		  if (attrs.username) {
-			  cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)			  
-		  } else {
-		  	cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
+		  if (!cmisService.initialized) {
+			  if (attrs.username) {
+				  cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)			  
+			  } else {
+			  	cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
+			  }
 		  }
-		  
 		  if (attrs.rootNode) {
 			  rootEntry=cmisService.getEntryById(attrs.rootNode)		 
 		  } else if (attrs.path) {
@@ -94,7 +94,7 @@ class CmisTagLib {
         var uploader = new qq.FileUploader({      			
       			element: document.getElementById('file-uploader'),
       			// path to server-side upload script
-      			action: cmis.baseUrl+'/document/fileupload',
+      			action: cmis.baseUrl+'/cmisDocument/fileupload',
       			params: {      	
       				},
       			onComplete: function(id, fileName, responseJSON){

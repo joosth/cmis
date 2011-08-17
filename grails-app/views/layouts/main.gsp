@@ -34,7 +34,7 @@
     	</span>
     	
     	<span id="user-toolbar" style="float:right;">    		
-    		<g:if test="${session.user}" >${session.user} <g:link title="Logout|Log out ${session.user}" class="logout action help" controller="authenticate" action="logout">&nbsp;</g:link></g:if>
+    		<g:if test="${session.user}" >${session.user} <g:link title="Logout|Log out ${session.user}" class="logout action help" controller="cmisAuthenticate" action="logout">&nbsp;</g:link></g:if>
     		
     	</span>
     

@@ -4,11 +4,11 @@
 <div id="list-toolbar"
 	class="fg-toolbar ui-toolbar xui-widget-header ui-corner-tl ui-corner-tr table-title">
 	<g:link onclick="simpleDialog(this.href);return false;" title="New folder"
-		class="action-newfolder action list-action simpleDialog" controller="document"
+		class="action-newfolder action list-action simpleDialog" controller="cmisDocument"
 		action="newfolder" params="[parentId:cmisEntry.prop.objectId]">&nbsp;
 	</g:link>
 	<g:link onclick="uploadDialog(this.href);return false;" title="New document"
-		class="action-newdocument action list-action uploadDialog" controller="document"
+		class="action-newdocument action list-action uploadDialog" controller="cmisDocument"
 		action="newdocument" params="[parentId:cmisEntry.prop.objectId]">&nbsp;
 	</g:link>
 </div>
@@ -41,11 +41,11 @@
 					<td>
 						<g:link onclick="simpleDialog(this.href);return false;"
 							title="Show properties" class="action-show action list-action simpleDialog"
-							controller="document" action="props" params="[objectId:document.prop.objectId]">&nbsp;
+							controller="cmisDocument" action="props" params="[objectId:document.prop.objectId]">&nbsp;
 						</g:link>
 						<g:link onclick="simpleDialog(this.href);return false;"
 							title="Edit properties" class="action-edit action list-action simpleDialog"
-							controller="document" action="edit" params="[objectId:document.prop.objectId]">&nbsp;
+							controller="cmisDocument" action="edit" params="[objectId:document.prop.objectId]">&nbsp;
 						</g:link>
 
 
@@ -53,24 +53,24 @@
 						<g:if test="${document.hasHistory()}">
 							<g:link onclick="simpleDialog(this.href);return false;"
 								title="Show history" class="action-history action list-action simpleDialog"
-								controller="document" action="history" params="[objectId:document.prop.objectId]">&nbsp;
+								controller="cmisDocument" action="history" params="[objectId:document.prop.objectId]">&nbsp;
 							</g:link>
 						</g:if>
 
 						<g:if test="${document.isDocument()}">
 							<g:link onclick="simpleDialog(this.href);return false;"
 								title="Download" class="action-download action list-action simpleDialog"
-								controller="document" action="download" params="[objectId:document.prop.objectId]">&nbsp;
+								controller="cmisDocument" action="download" params="[objectId:document.prop.objectId]">&nbsp;
 							</g:link>
 							<g:link onclick="uploadDialog(this.href);return false;"
 								title="Upload" class="action-upload action list-action uploadDialog"
-								controller="document" action="updatedocument" params="[objectId:document.prop.objectId]">&nbsp;
+								controller="cmisDocument" action="updatedocument" params="[objectId:document.prop.objectId]">&nbsp;
 							</g:link>
 
 							<g:if test="${document.isPwc()}">
 								<g:link onclick="simpleDialog(this.href);return false;"
 									title="Checkin" class="action-checkin action list-action simpleDialog"
-									controller="document" action="checkin"
+									controller="cmisDocument" action="checkin"
 									params="[objectId:document.prop.objectId]">&nbsp;
 								</g:link>
 							</g:if>
@@ -78,7 +78,7 @@
 								<g:if test="${!document.isCheckedOut()}">
 									<g:link onclick="simpleDialog(this.href);return false;"
 										title="Checkout" class="action-checkout action list-action simpleDialog"
-										controller="document" action="checkout"
+										controller="cmisDocument" action="checkout"
 										params="[objectId:document.prop.objectId]">&nbsp;
 									</g:link>
 								</g:if>
@@ -90,7 +90,7 @@
 
 						<g:link onclick="simpleDialog(this.href);return false;"
 							title="Delete document" class="action-delete action list-action simpleDialog"
-							controller="document" action="delete" params="[objectId:document.prop.objectId]">&nbsp;
+							controller="cmisDocument" action="delete" params="[objectId:document.prop.objectId]">&nbsp;
 						</g:link>
 
 					</td>

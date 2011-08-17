@@ -295,4 +295,44 @@ class RestService {
 		response.outputStream.flush()
 	}
 	
+	def getFile(String url,File file) {
+		
+		
+		
+    	
+		def client=new DefaultHttpClient();
+		
+		HttpGet httpget = new HttpGet(url);
+		authenticate(client)
+		println "executing request" + httpget.getRequestLine()
+		HttpResponse rsp = client.execute(httpget);
+		HttpEntity entity = rsp.getEntity();
+		def inputStream=entity.getContent()
+			
+		
+		def bufsize=100000
+		
+		byte[] bytes=new byte[(int)bufsize]
+		FileOutputStream out = new FileOutputStream(file)
+
+		def offset=0
+		def len=1
+		while (len>0) {
+
+            len=inputStream.read(bytes, 0, bufsize)
+            
+            
+            
+           // println "len=${len}"
+            if (len>0)
+            	out.write(bytes,0,len)
+            	
+            offset+=bufsize
+		}
+		client.getConnectionManager().shutdown();
+
+	}
+	
+
+	
 }

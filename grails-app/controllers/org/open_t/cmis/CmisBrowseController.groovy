@@ -4,7 +4,7 @@ import grails.converters.JSON;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import java.net.*
 
-class BrowseController {
+class CmisBrowseController {
 
 	def cmisService
 	def restService
@@ -23,7 +23,7 @@ class BrowseController {
 
 	def beforeInterceptor = {
 		if ((!restService.authenticated) || cmisService.repositories==null) {
-			redirect(controller:'authenticate',action:'login')
+			redirect(controller:'cmisAuthenticate',action:'login')
 			return false
 		} 
 	}

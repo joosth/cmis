@@ -126,7 +126,7 @@ class CmisEntry {
 	 */
 	def getThumbnailUrl() {		
 		if (link.alternate_thumbnail) {
-			return "${cmisService.contextPath}/document/thumbnail?objectId=${prop.objectId}"
+			return "${cmisService.contextPath}/cmisDocument/thumbnail?objectId=${prop.objectId}"
 		} else {
 			return "${cmisService.contextPath}/css/theme/images/generic-file-32.png"
 		}

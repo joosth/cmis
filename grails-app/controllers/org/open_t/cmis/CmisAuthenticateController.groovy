@@ -2,7 +2,7 @@ package org.open_t.cmis
 import org.open_t.cmis.*;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
-class AuthenticateController {
+class CmisAuthenticateController {
 
 	def cmisService
 	def restService
@@ -17,7 +17,7 @@ class AuthenticateController {
 		cmisService.init(ConfigurationHolder.config.cmis.url,params.username,params.password)
 		session["user"]=params.username
 		flash.message="User ${session["user"]} logged in."		
-		redirect(controller:'browse',action:'browse')
+		redirect(controller:'cmisBrowse',action:'browse')
     }
 	
 	

@@ -8,14 +8,14 @@ import groovy.xml.StreamingMarkupBuilder
 import java.net.URLEncoder;
 import grails.converters.*
 
-class DocumentController {
+class CmisDocumentController {
 	def cmisService
 	def restService
 
 	// Interceptor that allows us to use our own authenticator which performs a pass-through to the CMIS repository 
 	def beforeInterceptor = {
 			if ((!restService.authenticated) || cmisService.repositories==null) {
-				redirect(controller:'authenticate',action:'login')
+				redirect(controller:'cmisAuthenticate',action:'login')
 				return false
 			} else {
 			}

@@ -137,7 +137,7 @@ function uploadDialog(dialogUrl) {
       			// pass the dom node (ex. $(selector)[0] for jQuery users)
       			element: document.getElementById('file-uploader'),
       			// path to server-side upload script
-      			action: cmis.baseUrl+'/document/fileupload',
+      			action: cmis.baseUrl+'/cmisDocument/fileupload',
       			params: {
       				parentNode: $("#parentId").val()
       				},
@@ -182,7 +182,7 @@ function cmisReload() {
        "plugins" : [  "json_data","themes","contextmenu" ,"ui","crrm","cookies"],
          "json_data" : {
   	            "ajax" : {
-  	                "url" : cmis.baseUrl+"/browse/nodejson",
+  	                "url" : cmis.baseUrl+"/cmisBrowse/nodejson",
   	                "data" : function (n) {    					
   	                    return { id : n.attr ? n.attr("id") : "" , rootNode:cmis.rootNode }
     					//return { "" }	
@@ -225,7 +225,7 @@ function cmisReload() {
           $("#treediv").bind("select_node.jstree", function(e,data) {
 		  var node=data.rslt.obj[0];
 		  var parentPath=$(node).attr("parentPath");
-          		$("#detail-pane").load(cmis.baseUrl+"/browse/detail/?objectId="+data.rslt.obj[0].id+'&parentPath='+parentPath,'',function() {
+          		$("#detail-pane").load(cmis.baseUrl+"/cmisBrowse/detail/?objectId="+data.rslt.obj[0].id+'&parentPath='+parentPath,'',function() {
                   $("#detail-pane").find("span.help").cluetip({
         				splitTitle: '|',  
         				cluezIndex: 2000

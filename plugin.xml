@@ -11,12 +11,12 @@ Brief description of the plugin.
     <resource>Config</resource>
     <resource>DataSource</resource>
     <resource>UrlMappings</resource>
+    <resource>spring.resources</resource>
     <resource>org.open_t.cmis.AuthenticateController</resource>
     <resource>org.open_t.cmis.BrowseController</resource>
-    <resource>org.open_t.cmis.DocumentController</resource>
+    <resource>org.open_t.cmis.CmisDocumentController</resource>
     <resource>org.open_t.cmis.services.CmisService</resource>
     <resource>org.open_t.cmis.services.RestService</resource>
-    <resource>org.open_t.cmis.services.RestServiceOld</resource>
     <resource>org.open_t.cmis.CmisTagLib</resource>
   </resources>
   <dependencies />

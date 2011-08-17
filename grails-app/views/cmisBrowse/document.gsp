@@ -74,13 +74,13 @@
 
 <div id="document-actions" style="float:left;background-color:#EEE;margin:10px;padding:10px;border:1px dotted #888;">
 	
-	<g:link onclick="simpleDialog(this.href);return false;" title="Show properties" class="action-show action simpleDialog" controller="document" action="props" params="[objectId:entry.prop.objectId]">Show properties</g:link><br />
- 	<g:link onclick="simpleDialog(this.href);return false;" title="Edit properties" class="action-edit action simpleDialog" controller="document" action="edit" params="[objectId:entry.prop.objectId]">Edit properties</g:link><br />
+	<g:link onclick="simpleDialog(this.href);return false;" title="Show properties" class="action-show action simpleDialog" controller="cmisDocument" action="props" params="[objectId:entry.prop.objectId]">Show properties</g:link><br />
+ 	<g:link onclick="simpleDialog(this.href);return false;" title="Edit properties" class="action-edit action simpleDialog" controller="cmisDocument" action="edit" params="[objectId:entry.prop.objectId]">Edit properties</g:link><br />
  	
  	
  	
  	<g:if test="${entry.hasHistory()}" >
- 		<g:link onclick="simpleDialog(this.href);return false;" title="Show history" class="action-history action simpleDialog" controller="document" action="history" params="[objectId:entry.prop.objectId]">Show history</g:link><br />
+ 		<g:link onclick="simpleDialog(this.href);return false;" title="Show history" class="action-history action simpleDialog" controller="cmisDocument" action="history" params="[objectId:entry.prop.objectId]">Show history</g:link><br />
 	</g:if>
 	<g:if test="${sppPath}" >
  		<span href="${sppPath}" title="Edit online (SPP)" sppAppProgId="${sppAppProgId}" class="action-edit-online action spp-link">Edit online (SPP)</span><br />
@@ -91,15 +91,15 @@
 	
 	
 	<g:if test="${entry.isDocument()}" >
-		<g:link title="Download" class="action-download action simpleDialog" controller="document" action="download" params="[objectId:entry.prop.objectId]">Download</g:link><br />
-		<g:link onclick="uploadDialog(this.href);return false;" title="Upload" class="action-upload action uploadDialog" controller="document" action="updatedocument" params="[objectId:entry.prop.objectId]">Update</g:link><br />
+		<g:link title="Download" class="action-download action simpleDialog" controller="cmisDocument" action="download" params="[objectId:entry.prop.objectId]">Download</g:link><br />
+		<g:link onclick="uploadDialog(this.href);return false;" title="Upload" class="action-upload action uploadDialog" controller="cmisDocument" action="updatedocument" params="[objectId:entry.prop.objectId]">Update</g:link><br />
 		
  		<g:if test="${entry.isPwc()}">		
- 			<g:link onclick="simpleDialog(this.href);return false;" title="Checkin" class="action-checkin action simpleDialog" controller="document" action="checkin" params="[objectId:entry.prop.objectId]">Checkin</g:link><br />
+ 			<g:link onclick="simpleDialog(this.href);return false;" title="Checkin" class="action-checkin action simpleDialog" controller="cmisDocument" action="checkin" params="[objectId:entry.prop.objectId]">Checkin</g:link><br />
  		</g:if>
  		<g:else>
  		<g:if test="${!entry.isCheckedOut()}" >
-			<g:link onclick="simpleDialog(this.href);return false;" title="Checkout" class="action-checkout action simpleDialog" controller="document" action="checkout" params="[objectId:entry.prop.objectId]">Checkout</g:link><br />		
+			<g:link onclick="simpleDialog(this.href);return false;" title="Checkout" class="action-checkout action simpleDialog" controller="cmisDocument" action="checkout" params="[objectId:entry.prop.objectId]">Checkout</g:link><br />		
  		</g:if>
  		
  		
@@ -108,7 +108,7 @@
  	</g:if>
  	
  	
- 	<g:link onclick="simpleDialog(this.href);return false;" title="Delete document" class="action-delete action simpleDialog" controller="document" action="delete" params="[objectId:entry.prop.objectId]">Delete</g:link><br />
+ 	<g:link onclick="simpleDialog(this.href);return false;" title="Delete document" class="action-delete action simpleDialog" controller="cmisDocument" action="delete" params="[objectId:entry.prop.objectId]">Delete</g:link><br />
  
 
 </div>

@@ -26,13 +26,14 @@ log4j = {
 cmis {
 	enabled=true
 	
-	url="http://localhost:8080/alfresco/service/cmis"
+//	url="http://localhost:8080/alfresco/service/cmis"
 //	url="http://cmis.alfresco.com:80/service/cmis"
+	url="http://mercury:8080/alfresco/service/cmis"
 	
 	username="admin"
 	password="admin"
 	// Base path for SPP on-line editing
-	sppBasePath="http://10.0.1.140:7070/alfresco"
+	sppBasePath="http://mercury:7070/alfresco"
 	// Base path for WebDAV online editing
-	webdavBasePath="http://10.0.1.140:8080/alfresco/webdav"
+	webdavBasePath="http://mercury:8080/alfresco/webdav"
 }

@@ -23,6 +23,9 @@ import java.io.FileOutputStream;
 
 import groovy.xml.*
 import java.net.*;
+import java.util.Date;
+import java.text.*;
+
 import org.open_t.cmis.*;
 import org.open_t.base64.*;
 import net.sf.jmimemagic.*;
@@ -38,10 +41,12 @@ class CmisService {
     def url=""
     def initialized=false
     def enabled=false
+	def pluginManager
     /*
      * Initialize this CmisService bean, remember url, username,password
      */
     def init(theUrl,username,password) {
+		//println "Initilaizing with url: ${theUrl}, username: ${username}, password: ${password}"
     	url=theUrl
     	restService.credentials(username,password)    	
     	 if (!repositories) {    	
@@ -49,6 +54,9 @@ class CmisService {
     	 }
     	initialized=true
     	enabled=true
+		
+		contextPath=org.open_t.util.SpringUtil.applicationContext.id+pluginManager.getPluginPath("cmis")
+		
     }
 	
 	/*
@@ -239,7 +247,7 @@ class CmisService {
     		// The false means no extension hints.
     		MagicMatch match = parser.getMagicMatch(new File(filename),false);
     		mimetype=match.getMimeType();
-    		//println "Hey, we have a mimetype match: ${mimetype}"
+    		println "Hey, we have a mimetype match: ${mimetype}"
 		} catch (Exception e) {
     		// Quietly stay at the default if we can't find it ...
     	}
@@ -317,5 +325,59 @@ class CmisService {
 		def url="${entry.link.self}?checkin=true&major=${major}&checkinComment=${checkinComment}"
 		return restService.put(url,request)		
     }
-    
+	
+	def getFile(cmisEntry,file) {
+		def url=cmisEntry.link.enclosure
+		restService.getFile(url,file)
+		def lastModified=cmisEntry.prop.lastModificationDate
+		def lmDate=parseDate(lastModified)
+		file.setLastModified(lmDate.getTime())
+	}
+	
+	Date parseDate(String dateString) {
+		dateString=dateString.trim()
+		
+		int lastColon=dateString.lastIndexOf(":")
+		int len=dateString.length()
+		if ((dateString[len-6]=="+" || dateString[len-6]=="-") && (lastColon == len-3)){
+			dateString=dateString.substring(0,len-3)+dateString.substring(len-2)
+			//println "converting ${dateString}"
+			
+		} else {
+			//println " not converting"
+		}
+		
+		
+		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").parse(dateString)
+	}
+	
+	String formatDate(Date date) {
+		String DATE_FORMAT_8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+		return DateFormatUtils.format (date,DATE_FORMAT_8601);
+	}
+	
+	def createPath(cmisPath) {
+		
+		def pathElements=cmisPath.split("/")
+	
+		def parent=getEntryByPath("/")
+		
+		def path=""
+		pathElements.each { pathElement ->
+			if (pathElement.length()>0) {
+	
+				path+="/"+pathElement
+				def entry=getEntryByPath(path)
+				if(!entry) {
+					createFolder(parent.objectId,pathElement,"Created by CMIS service")
+					parent=getEntryByPath(path)
+				} else {
+					parent=entry
+				}
+			}
+		}
+		return getEntryByPath(cmisPath)
+	}
+	
+	
 }
