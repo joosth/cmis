@@ -125,7 +125,7 @@ class CmisBrowseController {
 	   }
 	// Shows document defails in sidepane
 	def document = {
-		println "params:${params}"
+		log.debug "params:${params}"
 
 		def cmisEntry=cmisService.getEntry(params.objectId)
 		

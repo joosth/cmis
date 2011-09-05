@@ -46,7 +46,7 @@ class CmisService {
      * Initialize this CmisService bean, remember url, username,password
      */
     def init(theUrl,username,password) {
-		//println "Initilaizing with url: ${theUrl}, username: ${username}, password: ${password}"
+		//log.debug "Initilaizing with url: ${theUrl}, username: ${username}, password: ${password}"
     	url=theUrl
     	restService.credentials(username,password)    	
     	 if (!repositories) {    	
@@ -247,7 +247,7 @@ class CmisService {
     		// The false means no extension hints.
     		MagicMatch match = parser.getMagicMatch(new File(filename),false);
     		mimetype=match.getMimeType();
-    		println "Hey, we have a mimetype match: ${mimetype}"
+    		log.debug "Hey, we have a mimetype match: ${mimetype}"
 		} catch (Exception e) {
     		// Quietly stay at the default if we can't find it ...
     	}
@@ -341,10 +341,10 @@ class CmisService {
 		int len=dateString.length()
 		if ((dateString[len-6]=="+" || dateString[len-6]=="-") && (lastColon == len-3)){
 			dateString=dateString.substring(0,len-3)+dateString.substring(len-2)
-			//println "converting ${dateString}"
+			//log.debug "converting ${dateString}"
 			
 		} else {
-			//println " not converting"
+			//log.debug " not converting"
 		}
 		
 		

@@ -48,7 +48,7 @@ class CmisDocumentController {
 	
 	// Show document
 	def show = {
-		println "PARAMS:${params}"
+		log.debug "PARAMS:${params}"
 		[entry:cmisService.getEntry(params.objectId)]
 	}
 

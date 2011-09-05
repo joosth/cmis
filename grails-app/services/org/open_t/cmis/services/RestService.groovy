@@ -96,15 +96,15 @@ class RestService {
 			
 			HttpGet httpget = new HttpGet(url);
 			authenticate(client)
-			println "executing request" + httpget.getRequestLine()
+			log.debug "executing request" + httpget.getRequestLine()
 			
 			HttpResponse response = client.execute(httpget);
 			HttpEntity entity = response.getEntity();
 
-			println "----------------------------------------";
-			println (response.getStatusLine());
+			log.debug "----------------------------------------";
+			log.debug (response.getStatusLine());
 			if (entity != null) {
-				System.out.println("Response content length: " + entity.getContentLength());
+				System.out.log.debug("Response content length: " + entity.getContentLength());
 			}
         
 			if (response.statusLine.statusCode==200) {    	
@@ -118,7 +118,7 @@ class RestService {
 			}
 		    	
 		} catch(Exception e) {
-    		println "Hm. That's not good: ${e}"
+    		log.debug "Hm. That's not good: ${e}"
     		return null
     	} finally {
 			client.getConnectionManager().shutdown();
@@ -162,7 +162,7 @@ class RestService {
 	    	def slurper = new XmlSlurper()    	
 	        rsp=slurper.parseText(theResponse)
     	} catch (Exception e) {
-    		println "HTTP ${method} error ${e}"
+    		log.debug "HTTP ${method} error ${e}"
        	}  finally {
 			client.getConnectionManager().shutdown();
 		} 
@@ -195,7 +195,7 @@ class RestService {
 			def slurper = new XmlSlurper()
 			rsp=slurper.parseText(theResponse)
 		} catch (Exception e) {
-			println "HTTP ${method} error ${e}"			
+			log.debug "HTTP ${method} error ${e}"			
   	    } finally {
 		  client.getConnectionManager().shutdown();
 		  }
@@ -214,7 +214,7 @@ class RestService {
 	
 	def writeFile (def method,def url, File file) {
 		
-		println "Write normal file to url ${url}"
+		log.debug "Write normal file to url ${url}"
 		Magic parser = new Magic() ;
     	// getMagicMatch accepts Files or byte[],
     	// which is nice if you want to test streams
@@ -227,7 +227,7 @@ class RestService {
     		// Quietly stay at the default if we can't find it ...
     	}
 		
-		println "The mimetype is ${mimetype}"
+		log.debug "The mimetype is ${mimetype}"
 
 		def client=new DefaultHttpClient();
 		authenticate(client)
@@ -247,7 +247,7 @@ class RestService {
 			rsp = response.statusLine.statusCode==200 ? null : response.statusLine.statusCode  
 						
 		} catch (Exception e) {
-			println "HTTP ${method} error ${e}"
+			log.debug "HTTP ${method} error ${e}"
   	    } finally {
 		  client.getConnectionManager().shutdown();
 		}
@@ -268,7 +268,7 @@ class RestService {
 		
 		HttpGet httpget = new HttpGet(url);
 		authenticate(client)
-		println "executing request" + httpget.getRequestLine()
+		log.debug "executing request" + httpget.getRequestLine()
 		HttpResponse rsp = client.execute(httpget);
 		HttpEntity entity = rsp.getEntity();
 		def inputStream=entity.getContent()
@@ -304,7 +304,7 @@ class RestService {
 		
 		HttpGet httpget = new HttpGet(url);
 		authenticate(client)
-		println "executing request" + httpget.getRequestLine()
+		log.debug "executing request" + httpget.getRequestLine()
 		HttpResponse rsp = client.execute(httpget);
 		HttpEntity entity = rsp.getEntity();
 		def inputStream=entity.getContent()
@@ -323,7 +323,7 @@ class RestService {
             
             
             
-           // println "len=${len}"
+           // log.debug "len=${len}"
             if (len>0)
             	out.write(bytes,0,len)
             	
