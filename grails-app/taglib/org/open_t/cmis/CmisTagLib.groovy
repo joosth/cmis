@@ -110,7 +110,8 @@ class CmisTagLib {
 	}
 	
 	
-	def tree = { attrs ->	
+	def tree = { attrs ->
+			
 	def html="""<div id="outer-treediv" class="outer-treediv" >   
 		            <div id="treediv" class="treediv" >		             
 		            </div>
@@ -119,14 +120,12 @@ class CmisTagLib {
 	}
 
 	def pane = { attrs ->
-	def html="""<div id="outer-detail-pane" class="outer-detail-pane" >
-			            <div id="detail-pane" class="detail-pane" >            
-		            	Select a file on the left to show the file details in this pane.
-		            </div>
-				</div>"""
-		out << html
+		def html="""<div id="outer-detail-pane" class="outer-detail-pane disabled" ></div>"""
+			if (cmisService.enabled) {
+				html="""<div id="outer-detail-pane" class="outer-detail-pane" >
+						            <div id="detail-pane" class="detail-pane" >${g.message(code:'cmis.pane.body')}</div>
+							</div>"""
+				}
+			out << html
 	}
-	
-	
-
 }

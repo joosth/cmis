@@ -104,7 +104,7 @@ class RestService {
 			log.debug "----------------------------------------";
 			log.debug (response.getStatusLine());
 			if (entity != null) {
-				System.out.log.debug("Response content length: " + entity.getContentLength());
+				log.debug("Response content length: " + entity.getContentLength());
 			}
         
 			if (response.statusLine.statusCode==200) {    	

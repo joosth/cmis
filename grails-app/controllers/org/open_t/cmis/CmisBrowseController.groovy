@@ -116,7 +116,6 @@ class CmisBrowseController {
 	// Shows document list in sidepane
 	 def list = {
 			if (!params.objectId)
-				//params.objectId="workspace://SpacesStore/fe1528db-4a48-4495-8204-9a1bc56a0926"
 				params.objectId=cmisService.repositories.rootFolderId					
 			def cmisEntry=cmisService.getEntry(params.objectId)					
 			def documents=cmisService.listDescendants(cmisEntry)

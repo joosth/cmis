@@ -46,7 +46,7 @@ class CmisService {
      * Initialize this CmisService bean, remember url, username,password
      */
     def init(theUrl,username,password) {
-		//log.debug "Initilaizing with url: ${theUrl}, username: ${username}, password: ${password}"
+		log.debug "Initilaizing with url: ${theUrl}, username: ${username}, password: ${password}"
     	url=theUrl
     	restService.credentials(username,password)    	
     	 if (!repositories) {    	

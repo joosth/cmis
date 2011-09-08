@@ -48,7 +48,7 @@ class Repositories {
 		// TODO add Collections, RepositoryInfo(s) and UriTemplates
 		
 		// TODO check for mediatype, according to the standard there could be more than 1 template per type
-		xml.workspace.uritemplate.each { uritemplate ->			
+		xml?.workspace?.uritemplate.each { uritemplate ->			
 			// Looks silly, but without the quotes the key isn't a string and can't be looked up as expected
 			templates["${uritemplate.type}"]="${uritemplate.template.text()}"			
 		}
@@ -56,7 +56,7 @@ class Repositories {
 	}
 	
 	def getTitle() {
-		xml.workspace.title.text()
+		xml?.workspace?.title?.text()
 	}
 	
 	
@@ -83,7 +83,7 @@ class Repositories {
 	
 	def getCollections() {
 		def collections=[:]
-		xml.workspace.collection.each { collection ->
+		xml?.workspace?.collection?.each { collection ->
 			String key=collection.collectionType.text()		
 			collections.put(key,collection.@href.text())
 		}
@@ -92,7 +92,7 @@ class Repositories {
 	
 	
 	def getRootFolderId() {
-		return xml.workspace.repositoryInfo.rootFolderId.text()
+		return xml?.workspace?.repositoryInfo?.rootFolderId?.text()
 	}
 	
 	

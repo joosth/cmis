@@ -21,14 +21,15 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
+	debug  'grails.app'
 }
 
 cmis {
 	enabled=true
 	
-//	url="http://localhost:8080/alfresco/service/cmis"
+	url="http://localhost:8080/alfresco/service/cmis"
 //	url="http://cmis.alfresco.com:80/service/cmis"
-	url="http://mercury:8080/alfresco/service/cmis"
+//	url="http://mercury:8080/alfresco/service/cmis"
 	
 	username="admin"
 	password="admin"

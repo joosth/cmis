@@ -20,7 +20,7 @@
     <body>
 	    <div class="body">
 	    	<div id="status" style="display:none;position:absolute;left:50px;top:50px;width:100px;border:1px solid #AAA;background-color:#EEE;text-align:center;padding:10px;" ></div>
-	    	    <%-- Data model tree --%>
+	    	    <%-- File tree --%>
 		        <table><tr>
 		        <td>
 		        <cmis:tree />
