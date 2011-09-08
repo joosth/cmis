@@ -1,5 +1,5 @@
- <div id="dialog" title="New document">
-	<g:form name="ajaxdialogform" controller="document" action="newdocumentsubmit" >			 							
+ <div id="dialog" title="${message(code:'cmis.dialog.newdocument.title')}">
+	<g:form name="ajaxdialogform" action="newdocumentsubmit" >			 							
 		<g:hiddenField name="parentId" value="${parentId}"/>						
 		<table style="border:none;">
 		    <tbody> 

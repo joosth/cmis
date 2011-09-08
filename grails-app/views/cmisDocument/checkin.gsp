@@ -1,4 +1,4 @@
- <div id="dialog" title="Check in document" style="width:600px;">
+ <div id="dialog" title="${message(code:'cmis.dialog.checkin.title')}" style="width:600px;">
 	<g:form name="ajaxdialogform" action="checkinsubmit" >			 							
 		<g:hiddenField name="objectId" value="${entry.objectId}"/>						
 		<table style="border:none;">

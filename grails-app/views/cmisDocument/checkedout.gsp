@@ -2,7 +2,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="layout" content="main" />       
-        <title>Documents</title>
+        <title>${message(code:'cmis.dialog.checkedout.title')}</title>
         <link rel="stylesheet" href="${resource(dir:'js/uploader',file:'fileuploader.css')}" />
         
         <g:javascript src="uploader/fileuploader.js" />

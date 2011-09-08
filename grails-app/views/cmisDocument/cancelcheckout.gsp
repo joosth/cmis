@@ -1,4 +1,4 @@
- <div id="dialog" title="Cancel checkout" style="width:600px;">
+ <div id="dialog" title="${message(code:'cmis.dialog.cancelcheckout.title')}" style="width:600px;">
 	<g:form name="ajaxdialogform" action="cancelcheckoutsubmit" >			 							
 		<g:hiddenField name="objectId" value="${entry.objectId}"/>
 		<p style="color:red;font-size:14px;text-align:center;">Are you sure you want to cancel the checkout of this document?</p>						

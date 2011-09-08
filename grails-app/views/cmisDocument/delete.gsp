@@ -1,4 +1,4 @@
- <div id="dialog" title="Delete document" style="width:600px;">
+ <div id="dialog" title="${message(code:'cmis.dialog.delete.title')}" style="width:600px;">
 	<g:form name="ajaxdialogform" action="deletesubmit" controller="document" >			 							
 		<g:hiddenField name="objectId" value="${entry.objectId}"/>
 		<p style="color:red;font-size:14px;text-align:center;">Are you sure you want to delete this document?</p>						

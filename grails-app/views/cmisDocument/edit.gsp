@@ -1,5 +1,5 @@
- <div id="dialog" title="Edit document properties">
-	<g:form name="ajaxdialogform" action="update" controller="document">			 							
+ <div id="dialog" title="${message(code:'cmis.dialog.editproperties.title')}">
+	<g:form name="ajaxdialogform" action="update" >			 							
 		<g:hiddenField name="objectId" value="${entry.objectId}"/>						
 		<table style="border:none;">
 		    <tbody>                        

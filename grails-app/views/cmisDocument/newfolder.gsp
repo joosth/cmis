@@ -1,4 +1,4 @@
- <div id="dialog" title="New folder">
+ <div id="dialog" title="${message(code:'cmis.dialog.newfolder.title')}">
 	<g:form name="ajaxdialogform" action="newfoldersubmit" >			 							
 		<g:hiddenField name="parentId" value="${parentId}"/>						
 		<table style="border:none;">

@@ -1,4 +1,4 @@
- <div id="dialog" title="Update document">
+ <div id="dialog" title="${message(code:'cmis.dialog.updatedocument.title')}">
 	<g:form name="ajaxdialogform" controller="document" action="updatedocumentsubmit" >			 							
 		<g:hiddenField name="objectId" value="${entry.prop.objectId}"/>						
 		<table style="border:none;">

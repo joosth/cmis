@@ -1,4 +1,4 @@
- <div id="dialog" title="Document history" style="width:750px;">
+ <div id="dialog" title="${message(code:'cmis.dialog.history.title')}" style="width:750px;">
 	<g:form name="ajaxdialogform" action="historysubmit" style="width:100%;">			 							
 		<g:hiddenField name="parentId" value="${parentId}"/>						
 		<table style="border:none;" class="history list">

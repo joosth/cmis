@@ -1,5 +1,5 @@
- <div id="dialog" title="Checkout document" style="width:600px;">
-	<g:form name="ajaxdialogform" controller="document" action="checkoutsubmit" >			 							
+ <div id="dialog" title="${message(code:'cmis.dialog.checkout.title')}" style="width:600px;">
+	<g:form name="ajaxdialogform" action="checkoutsubmit" >			 							
 		<g:hiddenField name="objectId" value="${entry.objectId}"/>
 		<p style="color:red;font-size:14px;text-align:center;">Are you sure you want to checkout this document?</p>						
 		<table style="border:none;">
