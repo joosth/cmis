@@ -18,12 +18,12 @@
 		class="display file-list">
 		<thead>
 			<tr>
-				<th>Icon</th>
-				<th>Name</th>
+				<th><g:message code="cmis.list.icon" default="Icon" /></th>
+				<th><g:message code="cmis.list.name" default="Name" /></th>
 			<!-- 	<th>Size</th>
 				<th>Author</th>
 				<th>Last modified</th> -->
-				<th>Actions</th>
+				<th><g:message code="cmis.list.actions" default="Actions" /></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -40,11 +40,11 @@
 					-->
 					<td>
 						<g:link onclick="simpleDialog(this.href);return false;"
-							title="Show properties" class="action-show action list-action simpleDialog"
+							title="${message(code:'cmis.list.showproperties')}" class="action-show action list-action simpleDialog"
 							controller="cmisDocument" action="props" params="[objectId:document.prop.objectId]">&nbsp;
 						</g:link>
 						<g:link onclick="simpleDialog(this.href);return false;"
-							title="Edit properties" class="action-edit action list-action simpleDialog"
+							title="${message(code:'cmis.list.editproperties')}" class="action-edit action list-action simpleDialog"
 							controller="cmisDocument" action="edit" params="[objectId:document.prop.objectId]">&nbsp;
 						</g:link>
 
@@ -52,24 +52,24 @@
 
 						<g:if test="${document.hasHistory()}">
 							<g:link onclick="simpleDialog(this.href);return false;"
-								title="Show history" class="action-history action list-action simpleDialog"
+								title="${message(code:'cmis.list.showhistory')}" class="action-history action list-action simpleDialog"
 								controller="cmisDocument" action="history" params="[objectId:document.prop.objectId]">&nbsp;
 							</g:link>
 						</g:if>
 
 						<g:if test="${document.isDocument()}">
 							<g:link onclick="simpleDialog(this.href);return false;"
-								title="Download" class="action-download action list-action simpleDialog"
+								title="${message(code:'cmis.list.download')}" class="action-download action list-action simpleDialog"
 								controller="cmisDocument" action="download" params="[objectId:document.prop.objectId]">&nbsp;
 							</g:link>
 							<g:link onclick="uploadDialog(this.href);return false;"
-								title="Upload" class="action-upload action list-action uploadDialog"
+								title="${message(code:'cmis.list.upload')}" class="action-upload action list-action uploadDialog"
 								controller="cmisDocument" action="updatedocument" params="[objectId:document.prop.objectId]">&nbsp;
 							</g:link>
 
 							<g:if test="${document.isPwc()}">
 								<g:link onclick="simpleDialog(this.href);return false;"
-									title="Checkin" class="action-checkin action list-action simpleDialog"
+									title="${message(code:'cmis.list.checkin')}" class="action-checkin action list-action simpleDialog"
 									controller="cmisDocument" action="checkin"
 									params="[objectId:document.prop.objectId]">&nbsp;
 								</g:link>
@@ -77,7 +77,7 @@
 							<g:else>
 								<g:if test="${!document.isCheckedOut()}">
 									<g:link onclick="simpleDialog(this.href);return false;"
-										title="Checkout" class="action-checkout action list-action simpleDialog"
+										title="${message(code:'cmis.list.checkout')}" class="action-checkout action list-action simpleDialog"
 										controller="cmisDocument" action="checkout"
 										params="[objectId:document.prop.objectId]">&nbsp;
 									</g:link>
@@ -89,7 +89,7 @@
 
 
 						<g:link onclick="simpleDialog(this.href);return false;"
-							title="Delete document" class="action-delete action list-action simpleDialog"
+							title="${message(code:'cmis.list.delete')}" class="action-delete action list-action simpleDialog"
 							controller="cmisDocument" action="delete" params="[objectId:document.prop.objectId]">&nbsp;
 						</g:link>
 
@@ -101,12 +101,12 @@
 		</tbody>
 		<tfoot>
 			<tr>
-				<th>Icon</th>
-			 	<th>Name</th>
+				<th><g:message code="cmis.list.icon" default="Icon" /></th>
+				<th><g:message code="cmis.list.name" default="Name" /></th>
 			<!-- 	<th>Size</th>
 				<th>Author</th>
 				<th>Last modified</th> -->
-				<th>Actions</th>
+				<th><g:message code="cmis.list.actions" default="Actions" /></th>
 			</tr>
 		</tfoot>
 

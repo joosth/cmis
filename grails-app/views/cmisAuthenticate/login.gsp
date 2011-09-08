@@ -47,22 +47,22 @@
 				<div class='login_message'>${flash.message}</div>
 			</g:if>
 			<div class='faheader ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix'>
-			<span id="ui-dialog-title-dialog" class="ui-dialog-title" ><g:message code="please.login" />:</span></div>
+			<span id="ui-dialog-title-dialog" class="ui-dialog-title" ><g:message code="login.title" />:</span></div>
 			<g:form name="loginform" id="loginform" action="loginsubmit" >
 			<table class="layout-table">
 				<tr>
-					<td><g:message code="username" /></td>
+					<td><g:message code="login.username" /></td>
 					<td><g:textField name="username" /></td>
 					
 				</tr>
 				<tr>
-					<td><g:message code="password" /></td>
+					<td><g:message code="login.password" /></td>
 					<td><g:passwordField name="password" /></td>
 					
 				</tr>
 				
 				<tr><td>
-					<input class='button submit' type='submit' value='${message(code:"login")} &raquo;' />
+					<input class='button submit' type='submit' value='${message(code:"login.submit")} &raquo;' />
 					</td>
 				</tr>
 				</table>
