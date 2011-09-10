@@ -42,7 +42,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class RestService {
 
-    static transactional = true
+    static transactional = false
 	static scope="session"
 
 	def maxBufSize=1000000

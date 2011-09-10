@@ -21,11 +21,13 @@ package org.open_t.cmis
 import org.codehaus.groovy.grails.commons.* 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
-
-class CmisTagLib {
-	def cmisService
-	def restService
+import org.springframework.context.*
+class CmisTagLib  implements ApplicationContextAware {
+	//def cmisService
+	//def restService
 	static namespace = 'cmis'
+	ApplicationContext applicationContext
+	
 		
 
 	def head = { attrs ->
@@ -34,25 +36,25 @@ class CmisTagLib {
 	  def rootEntry
 	  
 	  if (ConfigurationHolder.config.cmis.enabled) {
-		  if (!cmisService.initialized) {
+		  if (!applicationContext.cmisService.initialized) {
 			  if (attrs.username) {
-				  cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)			  
+				  applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)			  
 			  } else {
-			  	cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
+			  	applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
 			  }
 		  }
 		  if (attrs.rootNode) {
-			  rootEntry=cmisService.getEntryById(attrs.rootNode)		 
+			  rootEntry=applicationContext.cmisService.getEntryById(attrs.rootNode)		 
 		  } else if (attrs.path) {
-			  rootEntry=cmisService.getEntryByPath(attrs.path)
+			  rootEntry=applicationContext.cmisService.getEntryByPath(attrs.path)
 		  } else {
-			  rootEntry=cmisService.getEntryByPath("/")
+			  rootEntry=applicationContext.cmisService.getEntryByPath("/")
 		  }
 		  
 		 
 			
 	  
-		  cmisService.contextPath=request.contextPath
+		  applicationContext.cmisService.contextPath=request.contextPath
 	  
 	  
 	  
@@ -87,7 +89,7 @@ class CmisTagLib {
 	
 	def uploadHead = { attrs ->
 		def html=""
-		if (cmisService.enabled) { 
+		if (applicationContext.cmisService.enabled) { 
 		html="""
          <script  type="text/javascript">       
         \$(function() {		 
@@ -121,7 +123,7 @@ class CmisTagLib {
 
 	def pane = { attrs ->
 		def html="""<div id="outer-detail-pane" class="outer-detail-pane disabled" ></div>"""
-			if (cmisService.enabled) {
+			if (applicationContext.cmisService.enabled) {
 				html="""<div id="outer-detail-pane" class="outer-detail-pane" >
 						            <div id="detail-pane" class="detail-pane" >${g.message(code:'cmis.pane.body')}</div>
 							</div>"""

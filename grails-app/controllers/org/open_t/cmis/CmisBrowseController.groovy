@@ -22,7 +22,7 @@ class CmisBrowseController {
 	
 
 	def beforeInterceptor = {
-		if ((!restService.authenticated) || cmisService.repositories==null) {
+		if (!cmisService.initialized) {
 			redirect(controller:'cmisAuthenticate',action:'login')
 			return false
 		} 

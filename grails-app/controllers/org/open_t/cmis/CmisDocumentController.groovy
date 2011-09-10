@@ -14,7 +14,7 @@ class CmisDocumentController {
 
 	// Interceptor that allows us to use our own authenticator which performs a pass-through to the CMIS repository 
 	def beforeInterceptor = {
-			if ((!restService.authenticated) || cmisService.repositories==null) {
+			if (!cmisService.initialized) {
 				redirect(controller:'cmisAuthenticate',action:'login')
 				return false
 			} else {
