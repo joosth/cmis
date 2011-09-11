@@ -236,8 +236,10 @@ function cmisReload() {
               	  "sPaginationType": "full_numbers",
               	  "bProcessing": true,
               	  "bServerSide": false,        		
-              	   "bFilter": false
-                  
+              	   "bFilter": false,
+              	 "oLanguage": {
+              	      "sUrl": cmis.baseUrl+"/js/jquery/dataTables/localisation/dataTables."+cmis.language+".txt"
+              	    }
                   });
                   
               	  var toolbar=$("#list-toolbar")

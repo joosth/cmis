@@ -30,12 +30,11 @@
     <body>
     <div id="main-toolbar" >
     	<span id="menu-toolbar" >
-    		<g:link title="Home|Go to the home folder" class="action home help" controller="browse" action="browse">&nbsp;</g:link>
+    		<g:link title="${message(code:'cmis.layout.main.home.tooltip',default:'Home|Go to the home folder')}" class="action home help" controller="browse" action="browse">&nbsp;</g:link>
     	</span>
     	
     	<span id="user-toolbar" style="float:right;">    		
-    		<g:if test="${session.user}" >${session.user} <g:link title="Logout|Log out ${session.user}" class="logout action help" controller="cmisAuthenticate" action="logout">&nbsp;</g:link></g:if>
-    		
+    		<g:if test="${session.user}" >${session.user} <g:link title="${message(code:'cmis.layout.main.logout.tooltip',default:'Logout|Log out {0}',args:[session.user])}" class="logout action help" controller="cmisAuthenticate" action="logout">&nbsp;</g:link></g:if>
     	</span>
     
     </div>
@@ -46,8 +45,7 @@
             <g:message code="${flash.message}" args="${flash.args}" default="${flash.defaultMessage}"/>
             </div>
             </g:if>
-            <div id="status" style="z-index:10000;display:none;position:absolute;left:50px;top:50px;width:100px;border:1px solid #AAA;background-color:#EEE;text-align:center;padding:10px;" ></div>
-            
+            <div id="status" style="z-index:10000;display:none;position:absolute;left:50px;top:50px;width:100px;border:1px solid #AAA;background-color:#EEE;text-align:center;padding:10px;" ></div>            
         <g:layoutBody />
         </div>
     </body>

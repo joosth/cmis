@@ -2,7 +2,7 @@
     <head>
     	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="layout" content="main" />       
-        <title>Browse</title>
+        <title><g:message code="cmisBrowse.browse.title" default="Browse" /></title>
         <link rel="stylesheet" href="${resource(dir:'js/uploader',file:'fileuploader.css')}" />
         <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'jquery.jstree.css')}" />
          

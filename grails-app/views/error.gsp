@@ -1,6 +1,8 @@
+<%@ page import="grails.util.Environment" %>
 <html>
   <head>
-	  <title>Grails Runtime Exception</title>
+	  <title>Woops</title>
+	  <meta name="layout" content="main" />
 	  <style type="text/css">
 	  		.message {
 	  			border: 1px solid black;
@@ -24,10 +26,21 @@
   </head>
 
   <body>
-    <h1>Grails Runtime Exception</h1>
-    <h2>Error Details</h2>
-
-  	<div class="message">
+    
+	<div class="body">
+		<div class="nav" > <span class="menuButton"></span></div>
+		<h1>Woops</h1>
+		
+    	
+    	<div class="dialog">
+    	<p>Processing your request did not work out as expected. We apologize for the inconvenience.</p>
+    	</div>
+    	
+    	<g:if test="${Environment.current!=Environment.PRODUCTION}">
+    	<h1>Error Details</h1>
+ 		<div class="dialog">
+  		
+  		<p>
 		<strong>Error ${request.'javax.servlet.error.status_code'}:</strong> ${request.'javax.servlet.error.message'.encodeAsHTML()}<br/>
 		<strong>Servlet:</strong> ${request.'javax.servlet.error.servlet_name'}<br/>
 		<strong>URI:</strong> ${request.'javax.servlet.error.request_uri'}<br/>
@@ -43,12 +56,19 @@
 	  			</g:each>
 	  		</div>
 		</g:if>
-  	</div>
+		</p>
+		</div>
+  		<div class="dialog">
 	<g:if test="${exception}">
-	    <h2>Stack Trace</h2>
-	    <div class="stack">
-	      <pre><g:each in="${exception.stackTraceLines}">${it.encodeAsHTML()}<br/></g:each></pre>
+	    <h1>Stack Trace</h1>
+	    <div class="dialog">
+	      <pree><g:each in="${exception.stackTraceLines}">${it.encodeAsHTML()}<br/></g:each></pree>
 	    </div>
 	</g:if>
+	</div>
+	</g:if>
+	
+	</div>
+	
   </body>
 </html>

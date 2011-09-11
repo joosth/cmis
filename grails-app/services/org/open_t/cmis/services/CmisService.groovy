@@ -369,7 +369,7 @@ class CmisService {
 				path+="/"+pathElement
 				def entry=getEntryByPath(path)
 				if(!entry) {
-					createFolder(parent.objectId,pathElement,"Created by CMIS service")
+					createFolder(parent.objectId,pathElement,message(code:'cmisservice.createpath.message',default:"Created by CMIS service"))
 					parent=getEntryByPath(path)
 				} else {
 					parent=entry

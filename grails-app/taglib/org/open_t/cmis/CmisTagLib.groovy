@@ -63,9 +63,10 @@ class CmisTagLib  implements ApplicationContextAware {
 	  request.cmis=cmismap
 	  def html="""<!-- CMIS variables -->
 		  		  <script type="text/javascript">
-	  		      var cmis={};
-  				  cmis.baseUrl="${request.contextPath}";
+	  		      var cmis={};  				  
+  				  cmis.baseUrl="${resource(absolute:false,plugin:'cmis')}";
   				  cmis.rootNode="${request.cmis?.rootEntry?.uuid}";
+  				  cmis.language="${java.util.Locale.getDefault().getLanguage()}";
   				  </script>"""
 	  out << html
 	  

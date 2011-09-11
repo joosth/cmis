@@ -16,7 +16,7 @@ class CmisAuthenticateController {
     def loginsubmit = {
 		cmisService.init(ConfigurationHolder.config.cmis.url,params.username,params.password)
 		session["user"]=params.username
-		flash.message="User ${session["user"]} logged in."		
+		flash.message=message(code:'cmisauthenticate.loginsubmit.message',default:"User {0} logged in.",args:[session["user"]])
 		redirect(controller:'cmisBrowse',action:'browse')
     }
 	

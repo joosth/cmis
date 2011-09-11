@@ -70,7 +70,7 @@ class CmisDocumentController {
 		//render(contentType:"text/json") {
 		def result = [
 					'success': true,
-					message:"Document ${cmisEntry.title} updated",
+					message:message(code:'cmisdocument.update.message',default:"Document {0} updated",args:[cmisEntry.title]),					
 					refreshNodes:theRefreshNodes
 				]
 		def res=[result:result]
@@ -95,7 +95,7 @@ class CmisDocumentController {
 			render(contentType:"text/json") {
 				result(
 						'success': true,
-						message:"Document ${cmisEntry.title} deleted"
+						message:message(code:'cmisdocument.deletesubmit.message',default:"Document {0} deleted",args:[cmisEntry.title])						
 					)
 			}
 		}
@@ -112,7 +112,8 @@ class CmisDocumentController {
 		render(contentType:"text/json") {
 			result(
 					'success': true,
-					message:"Checkout of ${cmisEntry.title} cancelled"
+					message:message(code:'cmisdocument.cancelcheckoutsubmit.message',default:"Checkout of {0} cancelled",args:[cmisEntry.title])
+					
 				)
 		}
 	}
@@ -132,7 +133,7 @@ class CmisDocumentController {
 			render(contentType:"text/json") {
 				result(
 						'success': true,
-						message:"Document ${cmisEntry.title} checked out"
+						message:message(code:'cmisdocument.checkoutsubmit.message',default:"Document {0} checked out",args:[cmisEntry.title])						
 					)
 			}
 		}
@@ -156,7 +157,7 @@ class CmisDocumentController {
 		render(contentType:"text/json") {
 			result(
 					'success': true,
-					message:"Document ${entry.title} checked in"
+					message:message(code:'cmisdocument.checkinsubmit.message',default:"Document {0} checked in",args:[cmisEntry.title])
 				)
 		}
 
@@ -173,7 +174,7 @@ class CmisDocumentController {
 		render(contentType:"text/json") {
 			result(
 					success: true,
-					message:"Folder ${params.name} created"
+					message:message(code:'cmisdocument.newfoldersubmit.message',default:"Folder {0} created",args:[params.name])
 				)
 		}
 	}
@@ -187,18 +188,20 @@ class CmisDocumentController {
 		def success=true
 		if (params.filename.class.name=="java.lang.String") {
 			if (cmisService.createDocument(params.parentId,session['files'][params.filename],params.filename,params.filename)) {
-					message+="${params.filename} created"
+					message+=message(code:'cmisdocument.newdocumentsubmit.created',default:"{0} created",args:[params.filename])
+					
 			} else {
-				message+="creating ${params.filename} failed"
+				message+=message(code:'cmisdocument.newdocumentsubmit.failed',default:"creating {0} failed",args:[params.filename])
 				success=false
 			}
 			
 		} else {		
 			params.filename.each { filename ->
 			if(cmisService.createDocument(params.parentId,session['files'][filename],filename,filename)) {
-				message+="<br />${filename} created" 				
+				message+="<br />"+message(code:'cmisdocument.newdocumentsubmit.created',default:"{0} created",args:[filename]) 				
 			} else {
-				message+="<br /> creating ${filename} failed"
+				message+="<br />"+message(code:'cmisdocument.newdocumentsubmit.failed',default:"creating {0} failed",args:[filename])
+				
 				success=false
 			}
 		}
@@ -231,12 +234,13 @@ class CmisDocumentController {
 			
 			if (session['files'].size()!=1) {
 				message="You should upload exactly one file"
+				message=message(code:'cmisdocument.updatedocumentsubmit.onefile',default:"You should upload exactly one file")
 				success=false
 			} else {
 				def filename=session['files'].each { filename,tmpFilename ->
 					def file = new File(tmpFilename)					
 					restService.writeFile("PUT",entry.link.'edit-media',file);
-					message="${entry.title} updated"
+					message=message(code:'cmisdocument.updatedocumentsubmit.updated',default:"{0} updated",args:[entry.title])
 				}
 			}
 			
