@@ -66,7 +66,9 @@ class CmisDocumentController {
 		
 		cmisService.update(cmisEntry)
 
-		def theRefreshNodes=[ "${URLEncoder.encode(params.objectId)}" ]		
+		//def theRefreshNodes=[ "${URLEncoder.encode(params.objectId)}" ]
+		// ugly workaround until we figure out why the above is wrong
+		def theRefreshNodes=[ "ALL" ]
 		//render(contentType:"text/json") {
 		def result = [
 					'success': true,
@@ -95,7 +97,8 @@ class CmisDocumentController {
 			render(contentType:"text/json") {
 				result(
 						'success': true,
-						message:message(code:'cmisdocument.deletesubmit.message',default:"Document {0} deleted",args:[cmisEntry.title])						
+						message:message(code:'cmisdocument.deletesubmit.message',default:"Document {0} deleted",args:[cmisEntry.title]),
+						refreshNodes:["ALL"]						
 					)
 			}
 		}
@@ -174,7 +177,8 @@ class CmisDocumentController {
 		render(contentType:"text/json") {
 			result(
 					success: true,
-					message:message(code:'cmisdocument.newfoldersubmit.message',default:"Folder {0} created",args:[params.name])
+					message:message(code:'cmisdocument.newfoldersubmit.message',default:"Folder {0} created",args:[params.name]),
+					refreshNodes:["ALL"]
 				)
 		}
 	}
@@ -184,23 +188,23 @@ class CmisDocumentController {
 	}
 	
 	def newdocumentsubmit = {
-		String message=""
+		String msg=""
 		def success=true
 		if (params.filename.class.name=="java.lang.String") {
 			if (cmisService.createDocument(params.parentId,session['files'][params.filename],params.filename,params.filename)) {
-					message+=message(code:'cmisdocument.newdocumentsubmit.created',default:"{0} created",args:[params.filename])
+					msg+=message(code:'cmisdocument.newdocumentsubmit.created',default:"{0} created",args:[params.filename])
 					
 			} else {
-				message+=message(code:'cmisdocument.newdocumentsubmit.failed',default:"creating {0} failed",args:[params.filename])
+				msg+=message(code:'cmisdocument.newdocumentsubmit.failed',default:"creating {0} failed",args:[params.filename])
 				success=false
 			}
 			
 		} else {		
 			params.filename.each { filename ->
 			if(cmisService.createDocument(params.parentId,session['files'][filename],filename,filename)) {
-				message+="<br />"+message(code:'cmisdocument.newdocumentsubmit.created',default:"{0} created",args:[filename]) 				
+				msg+="<br />"+message(code:'cmisdocument.newdocumentsubmit.created',default:"{0} created",args:[filename]) 				
 			} else {
-				message+="<br />"+message(code:'cmisdocument.newdocumentsubmit.failed',default:"creating {0} failed",args:[filename])
+				msg+="<br />"+message(code:'cmisdocument.newdocumentsubmit.failed',default:"creating {0} failed",args:[filename])
 				
 				success=false
 			}
@@ -210,7 +214,7 @@ class CmisDocumentController {
 		
 		def result =[
 					'success': success,
-					message:"${message}",
+					'message':"${msg}",
 					refreshNodes:theRefreshNodes
 				]
 		

@@ -7,10 +7,10 @@
 		        <tr class="prop">
 		            <td valign="top" class="name"><g:message code="cmis.properties.name.title" default="Document name" />:</td>                                
 		            <td valign="top" class="value">${entry.title}</td>
-		            <td><span tabindex="9999" class="help action" title="${message(code:'cmis.properties.title.help',default:'Document name|This is the name of the document')}" href="" >&nbsp;</span></td>		                               
+		            <td><span tabindex="9999" class="help action" title="${message(code:'cmis.properties.name.help',default:'Document name|This is the name of the document')}" href="" >&nbsp;</span></td>		                               
 		        </tr>
 		        <tr class="prop">
-		            <td valign="top" class="name"><g:message code="cmis.properties.summary" default="Document summary" />:</td>
+		            <td valign="top" class="name"><g:message code="cmis.properties.summary.title" default="Document summary" />:</td>
 		            <td valign="top" >${entry.summary}</td>
 		            <td><span tabindex="9999" class="help action" title="${message(code:'cmis.properties.summary.help',default:'Summary|This is the summary of the document')}" href="" >&nbsp;</span></td>
 	            </tr>

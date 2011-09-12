@@ -73,19 +73,19 @@ class CmisTagLib  implements ApplicationContextAware {
 	  
       
 	  
-	  out << """<link rel="stylesheet" type="text/css" href="${resource(dir:'css',file:'cmis.css',contextPath:pluginContextPath)}" />"""
-	  out << """<link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'mimetypes.css',contextPath:pluginContextPath)}" />"""
+	  out << """<link rel="stylesheet" type="text/css" href="${resource(dir:'css',file:'cmis.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
+	  out << """<link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'mimetypes.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
 
-      out << """<link rel="stylesheet" href="${resource(dir:'js/uploader',file:'fileuploader.css',contextPath:pluginContextPath)}" />"""
-      out << """<link rel="stylesheet" href="${resource(dir:'css',file:'jquery.jstree.css',contextPath:pluginContextPath)}" />"""
+      out << """<link rel="stylesheet" href="${resource(dir:'js/uploader',file:'fileuploader.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
+      out << """<link rel="stylesheet" href="${resource(dir:'css',file:'jquery.jstree.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
       
-	  out << g.javascript(src:'cmis.js',contextPath:pluginContextPath)
+	  out << g.javascript(src:'cmis.js',contextPath:pluginContextPath,plugin:'cmis')
 	  
-	  out << g.javascript(src:'uploader/fileuploader.js',contextPath:pluginContextPath)
+	  out << g.javascript(src:'uploader/fileuploader.js',contextPath:pluginContextPath,plugin:'cmis')
 	  
-	  out << g.javascript(src:'jquery/jquery.cookie.js',contextPath:pluginContextPath)
-	  out << g.javascript(src:'jquery/jquery.hotkeys.js',contextPath:pluginContextPath)
-	  out << g.javascript(src:'jquery/jquery.jstree.js',contextPath:pluginContextPath)
+	  out << g.javascript(src:'jquery/jquery.cookie.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << g.javascript(src:'jquery/jquery.hotkeys.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << g.javascript(src:'jquery/jquery.jstree.js',contextPath:pluginContextPath,plugin:'cmis')
 	  }
 	}
 	
@@ -102,8 +102,13 @@ class CmisTagLib  implements ApplicationContextAware {
       			params: {      	
       				},
       			onComplete: function(id, fileName, responseJSON){
-  					\$("#form").append('<input type=\"hidden\" name=\"filename\" value=\""+fileName+"\" />');      			
-      			}
+  					\$("#form").append('<input type=\"hidden\" name=\"filename\" value=\""+fileName+"\" />');
+      			},
+      			template: '<div class="qq-uploader">' + 
+                '<div class="qq-upload-drop-area"><span>${message(code:'cmis.uploader.dropfileshere')}</span></div>' +
+                '<div class="qq-upload-button">${message(code:'cmis.uploader.uploadafile')}</div>' +
+                '<ul class="qq-upload-list"></ul>' + 
+             	'</div>'
    			});
    			});
 		</script> 

@@ -128,15 +128,18 @@ class RestService {
 	/* Delete to url, return status code */
     def delete(def url) {		
 		def client=new DefaultHttpClient();
+		def response
 		try {
 			authenticate(client)    	
 			HttpDelete httpdelete = new HttpDelete(url);
-			HttpResponse response = client.execute(httpdelete);
+			response = client.execute(httpdelete);
 		} finally {
 			client.getConnectionManager().shutdown();
 		}    	    	
 		return response.statusLine.statusCode==200 ? null : response.statusLine.statusCode
     }
+	
+	
 	/* write to URL, return slurped XML */
     def write (def method,def url,def xmlText,def mimeType="application/atom+xml") {
 		def rsp

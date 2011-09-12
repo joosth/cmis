@@ -43,14 +43,14 @@
     	<td class="actions">
     		
     		<g:link class="action-show action" action="show" params="[objectId:entry.prop.objectId]">Show properties</g:link><br />
-			<g:link class="action-show action" controller="document" action="props" class="simpleDialog" params="[objectId:entry.prop.objectId]">Show properties</g:link>    		    		
+			<g:link class="action-show action" controller="cmisDocument" action="props" class="simpleDialog" params="[objectId:entry.prop.objectId]">Show properties</g:link>    		    		
     		<%--<g:link class="action-edit action" action="edit" params="[objectId:entry.prop.objectId]">Edit</g:link> --%>
-    		<g:link controller="document" action="edit" class="simpleDialog" params="[objectId:entry.prop.objectId]">Edit</g:link>    		
+    		<g:link controller="cmisDocument" action="edit" class="simpleDialog" params="[objectId:entry.prop.objectId]">Edit</g:link>    		
     		<g:if test="${entry.link.'version-history'}" >
-    		<g:link controller="document" action="history" class="simpleDialog" params="[objectId:entry.prop.objectId]">History</g:link>    		
+    		<g:link controller="cmisDocument" action="history" class="simpleDialog" params="[objectId:entry.prop.objectId]">History</g:link>    		
     		</g:if>
-    		<g:link controller="document" action="cancelcheckout" class="simpleDialog" params="[objectId:entry.prop.objectId]">Cancel checkout</g:link>
-    		<g:link controller="document" action="checkin" class="simpleDialog" params="[objectId:entry.prop.objectId]">Checkin</g:link>
+    		<g:link controller="cmisDocument" action="cancelcheckout" class="simpleDialog" params="[objectId:entry.prop.objectId]">Cancel checkout</g:link>
+    		<g:link controller="cmisDocument" action="checkin" class="simpleDialog" params="[objectId:entry.prop.objectId]">Checkin</g:link>
     	</td></tr>
     
     

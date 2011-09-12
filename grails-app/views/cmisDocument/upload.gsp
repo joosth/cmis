@@ -41,7 +41,7 @@
     <%-- <g:hiddenField name="id" value="${params.id}"/> --%>
     <g:hiddenField name="objectId" value="${params.objectId}"/>
      <div class="buttons">
-		<span class="button"><g:actionSubmit class="awesome small blue button" controller="document" action="uploadsubmit" value="${message(code: 'default.button.update.label', default: 'Update')}" /></span>                    
+		<span class="button"><g:actionSubmit class="awesome small blue button" controller="cmisDocument" action="uploadsubmit" value="${message(code: 'default.button.update.label', default: 'Update')}" /></span>                    
 	</div>
 	</g:uploadForm>    
 	    

@@ -27,11 +27,11 @@
    <h1>${cmisEntry.summary}</h1>
    <h4>${documents.size()} files(s) and/or folder(s)</h4>
    <div id="toolbar">
-   		<g:link controller="document" action="newfolder" class="simpleDialog" params="[parentId:cmisEntry.objectId]">New folder</g:link>
-   		<g:link controller="document" action="newdocument" class="uploadDialog" params="[parentId:cmisEntry.objectId]">New document</g:link>
+   		<g:link controller="cmisDocument" action="newfolder" class="simpleDialog" params="[parentId:cmisEntry.objectId]">New folder</g:link>
+   		<g:link controller="cmisDocument" action="newdocument" class="uploadDialog" params="[parentId:cmisEntry.objectId]">New document</g:link>
 	</div>
    <g:if test="${cmisEntry.parentId}">
-   <h4><g:link controller="document" action="list" params="[objectId:cmisEntry.parentId]">..</g:link></h4>
+   <h4><g:link controller="cmisDocument" action="list" params="[objectId:cmisEntry.parentId]">..</g:link></h4>
    </g:if>
     <g:each in="${documents}" var="entry" >
     
@@ -60,16 +60,16 @@
    		</td>
     	<td class="actions">
     		<g:link class="action-show action" action="show" params="[objectId:entry.prop.objectId]">Show properties</g:link><br />
-			<g:link class="action-show action" controller="document" action="props" class="simpleDialog" params="[objectId:entry.prop.objectId]">Edit properties</g:link>    		    		
+			<g:link class="action-show action" controller="cmisDocument" action="props" class="simpleDialog" params="[objectId:entry.prop.objectId]">Edit properties</g:link>    		    		
     		<%--<g:link class="action-edit action" action="edit" params="[objectId:entry.prop.objectId]">Edit</g:link> --%>
-    		<g:link controller="document" action="edit" class="simpleDialog" params="[objectId:entry.prop.objectId]">Edit</g:link>    		
+    		<g:link controller="cmisDocument" action="edit" class="simpleDialog" params="[objectId:entry.prop.objectId]">Edit</g:link>    		
     		<g:if test="${entry.link.'version-history'}" >
-    			<g:link controller="document" action="history" class="simpleDialog" params="[objectId:entry.prop.objectId]">History</g:link>    		
+    			<g:link controller="cmisDocument" action="history" class="simpleDialog" params="[objectId:entry.prop.objectId]">History</g:link>    		
     		</g:if>
-    		<g:link controller="document" action="delete" class="simpleDialog" params="[objectId:entry.prop.objectId]">Delete</g:link>
-    		<g:link controller="document" action="checkout" class="simpleDialog" params="[objectId:entry.prop.objectId]">Checkout</g:link>
+    		<g:link controller="cmisDocument" action="delete" class="simpleDialog" params="[objectId:entry.prop.objectId]">Delete</g:link>
+    		<g:link controller="cmisDocument" action="checkout" class="simpleDialog" params="[objectId:entry.prop.objectId]">Checkout</g:link>
     		<g:if test="${entry.link.'working-copy'}">
-    			<g:link controller="document" action="workingcopy" params="[objectId:entry.prop.objectId]">Working copy</g:link>    			
+    			<g:link controller="cmisDocument" action="workingcopy" params="[objectId:entry.prop.objectId]">Working copy</g:link>    			
     		</g:if>
     		
     	</td></tr>

@@ -36,12 +36,14 @@ function simpleAlert(message) {
 
 
 function refreshTree(id) {
-		var el=document.getElementById(id)		
-		/*var parentel=$.jstree._focused()._get_parent(el)
-		cmis.tree.jstree("refresh",parentel)
-		*/
-		cmis.tree.jstree("refresh",el)
-		cmis.tree.jstree('select_node', el, true);
+		if (id=="ALL") {
+			cmis.tree.jstree("refresh",-1)
+		} else {
+			var el=document.getElementById(id)		
+		
+			cmis.tree.jstree("refresh",el)
+			cmis.tree.jstree('select_node', el, true);
+		}
 }
 
 function simpleDialog(dialogUrl) {
