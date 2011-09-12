@@ -238,7 +238,7 @@ function cmisReload() {
               	  "bServerSide": false,        		
               	   "bFilter": false,
               	 "oLanguage": {
-              	      "sUrl": cmis.baseUrl+"/js/jquery/dataTables/localisation/dataTables."+cmis.language+".txt"
+              	      "sUrl": cmis.pluginPath+"/js/jquery/dataTables/localisation/dataTables."+cmis.language+".txt"
               	    }
                   });
                   
