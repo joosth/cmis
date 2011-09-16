@@ -70,8 +70,7 @@
     		<g:link controller="cmisDocument" action="checkout" class="simpleDialog" params="[objectId:entry.prop.objectId]">Checkout</g:link>
     		<g:if test="${entry.link.'working-copy'}">
     			<g:link controller="cmisDocument" action="workingcopy" params="[objectId:entry.prop.objectId]">Working copy</g:link>    			
-    		</g:if>
-    		
+    		</g:if>    		
     	</td></tr>
     
     

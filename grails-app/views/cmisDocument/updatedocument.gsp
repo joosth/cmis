@@ -6,7 +6,7 @@
 		        <tr class="prop">
 		            <td valign="top" class="name"><g:message code="document.name.title" default="Document name" />:</td>                                
 		            <td valign="top" class="value">${entry.title}</td>
-		            <td><a tabindex="9999" class="help action" title="${message(code:'document.name.help',default:'Document name|The name of the document')}" href="" >&nbsp;</a></td>		                               
+		            <td><span tabindex="9999" class="help action" title="${message(code:'document.name.help',default:'Document name|The name of the document')}" href="" >&nbsp;</span></td>		                               
 		        </tr>
 		        	                                                               
 		    </tbody>

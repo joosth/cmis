@@ -42,6 +42,8 @@ class CmisService {
     def initialized=false
     def enabled=false
 	def pluginManager
+	def grailsApplication
+
     /*
      * Initialize this CmisService bean, remember url, username,password
      */
@@ -102,6 +104,8 @@ class CmisService {
     
     /*
      * List all descendants of the given Entry
+     * -- wrong - it lists the childrem only
+     * TODO move to listChildren, then fix this
      */
     
     def listDescendants(def cmisEntry) {
@@ -113,6 +117,30 @@ class CmisService {
 		}
 		return descendantList		
 	}
+	
+	/*
+	* List all descendants of the given Entry
+	*/
+   
+   def listChildren(def cmisEntry,params=[:]) {
+	   //def g=grailsApplication.mainContext.getBean('org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib')
+	   
+	   if (!params.renditionFilter) params.renditionFilter="cmis:thumbnail"	   
+	   if (!params.orderBy) params.orderBy="cmis:name%20ASC"
+	   def paramsString=""
+	   params.each { key,value ->
+		   paramsString+="${key}=${value}&"
+	   }
+	   def url="${cmisEntry.link.down}?${paramsString}"
+	   log.debug "URL: ${url}"
+	   def response=restService.get(url)
+	   log.debug("response: ${response}")	   
+	   def childList=response.entry.collect { entry ->
+		   new CmisEntry(entry)
+	   }	   
+	   return [documents:childList,response:response]
+   }
+	
     
 	/*
 	 * List all checked out entries

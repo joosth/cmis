@@ -67,6 +67,7 @@ class CmisTagLib  implements ApplicationContextAware {
   				  cmis.baseUrl="${request.contextPath}";
   				  cmis.pluginPath="${resource(absolute:false,plugin:'cmis')}";
   				  cmis.rootNode="${request.cmis?.rootEntry?.uuid}";
+  				  cmis.currentFolder="${request.cmis?.rootEntry?.uuid}";
   				  cmis.language="${java.util.Locale.getDefault().getLanguage()}";
   				  </script>"""
 	  out << html
@@ -78,14 +79,17 @@ class CmisTagLib  implements ApplicationContextAware {
 
       out << """<link rel="stylesheet" href="${resource(dir:'js/uploader',file:'fileuploader.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
       out << """<link rel="stylesheet" href="${resource(dir:'css',file:'jquery.jstree.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
-      
+      out << "\n"
 	  out << g.javascript(src:'cmis.js',contextPath:pluginContextPath,plugin:'cmis')
-	  
+	  out << "\n"
 	  out << g.javascript(src:'uploader/fileuploader.js',contextPath:pluginContextPath,plugin:'cmis')
-	  
+	  out << "\n"
 	  out << g.javascript(src:'jquery/jquery.cookie.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << "\n"
 	  out << g.javascript(src:'jquery/jquery.hotkeys.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << "\n"
 	  out << g.javascript(src:'jquery/jquery.jstree.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << "\n"
 	  }
 	}
 	
@@ -137,4 +141,5 @@ class CmisTagLib  implements ApplicationContextAware {
 				}
 			out << html
 	}
+		
 }

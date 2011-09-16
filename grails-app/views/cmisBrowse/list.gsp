@@ -3,16 +3,15 @@
 
 <div id="list-toolbar"
 	class="fg-toolbar ui-toolbar xui-widget-header ui-corner-tl ui-corner-tr table-title">
-	<g:link onclick="simpleDialog(this.href);return false;" title="New folder"
+	<g:link onclick="simpleDialog(this.href+'?parentId='+cmis.currentFolder);return false;" title="New folder"
 		class="action-newfolder action list-action simpleDialog" controller="cmisDocument"
-		action="newfolder" params="[parentId:cmisEntry.prop.objectId]">&nbsp;
+		action="newfolder" >&nbsp;
 	</g:link>
-	<g:link onclick="uploadDialog(this.href);return false;" title="New document"
+	<g:link onclick="uploadDialog(this.href+'?parentId='+cmis.currentFolder);return false;" title="New document"
 		class="action-newdocument action list-action uploadDialog" controller="cmisDocument"
-		action="newdocument" params="[parentId:cmisEntry.prop.objectId]">&nbsp;
+		action="newdocument" >&nbsp;
 	</g:link>
 </div>
-
 <div id="list-body" class="datatable">
 	<table id="file-list" cellpadding="0" cellspacing="0" border="0"
 		class="display file-list">
@@ -27,6 +26,10 @@
 			</tr>
 		</thead>
 		<tbody>
+		<tr>
+			<td colspan="3" class="dataTables_empty">Loading data from server</td>
+		</tr>
+		<%--
 			<g:each in="${documents}" var="document">
 				<tr>
 					<td>
@@ -98,6 +101,7 @@
 
 				</tr>
 			</g:each>
+			--%>
 		</tbody>
 		<tfoot>
 			<tr>

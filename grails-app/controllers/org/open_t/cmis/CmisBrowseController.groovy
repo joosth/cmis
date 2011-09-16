@@ -71,9 +71,6 @@ class CmisBrowseController {
 				documents=cmisService.listDescendants(cmisEntry)
 				theParentPath=cmisEntry?.path
 			}
-
-			
-			
 			
 			def doclist = { documents.collect { theDocument -> 
 			
@@ -96,11 +93,7 @@ class CmisBrowseController {
 				 ]
 				}
 			}		
-			render doclist() as JSON 
-			
-			
-			 
-			 
+			render doclist() as JSON 			
 	}
 	
 	def detail = {
@@ -122,6 +115,82 @@ class CmisBrowseController {
 			[documents:documents,cmisEntry:cmisEntry]
 	 
 	   }
+	 
+	 /*
+	  * Delivers JSON datasource to datatable
+	  */
+	 def jsonlist =  {
+		 
+		 if (!params.objectId)
+	       params.objectId=cmisService.repositories.rootFolderId
+		 
+		 def cmisParams=[:]
+		 def columns=["","cmis:name",""]
+		 String sortDir=params.sSortDir_0.toUpperCase()
+		 def orderName=columns[new Integer(params.iSortCol_0)]
+		 if (orderName.length()<1) {
+			 orderName="cmis:name"
+		 }
+		 
+		 cmisParams.orderBy="${orderName}%20${sortDir}"
+		 
+		 cmisParams.maxItems=params.iDisplayLength
+		 cmisParams.skipCount=params.iDisplayStart
+		 log.debug ("objectId:${params.objectId}")
+	     def cmisEntry=cmisService.getEntry(params.objectId)
+		 log.debug ("cmisEntry:${cmisEntry}")
+		 def res=cmisService.listChildren(cmisEntry,cmisParams)   
+		 def documents=res.documents
+		 def response=res.response	
+		 
+		 def iTotalRecords=response.numItems.text()
+		 def iTotalDisplayRecords=response.numItems.text()
+		 
+		 
+		 def aaData=[]
+		 documents.each { doc ->
+			 def icon
+			 if (doc.isDocument()) {
+			  icon="""<a href="#" class="mime-16 ${doc.cssClassName}-16">&nbsp;</a>"""
+			 } else {
+			  icon="""<a href="#" onclick="gotoFolder('${doc.prop.objectId}');return false;" class="mime-16 ${doc.cssClassName}-16">&nbsp;</a>"""
+			 }
+			 def actions=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.showproperties')}","class":"action-show action list-action simpleDialog",controller:"cmisDocument",action:"props", params:[objectId:doc.prop.objectId])
+			 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.editproperties')}","class":"action-edit action list-action simpleDialog",controller:"cmisDocument",action:"edit", params:[objectId:doc.prop.objectId])
+			 if (doc.isDocument()) {
+				 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.showhistory')}","class":"action-history action list-action simpleDialog",controller:"cmisDocument",action:"history", params:[objectId:doc.prop.objectId])
+				 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.download')}","class":"action-download action list-action simpleDialog",controller:"cmisDocument",action:"download", params:[objectId:doc.prop.objectId])
+				 actions+=link(onclick:"uploadDialog(this.href);return false;",title:"${message(code:'cmis.list.upload')}","class":"action-upload action list-action simpleDialog",controller:"cmisDocument",action:"updatedocument", params:[objectId:doc.prop.objectId])
+				 if (doc.isPwc()) {
+					 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.checkin')}","class":"action-checkin action list-action simpleDialog",controller:"cmisDocument",action:"checkin", params:[objectId:doc.prop.objectId])										 
+				 } else {
+				 if (!doc.isCheckedOut()){
+					 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.checkout')}","class":"action-checkout action list-action simpleDialog",controller:"cmisDocument",action:"checkout", params:[objectId:doc.prop.objectId])					 
+				 }
+				 }
+			
+			 }
+			 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.delete')}","class":"action-delete action list-action simpleDialog",controller:"cmisDocument",action:"delete", params:[objectId:doc.prop.objectId])
+				 
+/*			 def actions="""<g:link onclick="simpleDialog(this.href);return false;"
+							title="${message(code:'cmis.list.showproperties')}" class="action-show action list-action simpleDialog"
+							controller="cmisDocument" action="props" params="[objectId:${doc.prop.objectId}]">&nbsp;
+							</g:link>			 
+			 			"""*/
+			 //def actions="${action}"						 
+			 def inLine=[icon,doc.name,actions]			 
+			 def aaLine=[inLine]
+			 aaData+=(aaLine)
+		 }
+
+		 def json = [sEcho:params.sEcho,iTotalRecords:iTotalRecords,iTotalDisplayRecords:iTotalDisplayRecords,aaData:aaData]
+		 render json as JSON
+	 }
+
+	 
+	 
+	 
+	 
 	// Shows document defails in sidepane
 	def document = {
 		log.debug "params:${params}"

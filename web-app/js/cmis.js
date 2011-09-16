@@ -18,10 +18,12 @@ function simpleAlert(message) {
 	 			$( this ).dialog( "close" );
          }
 	 	},
-         open: function(event, ui) {           	       		 
+         open: function(event, ui) {
+        	var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	zindex=zindex+1
       		$("span.help").cluetip({
-      			splitTitle: '|',  
-      			cluezIndex: 2000
+      			splitTitle: '|'  ,
+      			cluezIndex: zindex
       		});
          },
     
@@ -85,15 +87,19 @@ function simpleDialog(dialogUrl) {
 	        		$( this ).dialog( "close" );
 	        }
        	},
-        open: function(event, ui) {           	       		 
+        open: function(event, ui) {
+        	
+        	var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	zindex=zindex+1
        		$("span.help").cluetip({
-       			splitTitle: '|',  
-       			cluezIndex: 2000
+       			splitTitle: '|' ,
+       				cluezIndex: zindex
       	    	});
        	},
-        close: function(event, ui) {      
+        close: function(event, ui) {
+        	   
                theDialog.dialog("destroy").remove();
-               
+             	
                }
              });	
 }
@@ -129,10 +135,13 @@ function uploadDialog(dialogUrl) {
 	        		$( this ).dialog( "close" );
 	        	}
       	},
-       open: function(event, ui) {           	       		 
+       open: function(event, ui) {
+    	    
+    	    var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	zindex=zindex+1
       		$("span.help").cluetip({
-      			splitTitle: '|',  
-      			cluezIndex: 2000
+      			splitTitle: '|',
+      			cluezIndex: zindex
      	    	});
       		var parentNode=$("#parentId").val();
       		var uploader = new qq.FileUploader({
@@ -156,6 +165,13 @@ function uploadDialog(dialogUrl) {
             });	
 }
 
+function gotoFolder(folderId) {
+	cmis.parentFolder=cmis.currentFolder;
+	cmis.currentFolder=folderId;
+	cmis.datatable.fnDraw(-1);
+}
+
+
 function cmisReload() {
 	$("a.simpleDialog").click(function() {
 		simpleDialog(this.href);
@@ -169,8 +185,7 @@ function cmisReload() {
 	});
 	
   //  $("#outer-treediv").resizable();
- //   $("#outer-detail-pane").resizable();
-    
+ //   $("#outer-detail-pane").resizable();	
     $("span.help").cluetip({
 		splitTitle: '|',  
 		cluezIndex: 2000
@@ -227,32 +242,55 @@ function cmisReload() {
           $("#treediv").bind("select_node.jstree", function(e,data) {
 		  var node=data.rslt.obj[0];
 		  var parentPath=$(node).attr("parentPath");
-          		$("#detail-pane").load(cmis.baseUrl+"/cmisBrowse/detail/?objectId="+data.rslt.obj[0].id+'&parentPath='+parentPath,'',function() {
-                  $("#detail-pane").find("span.help").cluetip({
-        				splitTitle: '|',  
-        				cluezIndex: 2000
+      		  $(".detail-pane").load(cmis.baseUrl+"/cmisBrowse/detail/?objectId="+data.rslt.obj[0].id+'&parentPath='+escape(parentPath),'',function() {      			  
+                  $(".detail-pane").find("span.help").cluetip({
+        				splitTitle: '|'
         				});
-                                    
-                  cmis.datatable=$(this).find(".file-list").dataTable({
-                  "bJQueryUI": true,
-              	  "sPaginationType": "full_numbers",
-              	  "bProcessing": true,
-              	  "bServerSide": false,        		
-              	   "bFilter": false,
-              	 "oLanguage": {
-              	      "sUrl": cmis.pluginPath+"/js/jquery/dataTables/localisation/dataTables."+cmis.language+".txt"
-              	    }
-                  });
-                  
-              	  var toolbar=$("#list-toolbar")
-                  $(this).find('div.dataTables_length').prepend(toolbar);
-
-                
-  				           	
-          });
-                  	
-          });
+                  cmis.currentFolder=data.rslt.obj[0].id;
+                  initDatatable();   
+                  //cmis.datatable.fnDraw(false);
+                  var toolbar=$("#list-toolbar")
+                  $(this).find('div.dataTables_length').prepend(toolbar);		           	
+      		  });                  	
+          });        
+        initDatatable()        	          
 }
+
+
+
+function initDatatable() {
+	  cmis.datatable=$(".file-list").dataTable( {
+	  		//"sDom": '<"H"lfr>t<"F"ip>',
+	  		"bProcessing": true,
+	  		"bServerSide": true,		
+	  		//"sAjaxSource": cmis.baseUrl+"/cmisBrowse/jsonlist?objectId="+cmis.currentFolder,
+	  		"sAjaxSource": cmis.baseUrl+"/cmisBrowse/jsonlist",
+	  		 "fnServerData": function ( sSource, aoData, fnCallback ) {
+	             aoData.push( { "name":"objectId","value": window.cmis.currentFolder } );
+	             $.getJSON( sSource, aoData, function (json) { 
+	                 fnCallback(json)
+	             } );
+	  		 },
+	  		
+	  		"sPaginationType": "full_numbers",
+	  		"bFilter": false,
+	  		"bJQueryUI": true,
+	  		 "oLanguage": {
+	     	      "sUrl": cmis.pluginPath+"/js/jquery/dataTables/localisation/dataTables."+cmis.language+".txt"
+	     	    },
+	  		"aoColumnDefs": [ 
+	  			{ "bSortable": false, "aTargets": [ 0,2 ] }
+	  		]
+	  		
+		
+	  		} );
+		//$("div.datatable div.fg-toolbar div.dataTables_length").prepend('<span class="list-toolbar-button ui-widget-content ui-state-default"><span onclick="formDialog(null,\'${controllerName}\',{ refresh : \''+tableId+'\'}, null)">New</span></span>&nbsp;');
+	  if (cmis.datatable) {
+	  	//cmis.datatable.fnDraw(false);
+		}
+
+}
+
 
 /*
  * Handles on-line editing through Sharepoint protocol
