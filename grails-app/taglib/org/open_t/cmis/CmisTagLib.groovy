@@ -43,32 +43,41 @@ class CmisTagLib  implements ApplicationContextAware {
 			  	applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
 			  }
 		  }
+		  
 		  if (attrs.rootNode) {
 			  rootEntry=applicationContext.cmisService.getEntryById(attrs.rootNode)		 
 		  } else if (attrs.path) {
-			  rootEntry=applicationContext.cmisService.getEntryByPath(attrs.path)
+			  rootEntry=applicationContext.cmisService.getEntryByPath(attrs.path)			  
 		  } else {
-			  rootEntry=applicationContext.cmisService.getEntryByPath("/")
+			  rootEntry=applicationContext.cmisService.getEntryByPath("/")			  
 		  }
 		  
-		 
-			
-	  
 		  applicationContext.cmisService.contextPath=request.contextPath
 	  
 	  
+	  def cico=false
+	  def readOnly=false
 	  
-	  cmismap+=[rootEntry:rootEntry]
-	  
+	  if (attrs.cico && (attrs.cico=="true" || attrs.cico==true)) cico=true;
+	  if (attrs.readOnly && (attrs.readOnly=="true" || attrs.readOnly==true)) readOnly=true;
+	  	  
+	  cmismap+=[rootEntry:rootEntry,cico:cico,readOnly:readOnly]
 	  request.cmis=cmismap
 	  def html="""<!-- CMIS variables -->
 		  		  <script type="text/javascript">
 	  		      var cmis={};  				    				  
   				  cmis.baseUrl="${request.contextPath}";
   				  cmis.pluginPath="${resource(absolute:false,plugin:'cmis')}";
-  				  cmis.rootNode="${request.cmis?.rootEntry?.uuid}";
-  				  cmis.currentFolder="${request.cmis?.rootEntry?.uuid}";
+  				  cmis.rootNode="${request.cmis?.rootEntry?.uuid}";  				    				  
+  				  cmis.currentFolder="${request.cmis?.rootEntry?.uuid}";  				  
   				  cmis.language="${java.util.Locale.getDefault().getLanguage()}";
+  				  cmis.readOnly=${readOnly};
+  				  cmis.cico=${cico};
+  				  
+  				  var uploader={}
+  				  uploader.uploadMessage="${message(code:'cmis.uploader.uploadafile')}";
+  				  uploader.dropfilesMessage="${message(code:'cmis.uploader.dropfileshere')}";
+  				    				    				  
   				  </script>"""
 	  out << html
 	  
@@ -141,5 +150,44 @@ class CmisTagLib  implements ApplicationContextAware {
 				}
 			out << html
 	}
+	
+	def list = { attrs ->		
+		def html="""
+		<div id="list-toolbar" class="fg-toolbar ui-toolbar xui-widget-header ui-corner-tl ui-corner-tr table-title">
+			${g.link(onclick:"gotoHomeFolder();return false;", title:"${g.message(code:'cmis.browse.homefolder.tooltip')}",class:"action-home action list-action") {"&nbsp;"} }
+			${g.link(onclick:"gotoParentFolder();return false;", title:"${g.message(code:'cmis.browse.parentfolder.tooltip')}",class:"action-up action list-action") {"&nbsp;"} }
+			${g.link(onclick:"simpleDialog(this.href+'?parentId='+cmis.currentFolder);return false;",title:"${g.message(code:'cmis.browse.newfolder.tooltip')}",class:"action-newfolder action list-action",controller:"cmisDocument",action:"newfolder") {"&nbsp;"}  }			
+			${g.link(onclick:"uploadDialog(this.href+'?parentId='+cmis.currentFolder);return false;", title:"${g.message(code:'cmis.browse.newdocument.tooltip')}",class:"action-newdocument action list-action",controller:"cmisDocument",action:"newdocument") {"&nbsp;"} }						
+		</div>
 		
+		
+		<div id="list-body" class="datatable">
+			<table id="file-list" cellpadding="0" cellspacing="0" border="0"
+				   class="display file-list">
+				<thead>
+					<tr>
+						<th>${g.message(code:"cmis.list.icon",    default:"Icon")}		</th>
+						<th>${g.message(code:"cmis.list.name",    default:"Name")}		</th>			
+						<th>${g.message(code:"cmis.list.actions", default:"Actions")}   </th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td colspan="3" class="dataTables_empty">${g.message(code:"cmis.loading", default:"Loading data from server")}</td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<th>${g.message(code:"cmis.list.icon",    default:"Icon")}		</th>
+						<th>${g.message(code:"cmis.list.name",    default:"Name")}		</th>			
+						<th>${g.message(code:"cmis.list.actions", default:"Actions")}   </th>
+					</tr>
+				</tfoot>
+			</table>
+		</div>"""
+		
+		if (applicationContext.cmisService.enabled) {					
+			out << html		
+		}
+	}
 }

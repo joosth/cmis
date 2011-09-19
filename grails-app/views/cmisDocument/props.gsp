@@ -59,7 +59,7 @@
 		        </tr>
 
 		        <tr class="prop">
-		            <td valign="top" class="name"><g:message code="cmis.properties.creationDate" default="Creation date" />:</td>                                
+		            <td valign="top" class="name"><g:message code="cmis.properties.creationDate.title" default="Creation date" />:</td>                                
 		            <td valign="top" class="value">${entry.prop.creationDate}</td>
 		            <td><span tabindex="9999" class="help action" title="${message(code:'cmis.properties.creationDate.help')}" href="" >&nbsp;</span></td>		                               
 		        </tr>

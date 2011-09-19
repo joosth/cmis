@@ -22,7 +22,7 @@
         <g:javascript src="jquery/jquery.cluetip-patched.js"  contextPath="" />
         
         <g:javascript src="jquery/jquery.dataTables.js"  contextPath="" />
-        <g:javascript src="cmis.js"  contextPath="" />
+<%--        <g:javascript src="cmis.js"  contextPath="" /> --%>
      
         <g:layoutHead />
         

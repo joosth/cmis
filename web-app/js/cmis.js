@@ -73,7 +73,7 @@ function simpleDialog(dialogUrl) {
 			 			simpleAlert(data.result.message);
 			 			}
 			 		var result=data.result;
-			 		
+			 		cmis.datatable.fnDraw(false);
 			 		for (i in result.refreshNodes) {
 			 			refreshTree(result.refreshNodes[i])
 			 		}
@@ -122,7 +122,7 @@ function uploadDialog(dialogUrl) {
 		 			} else {
 		 				simpleAlert(data.result.message);
 		 			}		 			
-
+			 		cmis.datatable.fnDraw(false);
 		 			var result=data.result;
 		 			for (i in result.refreshNodes) {
 			 			refreshTree(result.refreshNodes[i])
@@ -149,12 +149,18 @@ function uploadDialog(dialogUrl) {
       			element: document.getElementById('file-uploader'),
       			// path to server-side upload script
       			action: cmis.baseUrl+'/cmisDocument/fileupload',
+
       			params: {
       				parentNode: $("#parentId").val()
       				},
       			onComplete: function(id, fileName, responseJSON){
   					$("#ajaxdialogform").append("<input type=\"hidden\" name=\"filename\" value=\""+fileName+"\" />");      			
-      			}
+      			},
+      			template: '<div class="qq-uploader">' + 
+                    '<div class="qq-upload-drop-area"><span>'+window.uploader.dropfilesMessage+'</span></div>' +
+                    '<div class="qq-upload-button">'+window.uploader.uploadMessage+ '</div>' +
+                    '<ul class="qq-upload-list"></ul>' + 
+                 	'</div>'
    			});
 
       		
@@ -171,6 +177,19 @@ function gotoFolder(folderId) {
 	cmis.datatable.fnDraw(-1);
 }
 
+function gotoParentFolder() {
+	if (cmis.currentFolder!=cmis.rootNode) {
+		var res=$.getJSON(cmis.baseUrl+"/cmisBrowse/jsonparent?objectId="+cmis.currentFolder, function (json) {
+			cmis.currentFolder=json.objectId
+			cmis.datatable.fnDraw(-1);		
+		});
+	}
+}
+
+function gotoHomeFolder() {
+	cmis.currentFolder=cmis.rootNode;
+	cmis.datatable.fnDraw(-1);		
+}
 
 function cmisReload() {
 	$("a.simpleDialog").click(function() {
@@ -183,6 +202,7 @@ function cmisReload() {
 		uploadDialog(this.href);
 		return false;
 	});
+	
 	
   //  $("#outer-treediv").resizable();
  //   $("#outer-detail-pane").resizable();	
@@ -259,6 +279,7 @@ function cmisReload() {
 
 
 function initDatatable() {
+	  if (!cmis.datatable) {
 	  cmis.datatable=$(".file-list").dataTable( {
 	  		//"sDom": '<"H"lfr>t<"F"ip>',
 	  		"bProcessing": true,
@@ -267,6 +288,8 @@ function initDatatable() {
 	  		"sAjaxSource": cmis.baseUrl+"/cmisBrowse/jsonlist",
 	  		 "fnServerData": function ( sSource, aoData, fnCallback ) {
 	             aoData.push( { "name":"objectId","value": window.cmis.currentFolder } );
+	             aoData.push( { "name":"readOnly","value": window.cmis.readOnly } );
+	             aoData.push( { "name":"cico","value": window.cmis.cico } );
 	             $.getJSON( sSource, aoData, function (json) { 
 	                 fnCallback(json)
 	             } );
@@ -284,10 +307,8 @@ function initDatatable() {
 	  		
 		
 	  		} );
-		//$("div.datatable div.fg-toolbar div.dataTables_length").prepend('<span class="list-toolbar-button ui-widget-content ui-state-default"><span onclick="formDialog(null,\'${controllerName}\',{ refresh : \''+tableId+'\'}, null)">New</span></span>&nbsp;');
-	  if (cmis.datatable) {
-	  	//cmis.datatable.fnDraw(false);
-		}
+
+	}
 
 }
 

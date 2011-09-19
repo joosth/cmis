@@ -30,6 +30,7 @@ import org.open_t.cmis.*;
 import org.open_t.base64.*;
 import net.sf.jmimemagic.*;
 import groovy.xml.StreamingMarkupBuilder
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class CmisService {
     
@@ -43,6 +44,18 @@ class CmisService {
     def enabled=false
 	def pluginManager
 	def grailsApplication
+	def sppBasePath=ConfigurationHolder.config.cmis.sppBasePath
+	def webdavBasePath=ConfigurationHolder.config.cmis.webdavBasePath
+	
+	def onlineEditMimetypes =
+	[
+	   "application/vnd.ms-excel": "Excel.Sheet",
+	   "application/vnd.ms-powerpoint": "PowerPoint.Slide",
+	   "application/msword": "Word.Document",
+	   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel.Sheet",
+	   "application/vnd.openxmlformats-officedocument.presentationml.presentation": "PowerPoint.Slide",
+	   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word.Document"
+	]
 
     /*
      * Initialize this CmisService bean, remember url, username,password
@@ -407,5 +420,28 @@ class CmisService {
 		return getEntryByPath(cmisPath)
 	}
 	
+	
+	
+	def getSppPath(def cmisEntry,parentPath) {
+		def sppPath=null	
+		def sppAppProgId=onlineEditMimetypes[cmisEntry.prop.contentStreamMimeType]
+		log.debug "SPP base path: ${sppBasePath} parentPath: ${parentPath} sppAppProgId: ${sppAppProgId}" 
+		
+		if (parentPath && sppBasePath && sppAppProgId) {
+			if (parentPath.startsWith("/Sites/")) {
+				def path=parentPath.replace("/Sites/","/")
+				sppPath=sppBasePath+path+"/"+cmisEntry.name
+			}
+		}
+		return [path:sppPath,appProgId:sppAppProgId]
+	}
+	
+	def getWebdavPath(def cmisEntry,parentPath) {
+		def webdavPath=null		
+			if (parentPath && webdavBasePath) {
+				webdavPath=webdavBasePath+parentPath+"/"+cmisEntry.name
+			}
+		return webdavPath
+	}
 	
 }
