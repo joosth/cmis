@@ -266,7 +266,7 @@ class CmisDocumentController {
 		def cmisEntry=cmisService.getEntry(params.objectId)		
 		def downloadUrl=cmisEntry.link.enclosure
 		def fileName=cmisEntry.prop.contentStreamFileName		
-		restService.streamFile(downloadUrl,fileName,response)	
+		restService.streamFile(downloadUrl,fileName,response,cmisEntry.prop.contentStreamMimeType)	
 	}
 	
 	def thumbnail = {
@@ -282,10 +282,18 @@ class CmisDocumentController {
 	
 	
 	def fileupload = { uploadbody ->
-			def filename=params.qqfile
-			InputStream is =request.getInputStream()
-			def mimetype=request.getHeader("Content-Type")
-			
+			def filename
+			def is
+			def mimetype 
+			if (params.qqfile.class.name=="org.springframework.web.multipart.commons.CommonsMultipartFile") {
+				filename=params.qqfile.getOriginalFilename()
+				is =params.qqfile.getInputStream()
+				mimetype=params.qqfile.getContentType()
+			} else {
+				filename=params.qqfile
+				is =request.getInputStream()
+				mimetype=request.getHeader("Content-Type")
+			}
 			
 			char[] cbuf=new char[100000]
             byte[] bbuf=new byte[100000]                     
@@ -312,10 +320,14 @@ class CmisDocumentController {
 			session["files"][filename]=tempFile.getAbsolutePath()
 			session["mimetypes"][filename]=mimetype
 	
-			render(contentType:"text/json") {
-				success(success : true)
-					
-			}
+			//def res = [success : true]
+			//render res as JSON
+			//text/html
+			
+			render(contentType:"text/html",text:"{success:true}")
+			
+			
+			
 	}
 	
 	

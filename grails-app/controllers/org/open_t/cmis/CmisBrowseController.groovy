@@ -121,9 +121,11 @@ class CmisBrowseController {
 	  */
 	 def jsonlist =  {
 		 log.debug "params: ${params}"
-		 if (!params.objectId)
-	       params.objectId=cmisService.repositories.rootFolderId
-		 
+		 if (!params.objectId) {
+	       //params.objectId=cmisService.repositories.rootFolderId
+		 	def emtpyjson = [sEcho:params.sEcho,iTotalRecords:0,iTotalDisplayRecords:0,aaData:[]]
+			render emptyjson as JSON
+		 } else {
 		 def cmisParams=[:]
 		 def columns=["","cmis:name",""]
 		 String sortDir=params.sSortDir_0.toUpperCase()
@@ -152,9 +154,9 @@ class CmisBrowseController {
 		 documents.each { doc ->
 			 def icon
 			 if (doc.isDocument()) {
-			  icon="""<a href="#" class="mime-16 ${doc.cssClassName}-16">&nbsp;</a>"""
+			  icon="""<a href='#' class='mime-16 ${doc.cssClassName}-16'>&nbsp;</a>"""
 			 } else {
-			  icon="""<a href="#" onclick="gotoFolder('${doc.prop.objectId}');return false;" class="mime-16 ${doc.cssClassName}-16">&nbsp;</a>"""
+			  icon="""<a href='#' onclick="gotoFolder('${doc.prop.objectId}');return false;" class='mime-16 ${doc.cssClassName}-16'>&nbsp;</a>"""
 			 }
 			 def actions=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.showproperties')}","class":"action-show action list-action simpleDialog",controller:"cmisDocument",action:"props", params:[objectId:doc.prop.objectId])
 			 if (params.readOnly!="true") {
@@ -167,11 +169,11 @@ class CmisBrowseController {
 					 actions+=link(onclick:"uploadDialog(this.href);return false;",title:"${message(code:'cmis.list.upload')}","class":"action-upload action list-action simpleDialog",controller:"cmisDocument",action:"updatedocument", params:[objectId:doc.prop.objectId])
 					 def spp=cmisService.getSppPath(doc,parentPath) 
 					 if (spp.path){
-						 actions+="""<span href="${spp.path}" title="${message(code:'cmis.actions.editonlinespp.tooltip')}" sppAppProgId="${spp.appProgId}" class="action-edit-online list-action action spp-link">&nbsp;</span>"""
+						 actions+="""<span href='${spp.path}' title='${message(code:'cmis.actions.editonlinespp.tooltip')}' sppAppProgId='${spp.appProgId}' class='action-edit-online list-action action spp-link'>&nbsp;</span>"""
 					 }
 					 def webdavPath=cmisService.getWebdavPath(doc,parentPath)
 					 if(webdavPath) {
-						 actions+="""<a href="${webdavPath}" title="${message(code:'cmis.actions.editonlinewebdav.tooltip')}" class="action-edit-online list-action action" target="_blank">&nbsp;</a>"""						 
+						 actions+="""<a href='${webdavPath}' title='${message(code:'cmis.actions.editonlinewebdav.tooltip')}' class='action-edit-online list-action action' target='_blank'>&nbsp;</a>"""						 
 					 }
 					 
 				 }
@@ -195,7 +197,8 @@ class CmisBrowseController {
 							controller="cmisDocument" action="props" params="[objectId:${doc.prop.objectId}]">&nbsp;
 							</g:link>			 
 			 			"""*/
-			 //def actions="${action}"						 
+			 //def actions="${action}"
+			 actions=actions.replace('"', '\"')						 
 			 def inLine=[icon,doc.name,actions]			 
 			 def aaLine=[inLine]
 			 aaData+=(aaLine)
@@ -203,6 +206,7 @@ class CmisBrowseController {
 
 		 def json = [sEcho:params.sEcho,iTotalRecords:iTotalRecords,iTotalDisplayRecords:iTotalDisplayRecords,aaData:aaData]
 		 render json as JSON
+		 }
 	 }
 
 	 

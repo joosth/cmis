@@ -263,7 +263,7 @@ class RestService {
 	 * Stream file from CMIS repository to client
 	 */
 	
-	def streamFile(url,fileName,response) {
+	def streamFile(url,fileName,response,contentType="") {
 		
 		
 		
@@ -277,7 +277,9 @@ class RestService {
 		def inputStream=entity.getContent()
 		
 		response.setHeader("Content-disposition", "attachment; filename=\"" +fileName+"\"")
-			
+		if (contentType) {
+			response.setHeader("Content-Type", contentType)
+		}		
 		
 		def bufsize=100000
 		byte[] bytes=new byte[(int)bufsize]

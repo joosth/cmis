@@ -49,7 +49,8 @@ class CmisTagLib  implements ApplicationContextAware {
 		  } else if (attrs.path) {
 			  rootEntry=applicationContext.cmisService.getEntryByPath(attrs.path)			  
 		  } else {
-			  rootEntry=applicationContext.cmisService.getEntryByPath("/")			  
+			  //rootEntry=applicationContext.cmisService.getEntryByPath("/")
+		  	  rootEntry=null			  
 		  }
 		  
 		  applicationContext.cmisService.contextPath=request.contextPath

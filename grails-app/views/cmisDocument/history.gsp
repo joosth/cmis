@@ -11,10 +11,10 @@
 		            <th valign="top"><g:message code="cmis.history.download" default="Download" /></th>
 		        </tr>
 		        <g:each in="${documents}" var="document">
-		        <tr class="prop null">
+		        <tr class="prop">
 		            <td valign="top">${document.prop.versionLabel}</td>
-		            <td valign="top">${document.prop.creationDate}</td>
-		            <td valign="top">${document.prop.createdBy}</td>
+		            <td valign="top">${document.prop.lastModificationDate}</td>
+		            <td valign="top">${document.prop.lastModifiedBy}</td>
 		            <td valign="top">${document.prop.checkinComment}</td>		            
 		            <td valign="top"><g:link class="action-download action" controller="cmisDocument" action="download" params="[objectId:document.objectId]" ><g:message code="history.download" default="Download" /></g:link></td>
 	            </tr>		            
