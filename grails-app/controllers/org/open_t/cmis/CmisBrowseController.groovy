@@ -116,6 +116,17 @@ class CmisBrowseController {
 	 
 	   }
 	 
+	 def createAction(name,id,def handler="simpleDialog") {
+		 def href=g.createLink(controller:"cmisDocument",action:name,params:[objectId:id])
+		 def title=g.message(code:"cmis.list.${name}.tooltip")
+		 def onclick=""
+		 if (handler) {
+			 onclick="""onclick="${handler}(this.getAttribute('rel'));event.returnValue=false; return false;" """
+		 }		 
+		 return """<span class="action-${name} action list-action simpleDialog" rel="${href}" title="${title}" ${onclick} >&nbsp;</span>""" 
+	 }
+	 
+	 
 	 /*
 	  * Delivers JSON datasource to datatable
 	  */
@@ -152,21 +163,27 @@ class CmisBrowseController {
 		 
 		 def aaData=[]
 		 documents.each { doc ->
+			 def id=doc.prop.objectId
 			 def icon
 			 if (doc.isDocument()) {
-			  icon="""<a href='#' class='mime-16 ${doc.cssClassName}-16'>&nbsp;</a>"""
+			  icon="""<span href='#' class='mime-16 ${doc.cssClassName}-16'>&nbsp;</span>"""
 			 } else {
-			  icon="""<a href='#' onclick="gotoFolder('${doc.prop.objectId}');return false;" class='mime-16 ${doc.cssClassName}-16'>&nbsp;</a>"""
+			  icon="""<span href='#' onclick="gotoFolder('${doc.prop.objectId}');event.returnValue=false; return false;" class='mime-16 ${doc.cssClassName}-16'>&nbsp;</span>"""
 			 }
-			 def actions=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.showproperties')}","class":"action-show action list-action simpleDialog",controller:"cmisDocument",action:"props", params:[objectId:doc.prop.objectId])
+			 //def actions=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.showproperties')}","class":"action-show action list-action simpleDialog",controller:"cmisDocument",action:"props", params:[objectId:doc.prop.objectId])
+			 def actions=createAction("props",id)
 			 if (params.readOnly!="true") {
-				 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.editproperties')}","class":"action-edit action list-action simpleDialog",controller:"cmisDocument",action:"edit", params:[objectId:doc.prop.objectId])
+				 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.editproperties')}","class":"action-edit action list-action simpleDialog",controller:"cmisDocument",action:"edit", params:[objectId:doc.prop.objectId])
+				 actions+=createAction("edit",id)
 			 }
 			 if (doc.isDocument()) {
-				 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.showhistory')}","class":"action-history action list-action simpleDialog",controller:"cmisDocument",action:"history", params:[objectId:doc.prop.objectId])
-				 actions+=link(title:"${message(code:'cmis.list.download')}","class":"action-download action list-action simpleDialog",controller:"cmisDocument",action:"download", params:[objectId:doc.prop.objectId])
+				 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.showhistory')}","class":"action-history action list-action simpleDialog",controller:"cmisDocument",action:"history", params:[objectId:doc.prop.objectId])
+				 actions+=createAction("history",id)
+				 actions+=link(title:"${message(code:'cmis.list.download.tooltip')}","class":"action-download action list-action simpleDialog",controller:"cmisDocument",action:"download", params:[objectId:doc.prop.objectId])
+				 //actions+=createAction("download",id)
 				 if (params.readOnly!="true") {
-					 actions+=link(onclick:"uploadDialog(this.href);return false;",title:"${message(code:'cmis.list.upload')}","class":"action-upload action list-action simpleDialog",controller:"cmisDocument",action:"updatedocument", params:[objectId:doc.prop.objectId])
+					 //actions+=link(onclick:"uploadDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.upload')}","class":"action-upload action list-action simpleDialog",controller:"cmisDocument",action:"updatedocument", params:[objectId:doc.prop.objectId])
+					 actions+=createAction("updatedocument",id,"uploadDialog")
 					 def spp=cmisService.getSppPath(doc,parentPath) 
 					 if (spp.path){
 						 actions+="""<span href='${spp.path}' title='${message(code:'cmis.actions.editonlinespp.tooltip')}' sppAppProgId='${spp.appProgId}' class='action-edit-online list-action action spp-link'>&nbsp;</span>"""
@@ -179,17 +196,20 @@ class CmisBrowseController {
 				 }
 				 if(params.cico!="false") {
 					 if (doc.isPwc()) {
-						 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.checkin')}","class":"action-checkin action list-action simpleDialog",controller:"cmisDocument",action:"checkin", params:[objectId:doc.prop.objectId])										 
+						 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.checkin')}","class":"action-checkin action list-action simpleDialog",controller:"cmisDocument",action:"checkin", params:[objectId:doc.prop.objectId])
+						 actions+=createAction("checkin",id)
 					 } else {
 					 if (!doc.isCheckedOut()){
-						 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.checkout')}","class":"action-checkout action list-action simpleDialog",controller:"cmisDocument",action:"checkout", params:[objectId:doc.prop.objectId])					 
+						 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.checkout')}","class":"action-checkout action list-action simpleDialog",controller:"cmisDocument",action:"checkout", params:[objectId:doc.prop.objectId])
+						 actions+=createAction("checkout",id)
 					 }
 					 }
 				 }
 			
 			 }
 			 if (params.readOnly!="true") {
-				 actions+=link(onclick:"simpleDialog(this.href);return false;",title:"${message(code:'cmis.list.delete')}","class":"action-delete action list-action simpleDialog",controller:"cmisDocument",action:"delete", params:[objectId:doc.prop.objectId])
+				 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.delete')}","class":"action-delete action list-action simpleDialog",controller:"cmisDocument",action:"delete", params:[objectId:doc.prop.objectId])
+				 actions+=createAction("delete",id)
 			 }
 				 
 /*			 def actions="""<g:link onclick="simpleDialog(this.href);return false;"

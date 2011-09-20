@@ -3,7 +3,7 @@
 .dataTables_length { width:200px;float:left;}
 
 
-.mime-16 {display:block;min-height:16px; padding:2px 0 2px 24px;background-repeat:no-repeat;display:block;}
+.mime-16 {cursor:pointer;display:block;min-height:16px; padding:2px 0 2px 24px;background-repeat:no-repeat;display:block;}
 .folder-16 { background-image: url("theme/icons/places/16/folder.png" ) ;}
 li.folder-16 a ins { background-image: url("theme/icons/places/16/folder.png" ) !important; background-position: 0px 0px !important; }
 
@@ -43,13 +43,13 @@ img {border:none;}
 
 //.action-edit {background-image:url("theme/icons/actions/details-16.png"); display:block;}
 //.action-show {background-image:url("theme/icons/actions/view-in-browser-16.png"); display:block;}
-.action-show {background-image:url("theme/icons/actions/16/document-properties.png"); display:block;}
+.action-props {background-image:url("theme/icons/actions/16/document-properties.png"); display:block;}
 .action-edit {background-image:url("theme/icons/actions/16/editcopy.png"); display:block;}
 .action-history {background-image:url("theme/icons/actions/16/document-history.png"); display:block;}
 .action-delete {background-image:url("theme/icons/actions/16/remove.png"); display:block;}
 
 .action-download {background-image:url("theme/icons/actions/16/document-save.png"); display:block;}
-.action-upload {background-image:url("theme/icons/actions/16/extract-archive.png"); display:block;}
+.action-updatedocument {background-image:url("theme/icons/actions/16/extract-archive.png"); display:block;}
 .action-checkout {background-image:url("theme/icons/actions/16/document-send.png"); display:block;}
 .action-checkin {background-image:url("theme/icons/actions/16/document-revert.png"); display:block;}
 .action-newfolder {background-image:url("theme/icons/actions/16/folder-new.png"); display:block;}
