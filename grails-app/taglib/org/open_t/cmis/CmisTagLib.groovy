@@ -116,7 +116,7 @@ class CmisTagLib  implements ApplicationContextAware {
       			params: {      	
       				},
       			onComplete: function(id, fileName, responseJSON){
-  					\$("#form").append('<input type=\"hidden\" name=\"filename\" value=\""+fileName+"\" />');
+  					\$("#form").append('<input type=\"hidden\" name=\"filename\" value=\"'+fileName+'\" />');
       			},
       			template: '<div class="qq-uploader">' + 
                 '<div class="qq-upload-drop-area"><span>${message(code:'cmis.uploader.dropfileshere')}</span></div>' +
@@ -167,9 +167,9 @@ class CmisTagLib  implements ApplicationContextAware {
 				   class="display file-list">
 				<thead>
 					<tr>
-						<th>${g.message(code:"cmis.list.icon",    default:"Icon")}		</th>
-						<th>${g.message(code:"cmis.list.name",    default:"Name")}		</th>			
-						<th>${g.message(code:"cmis.list.actions", default:"Actions")}   </th>
+						<th class="cmis-list-icon">${g.message(code:"cmis.list.icon",    default:"Icon")}		</th>
+						<th class="cmis-list-name">${g.message(code:"cmis.list.name",    default:"Name")}		</th>			
+						<th class="cmis-list-actions"> ${g.message(code:"cmis.list.actions", default:"Actions")}   </th>
 					</tr>
 				</thead>
 				<tbody>
@@ -179,9 +179,9 @@ class CmisTagLib  implements ApplicationContextAware {
 				</tbody>
 				<tfoot>
 					<tr>
-						<th>${g.message(code:"cmis.list.icon",    default:"Icon")}		</th>
-						<th>${g.message(code:"cmis.list.name",    default:"Name")}		</th>			
-						<th>${g.message(code:"cmis.list.actions", default:"Actions")}   </th>
+						<th class="cmis-list-icon">${g.message(code:"cmis.list.icon",    default:"Icon")}		</th>
+						<th class="cmis-list-name">${g.message(code:"cmis.list.name",    default:"Name")}		</th>			
+						<th class="cmis-list-actions"> ${g.message(code:"cmis.list.actions", default:"Actions")}   </th>
 					</tr>
 				</tfoot>
 			</table>
