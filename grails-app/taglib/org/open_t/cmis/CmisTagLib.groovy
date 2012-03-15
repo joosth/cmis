@@ -69,16 +69,19 @@ class CmisTagLib  implements ApplicationContextAware {
 	  		      var cmis={};  				    				  
   				  cmis.baseUrl="${request.contextPath}";
   				  cmis.pluginPath="${resource(absolute:false,plugin:'cmis')}";
-  				  cmis.rootNode="${request.cmis?.rootEntry?.uuid}";  				    				  
-  				  cmis.currentFolder="${request.cmis?.rootEntry?.uuid}";  				  
+  				  cmis.rootFolderId="${request.cmis?.rootEntry?.uuid}";
+  				    				  
+  				  cmis.currentFolderId="${request.cmis?.rootEntry?.uuid}";
+	  			  
+	  			  cmis.currentObjectId="${request.cmis?.rootEntry?.uuid}";
+  				  
   				  cmis.language="${java.util.Locale.getDefault().getLanguage()}";
   				  cmis.readOnly=${readOnly};
   				  cmis.cico=${cico};
   				  
   				  var uploader={}
   				  uploader.uploadMessage="${message(code:'cmis.uploader.uploadafile')}";
-  				  uploader.dropfilesMessage="${message(code:'cmis.uploader.dropfileshere')}";
-  				    				    				  
+  				  uploader.dropfilesMessage="${message(code:'cmis.uploader.dropfileshere')}"; 				    				    				  
   				  </script>"""
 	  out << html
 	  
@@ -89,9 +92,24 @@ class CmisTagLib  implements ApplicationContextAware {
 
       out << """<link rel="stylesheet" href="${resource(dir:'js/uploader',file:'fileuploader.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
       out << """<link rel="stylesheet" href="${resource(dir:'css',file:'jquery.jstree.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
+      
       out << "\n"
 	  out << g.javascript(src:'cmis.js',contextPath:pluginContextPath,plugin:'cmis')
 	  out << "\n"
+	  
+	  out << g.javascript(src:'cmis.spp.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << "\n"
+	  
+	  out << g.javascript(src:'cmis.tree.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << "\n"
+	  
+	  out << g.javascript(src:'cmis.datatable.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << "\n"
+	  
+	  out << g.javascript(src:'cmis.detailspane.js',contextPath:pluginContextPath,plugin:'cmis')
+	  out << "\n"
+	  
+	  
 	  out << g.javascript(src:'uploader/fileuploader.js',contextPath:pluginContextPath,plugin:'cmis')
 	  out << "\n"
 	  out << g.javascript(src:'jquery/jquery.cookie.js',contextPath:pluginContextPath,plugin:'cmis')
@@ -136,7 +154,7 @@ class CmisTagLib  implements ApplicationContextAware {
 	def tree = { attrs ->
 			
 	def html="""<div id="outer-treediv" class="outer-treediv" >   
-		            <div id="treediv" class="treediv" >		             
+		            <div id="treediv" class="treediv cmis-tree" >		             
 		            </div>
 				</div>"""
 		out << html
@@ -146,7 +164,7 @@ class CmisTagLib  implements ApplicationContextAware {
 		def html="""<div id="outer-detail-pane" class="outer-detail-pane disabled" ></div>"""
 			if (applicationContext.cmisService.enabled) {
 				html="""<div id="outer-detail-pane" class="outer-detail-pane" >
-						            <div id="detail-pane" class="detail-pane" >${g.message(code:'cmis.pane.body')}</div>
+						            <div id="detail-pane" class="detail-pane cmis-detailspane" >${g.message(code:'cmis.pane.body')}</div>
 							</div>"""
 				}
 			out << html
@@ -157,14 +175,14 @@ class CmisTagLib  implements ApplicationContextAware {
 		<div id="list-toolbar" class="fg-toolbar ui-toolbar xui-widget-header ui-corner-tl ui-corner-tr table-title">
 			${g.link(onclick:"gotoHomeFolder();return false;", title:"${g.message(code:'cmis.browse.homefolder.tooltip')}",class:"action-home action list-action") {"&nbsp;"} }
 			${g.link(onclick:"gotoParentFolder();return false;", title:"${g.message(code:'cmis.browse.parentfolder.tooltip')}",class:"action-up action list-action") {"&nbsp;"} }
-			${g.link(onclick:"simpleDialog(this.href+'?parentId='+cmis.currentFolder);return false;",title:"${g.message(code:'cmis.browse.newfolder.tooltip')}",class:"action-newfolder action list-action",controller:"cmisDocument",action:"newfolder") {"&nbsp;"}  }			
-			${g.link(onclick:"uploadDialog(this.href+'?parentId='+cmis.currentFolder);return false;", title:"${g.message(code:'cmis.browse.newdocument.tooltip')}",class:"action-newdocument action list-action",controller:"cmisDocument",action:"newdocument") {"&nbsp;"} }						
+			${g.link(onclick:"OpenT.dialogs.simpleDialog(this.href+'?parentId='+cmis.currentFolderId);return false;",title:"${g.message(code:'cmis.browse.newfolder.tooltip')}",class:"action-newfolder action list-action",controller:"cmisDocument",action:"newfolder") {"&nbsp;"}  }			
+			${g.link(onclick:"OpenT.dialogs.uploadDialog(this.href+'?parentId='+cmis.currentFolderId);return false;", title:"${g.message(code:'cmis.browse.newdocument.tooltip')}",class:"action-newdocument action list-action",controller:"cmisDocument",action:"newdocument") {"&nbsp;"} }						
 		</div>
 		
 		
 		<div id="list-body" class="datatable">
 			<table id="file-list" cellpadding="0" cellspacing="0" border="0"
-				   class="display file-list">
+				   class="display file-list cmis-datatable">
 				<thead>
 					<tr>
 						<th class="cmis-list-icon">${g.message(code:"cmis.list.icon",    default:"Icon")}		</th>

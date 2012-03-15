@@ -1,5 +1,5 @@
  <%-- This view is used for the document deatails sidepane --%>
- <div id="dialog" title="${message(code:'cmis.properties.title')}" style="float:left;"> 		
+ <div id="dialog" style="float:left;"> 		
 		<g:hiddenField name="objectId" value="${entry.objectId}"/>
 		<img src="${entry.thumbnailUrl}" />						
 		<table style="border:none;width:500px;">
@@ -74,13 +74,13 @@
 
 <div id="document-actions" style="float:left;background-color:#EEE;margin:10px;padding:10px;border:1px dotted #888;">
 	
-	<g:link onclick="simpleDialog(this.href);return false;" title="${message(code:'cmis.actions.showproperties.tooltip')}" class="action-show action simpleDialog" controller="cmisDocument" action="props" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.showproperties.title" /></g:link><br />
- 	<g:link onclick="simpleDialog(this.href);return false;" title="${message(code:'cmis.actions.editproperties.tooltip')}" class="action-edit action simpleDialog" controller="cmisDocument" action="edit" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.editproperties.title" /></g:link><br />
+	<g:link title="${message(code:'cmis.actions.showproperties.tooltip')}" class="action-show action simpleDialog" controller="cmisDocument" action="props" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.showproperties.title" /></g:link><br />
+ 	<g:link title="${message(code:'cmis.actions.editproperties.tooltip')}" class="action-edit action simpleDialog" controller="cmisDocument" action="edit" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.editproperties.title" /></g:link><br />
  	
  	
  	
  	<g:if test="${entry.hasHistory()}" >
- 		<g:link onclick="simpleDialog(this.href);return false;" title="${message(code:'cmis.actions.showhistory.tooltip')}" class="action-history action simpleDialog" controller="cmisDocument" action="history" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.showhistory.title" /></g:link><br />
+ 		<g:link title="${message(code:'cmis.actions.showhistory.tooltip')}" class="action-history action simpleDialog" controller="cmisDocument" action="history" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.showhistory.title" /></g:link><br />
 	</g:if>
 	<g:if test="${sppPath}" >
  		<span href="${sppPath}" title="${message(code:'cmis.actions.editonlinespp.tooltip')}" sppAppProgId="${sppAppProgId}" class="action-edit-online action spp-link"><g:message code="cmis.actions.editonlinespp.title" /></span><br />
@@ -92,14 +92,14 @@
 	
 	<g:if test="${entry.isDocument()}" >
 		<g:link title="${message(code:'cmis.actions.download.tooltip')}" class="action-download action simpleDialog" controller="cmisDocument" action="download" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.download.title" /></g:link><br />
-		<g:link onclick="uploadDialog(this.href);return false;" title="${message(code:'cmis.actions.update.tooltip')}" class="action-upload action uploadDialog" controller="cmisDocument" action="updatedocument" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.update.title" /></g:link><br />
+		<g:link title="${message(code:'cmis.actions.update.tooltip')}" class="action-upload action uploadDialog" controller="cmisDocument" action="updatedocument" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.update.title" /></g:link><br />
 		
  		<g:if test="${entry.isPwc()}">		
- 			<g:link onclick="simpleDialog(this.href);return false;" title="${message(code:'cmis.actions.checkin.tooltip')}" class="action-checkin action simpleDialog" controller="cmisDocument" action="checkin" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.checkin.title" /></g:link><br />
+ 			<g:link title="${message(code:'cmis.actions.checkin.tooltip')}" class="action-checkin action simpleDialog" controller="cmisDocument" action="checkin" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.checkin.title" /></g:link><br />
  		</g:if>
  		<g:else>
  		<g:if test="${!entry.isCheckedOut()}" >
-			<g:link onclick="simpleDialog(this.href);return false;" title="${message(code:'cmis.actions.checkout.tooltip')}" class="action-checkout action simpleDialog" controller="cmisDocument" action="checkout" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.checkout.title" /></g:link><br />		
+			<g:link title="${message(code:'cmis.actions.checkout.tooltip')}" class="action-checkout action simpleDialog" controller="cmisDocument" action="checkout" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.checkout.title" /></g:link><br />		
  		</g:if>
  		
  		
@@ -108,7 +108,7 @@
  	</g:if>
  	
  	
- 	<g:link onclick="simpleDialog(this.href);return false;" title="${message(code:'cmis.actions.delete.tooltip')}" class="action-delete action simpleDialog" controller="cmisDocument" action="delete" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.delete.title" /></g:link><br />
+ 	<g:link title="${message(code:'cmis.actions.delete.tooltip')}" class="action-delete action simpleDialog" controller="cmisDocument" action="delete" params="[objectId:entry.prop.objectId]"><g:message code="cmis.actions.delete.title" /></g:link><br />
  
 
 </div>

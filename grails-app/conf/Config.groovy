@@ -27,9 +27,9 @@ log4j = {
 cmis {
 	enabled=true
 	
-	//url="http://localhost:8080/alfresco/service/cmis"
+	url="http://localhost:8080/alfresco/service/cmis"
 //	url="http://cmis.alfresco.com:80/service/cmis"
-	url="http://mercury:8080/alfresco/service/cmis"
+	//url="http://mercury:8080/alfresco/service/cmis"
 	
 	username="wfp"
 	password="wfp"

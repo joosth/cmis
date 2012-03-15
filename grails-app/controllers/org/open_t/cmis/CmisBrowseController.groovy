@@ -116,7 +116,7 @@ class CmisBrowseController {
 	 
 	   }
 	 
-	 def createAction(name,id,def handler="simpleDialog") {
+	 def createAction(name,id,def handler="OpenT.dialogs.simpleDialog") {
 		 def href=g.createLink(controller:"cmisDocument",action:name,params:[objectId:id])
 		 def title=g.message(code:"cmis.list.${name}.tooltip")
 		 def onclick=""
@@ -183,7 +183,7 @@ class CmisBrowseController {
 				 //actions+=createAction("download",id)
 				 if (params.readOnly!="true") {
 					 //actions+=link(onclick:"uploadDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.upload')}","class":"action-upload action list-action simpleDialog",controller:"cmisDocument",action:"updatedocument", params:[objectId:doc.prop.objectId])
-					 actions+=createAction("updatedocument",id,"uploadDialog")
+					 actions+=createAction("updatedocument",id,"OpenT.dialogs.uploadDialog")
 					 def spp=cmisService.getSppPath(doc,parentPath) 
 					 if (spp.path){
 						 actions+="""<span href='${spp.path}' title='${message(code:'cmis.actions.editonlinespp.tooltip')}' sppAppProgId='${spp.appProgId}' class='action-edit-online list-action action spp-link'>&nbsp;</span>"""
@@ -274,4 +274,13 @@ class CmisBrowseController {
 		def res=[success:true,objectId:parentEntry.uuid]
 		render res as JSON
 	}
+	
+	def jsonEntry =  {
+		if (!params.objectId)
+		  params.objectId=cmisService.repositories.rootFolderId
+		def entry=cmisService.getEntry(params.objectId)
+		
+		def res=[success:true,properties:entry.properties,links:entry.links]
+		render res as JSON
+	}	
 }

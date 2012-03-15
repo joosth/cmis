@@ -14,6 +14,9 @@
 		
 		<g:javascript src="jquery/jquery.jstree.js" contextPath="${pluginContextPath}" />
 		
+		<g:javascript src="opent.js" contextPath="${pluginContextPath}" />
+		<g:javascript src="opent.dialogs.js" contextPath="${pluginContextPath}" />
+		
 		<cmis:head path="/" />
     </head>
     

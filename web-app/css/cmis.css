@@ -41,8 +41,8 @@ td.thumbnail {width:50px;}
 img {border:none;}
 .action {min-height:16px; padding:2px 0 2px 24px;background-repeat:no-repeat;cursor:pointer;}
 
-//.action-edit {background-image:url("theme/icons/actions/details-16.png"); display:block;}
-//.action-show {background-image:url("theme/icons/actions/view-in-browser-16.png"); display:block;}
+.action-edit {background-image:url("theme/icons/actions/16/details-16.png"); display:block;}
+.action-show {background-image:url("theme/icons/actions/16/view-in-browser-16.png"); display:block;}
 .action-props {background-image:url("theme/icons/actions/16/document-properties.png"); display:block;}
 .action-edit {background-image:url("theme/icons/actions/16/editcopy.png"); display:block;}
 .action-history {background-image:url("theme/icons/actions/16/document-history.png"); display:block;}
@@ -50,12 +50,15 @@ img {border:none;}
 
 .action-download {background-image:url("theme/icons/actions/16/document-save.png"); display:block;}
 .action-updatedocument {background-image:url("theme/icons/actions/16/extract-archive.png"); display:block;}
+.action-upload {background-image:url("theme/icons/actions/16/extract-archive.png"); display:block;}
+
 .action-checkout {background-image:url("theme/icons/actions/16/document-send.png"); display:block;}
 .action-checkin {background-image:url("theme/icons/actions/16/document-revert.png"); display:block;}
 .action-newfolder {background-image:url("theme/icons/actions/16/folder-new.png"); display:block;}
 .action-newdocument {background-image:url("theme/icons/actions/16/document-new.png"); display:block;}
 
 .action-edit-online {background-image:url("theme/icons/actions/16/edit-online.png"); display:block;}
+
 
 .action-home {background-image:url("theme/icons/actions/16/gohome.png"); display:block;}
 .action-up {background-image:url("theme/icons/actions/16/go-up.png"); display:block;}
@@ -154,3 +157,6 @@ html * {
     margin: 0;
 }
 span.spp-link {font-weight:bold;color:#666;}
+
+th.cmis-list-icon {width:20px;}
+th.cmis-list-actions {width:235px;}
