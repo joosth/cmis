@@ -2,15 +2,17 @@
     <head>
         <title><g:layoutTitle default="CMIS" /></title>
         
-        <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'main.css',contextPath:'')}" />
-        <link rel="stylesheet" type="text/css" href="${resource(dir:'css',file:'jquery.cluetip.css',contextPath:'')}" />
-        <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'datatables.css',contextPath:'')}" />
+        <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'main.css',plugin:'cmis')}" />
+        <link rel="stylesheet" href="${createLinkTo(dir:'css',file:'cmis.css',plugin:'cmis')}" />
         
-        <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'mimetypes.css',contextPath:'')}" />
-        <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'roller-theme.css',contextPath:'')}" />
-        <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'theme.css',contextPath:'')}" />
+        <link rel="stylesheet" type="text/css" href="${resource(dir:'css',file:'jquery.cluetip.css',plugin:'cmis')}" />
+        <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'datatables.css',plugin:'cmis')}" />
+        
+        <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'mimetypes.css',plugin:'cmis')}" />
+        <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'roller-theme.css',plugin:'cmis')}" />
+        <link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'theme.css',plugin:'cmis')}" />
        
-        <link rel="shortcut icon" href="${createLinkTo(dir:'images',file:'favicon.ico',contextPath:'')}" type="image/x-icon" />
+        <link rel="shortcut icon" href="${createLinkTo(dir:'images',file:'favicon.ico',plugin:'cmis')}" type="image/x-icon" />
 
         
         <g:javascript src="jquery/jquery.js" />

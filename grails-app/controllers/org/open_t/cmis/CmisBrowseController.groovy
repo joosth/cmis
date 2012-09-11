@@ -116,7 +116,7 @@ class CmisBrowseController {
 	 
 	   }
 	 
-	 def createAction(name,id,def handler="OpenT.dialogs.simpleDialog") {
+	 def createAction = {name,id,def handler="OpenT.dialogs.simpleDialog" ->
 		 def href=g.createLink(controller:"cmisDocument",action:name,params:[objectId:id])
 		 def title=g.message(code:"cmis.list.${name}.tooltip")
 		 def onclick=""

@@ -281,7 +281,7 @@ class CmisDocumentController {
 	}
 	
 	
-	def fileupload = { uploadbody ->
+	def fileupload = { 
 			def filename
 			def is
 			def mimetype 
