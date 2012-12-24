@@ -23,7 +23,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.springframework.context.*
 class CmisTagLib  implements ApplicationContextAware {
-	//def cmisService
+	def cmisServiceProxy
 	//def restService
 	static namespace = 'cmis'
 	ApplicationContext applicationContext
@@ -45,22 +45,23 @@ class CmisTagLib  implements ApplicationContextAware {
 		  }
 		  
 		  if (attrs.rootNode) {
-			  rootEntry=applicationContext.cmisService.getEntryById(attrs.rootNode)		 
+			  rootEntry=applicationContext.cmisService.getObject(attrs.rootNode)		 
 		  } else if (attrs.path) {
-			  rootEntry=applicationContext.cmisService.getEntryByPath(attrs.path)			  
+			  rootEntry=applicationContext.cmisService.getObjectByPath(attrs.path)			  
 		  } else {
-			  //rootEntry=applicationContext.cmisService.getEntryByPath("/")
-		  	  rootEntry=null			  
+			  rootEntry=applicationContext.cmisService.getObjectByPath("/")
 		  }
-		  
+		  def rootFolderEntry=[success:true,objectId:rootEntry.id,id:rootEntry.id,properties:rootEntry.props,isDocument:rootEntry.isDocument,isFolder:rootEntry.isFolder];
 		  applicationContext.cmisService.contextPath=request.contextPath
 	  
 	  
 	  def cico=false
 	  def readOnly=false
+	  def restore=false
 	  
 	  if (attrs.cico && (attrs.cico=="true" || attrs.cico==true)) cico=true;
 	  if (attrs.readOnly && (attrs.readOnly=="true" || attrs.readOnly==true)) readOnly=true;
+	  if (attrs.restore && (attrs.restore=="true" || attrs.restore==true)) restore=true;
 	  	  
 	  cmismap+=[rootEntry:rootEntry,cico:cico,readOnly:readOnly]
 	  request.cmis=cmismap
@@ -69,55 +70,24 @@ class CmisTagLib  implements ApplicationContextAware {
 	  		      var cmis={};  				    				  
   				  cmis.baseUrl="${request.contextPath}";
   				  cmis.pluginPath="${resource(absolute:false,plugin:'cmis')}";
-  				  cmis.rootFolderId="${request.cmis?.rootEntry?.uuid}";
+  				  cmis.rootFolderId="${request.cmis?.rootEntry?.id}";
+				  cmis.rootFolder=${rootFolderEntry.encodeAsJSON()};
   				    				  
-  				  cmis.currentFolderId="${request.cmis?.rootEntry?.uuid}";
+  				  cmis.currentFolderId="${request.cmis?.rootEntry?.id}";
 	  			  
-	  			  cmis.currentObjectId="${request.cmis?.rootEntry?.uuid}";
+	  			  cmis.currentObjectId="${request.cmis?.rootEntry?.id}";
   				  
   				  cmis.language="${java.util.Locale.getDefault().getLanguage()}";
   				  cmis.readOnly=${readOnly};
   				  cmis.cico=${cico};
+				  cmis.restore=${restore};
   				  
   				  var uploader={}
   				  uploader.uploadMessage="${message(code:'cmis.uploader.uploadafile')}";
   				  uploader.dropfilesMessage="${message(code:'cmis.uploader.dropfileshere')}"; 				    				    				  
   				  </script>"""
 	  out << html
-	  
-      
-	  
-	  out << """<link rel="stylesheet" type="text/css" href="${resource(dir:'css',file:'cmis.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
-	  out << """<link rel="stylesheet" type="text/css" href="${resource(dir:'css/theme',file:'mimetypes.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
-
-      out << """<link rel="stylesheet" href="${resource(dir:'js/uploader',file:'fileuploader.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
-      out << """<link rel="stylesheet" href="${resource(dir:'css',file:'jquery.jstree.css',contextPath:pluginContextPath,plugin:'cmis')}" />"""
-      
-      out << "\n"
-	  out << g.javascript(src:'cmis.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
-	  
-	  out << g.javascript(src:'cmis.spp.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
-	  
-	  out << g.javascript(src:'cmis.tree.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
-	  
-	  out << g.javascript(src:'cmis.datatable.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
-	  
-	  out << g.javascript(src:'cmis.detailspane.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
-	  
-	  
-	  out << g.javascript(src:'uploader/fileuploader.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
-	  out << g.javascript(src:'jquery/jquery.cookie.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
-	  out << g.javascript(src:'jquery/jquery.hotkeys.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
-	  out << g.javascript(src:'jquery/jquery.jstree.js',contextPath:pluginContextPath,plugin:'cmis')
-	  out << "\n"
+	 
 	  }
 	}
 	
@@ -163,26 +133,35 @@ class CmisTagLib  implements ApplicationContextAware {
 	def pane = { attrs ->
 		def html="""<div id="outer-detail-pane" class="outer-detail-pane disabled" ></div>"""
 			if (applicationContext.cmisService.enabled) {
-				html="""<div id="outer-detail-pane" class="outer-detail-pane" >
+				html="""
 						            <div id="detail-pane" class="detail-pane cmis-detailspane" >${g.message(code:'cmis.pane.body')}</div>
-							</div>"""
+							"""
 				}
 			out << html
 	}
 	
-	def list = { attrs ->		
+	def list = { attrs ->
+		def breadcrumb=""
+		if (!attrs.breadcrumb || attrs.breadcrumb=="true") {
+			breadcrumb="""<div class="cmis-breadcrumb">
+				<ul class="breadcrumb">
+					<li class="active">${g.message(code:"cmis.home.label")}</li>
+				</ul>				
+			</div>"""			
+		}
+
 		def html="""
-		<div id="list-toolbar" class="fg-toolbar ui-toolbar xui-widget-header ui-corner-tl ui-corner-tr table-title">
-			${g.link(onclick:"gotoHomeFolder();return false;", title:"${g.message(code:'cmis.browse.homefolder.tooltip')}",class:"action-home action list-action") {"&nbsp;"} }
-			${g.link(onclick:"gotoParentFolder();return false;", title:"${g.message(code:'cmis.browse.parentfolder.tooltip')}",class:"action-up action list-action") {"&nbsp;"} }
-			${g.link(onclick:"OpenT.dialogs.simpleDialog(this.href+'?parentId='+cmis.currentFolderId);return false;",title:"${g.message(code:'cmis.browse.newfolder.tooltip')}",class:"action-newfolder action list-action",controller:"cmisDocument",action:"newfolder") {"&nbsp;"}  }			
-			${g.link(onclick:"OpenT.dialogs.uploadDialog(this.href+'?parentId='+cmis.currentFolderId);return false;", title:"${g.message(code:'cmis.browse.newdocument.tooltip')}",class:"action-newdocument action list-action",controller:"cmisDocument",action:"newdocument") {"&nbsp;"} }						
+		<div id="list-toolbar" class="navbar btn-group" >
+			<a href="#" onclick="cmis.gotoHomeFolder();return false;" title="${g.message(code:'cmis.list.homefolder.help')}" class="btn btn-small" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'gohome.png')}" /></a>
+			<a href="#" onclick="cmis.gotoParentFolder();return false;" title="${g.message(code:'cmis.list.parentfolder.help')}" class="btn btn-small" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'go-up.png')}" /></a>
+			<a onclick="dialog.formDialog(null,'cmisDocument',{'dialogname':'newfolder'},{'getParentId':cmis.currentFolderId});return false;" title="${g.message(code:'cmis.list.newfolder.help')}" class="btn btn-small" href="${createLink(controller:'cmisDocument',action: 'newfolder')}" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'folder-new.png')}" /></a>
+			<a onclick="dialog.formDialog(null,'cmisDocument',{'dialogname':'newdocument'},{'getParentId':cmis.currentFolderId});return false;" title="${g.message(code:'cmis.list.newdocument.help')}" class="btn btn-small" href="${createLink(controller:'cmisDocument',action: 'newdocument')}" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'document-new.png')}" /></a>
 		</div>
-		
-		
 		<div id="list-body" class="datatable">
-			<table id="file-list" cellpadding="0" cellspacing="0" border="0"
-				   class="display file-list cmis-datatable">
+			${breadcrumb}
+			
+				<table id="file-list" cellpadding="0" cellspacing="0" border="0"
+				   class="display file-list cmis-datatable table table-striped table-bordered table-hover">
 				<thead>
 					<tr>
 						<th class="cmis-list-icon">${g.message(code:"cmis.list.icon",    default:"Icon")}		</th>
@@ -208,5 +187,9 @@ class CmisTagLib  implements ApplicationContextAware {
 		if (applicationContext.cmisService.enabled) {					
 			out << html		
 		}
+	}
+	
+	def thumbnail = { attrs ->		
+		out << """<img src="${createLink(controller:'cmisDocument',action: 'thumbnail',params:[objectId:attrs.object.prop.objectId])}" />"""		
 	}
 }

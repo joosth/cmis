@@ -20,31 +20,32 @@
 
 
 
-function refreshDetailsPane(){
+cmis.refreshDetailsPane = function refreshDetailsPane(){
 	
 	if (cmis.currentObjectEntry.properties["cmis:baseTypeId"]=="cmis:folder" && $(".file-list")[0]) {		
-		initDatatable();
+		cmis.initDatatable();
 	} else {
 		var parentPath=cmis.currentObjectEntry.properties["cmis:path"];
 		var objectId=cmis.currentObjectEntry.properties["cmis:objectId"];
 			
 		$(".detail-pane").load(cmis.baseUrl+"/cmisBrowse/detail/?objectId="+objectId+'&parentPath='+escape(parentPath),'',function() {      			  
-            $(".detail-pane").find("span.help").cluetip({
-  				splitTitle: '|'
-  				});
             cmis.datatable=null;
-            initDatatable();
-            var toolbar=$("#list-toolbar")
-            $(this).find('div.dataTables_length').prepend(toolbar);		           	
+            cmis.initDatatable();
+            
+            $(".detail-pane").find("span.help").tooltip({placement:'top'});            
+            $(".detail-pane").find("li.menu-item a").tooltip({placement:'top'});
+            
+         
 		  });
-	}	
+	}
+	 
 }
     
-function initDetailsPane() {	
-	$(".cmis-detailspane").bind("refresh",refreshDetailsPane);
+cmis.initDetailsPane = function initDetailsPane() {	
+	$(".cmis-detailspane").bind("refresh",cmis.refreshDetailsPane);
 	$(".cmis-detailspane").addClass("cmis-events");
 }
 	
 $(function() {	
-	initDetailsPane();
+	cmis.initDetailsPane();
 });

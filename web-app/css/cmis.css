@@ -1,45 +1,33 @@
+/* Fix datatables pagination and length area */
 .DataTables_sort_wrapper .ui-icon { float:right;}
 .dataTables_filter { float: right;}
 .dataTables_length { width:200px;float:left;}
-
-
-.mime-16 {cursor:pointer;display:block;min-height:16px; padding:2px 0 2px 24px;background-repeat:no-repeat;display:block;}
-.folder-16 { background-image: url("theme/icons/places/16/folder.png" ) ;}
-li.folder-16 a ins { background-image: url("theme/icons/places/16/folder.png" ) !important; background-position: 0px 0px !important; }
-
-
-#list-toolbar {float:left;clear:both;height:20px;margin-top:3px;}
-#file-list {width:100%;}
-//#list-body { float:left;clear:both;width:1200px;}
-#list-body { float:left;clear:both;}
-.home { background-image: url("theme/icons/actions/16/gohome.png" ) !important; background-position: 0px 0px !important; }
-.logout { background-image: url("theme/icons/actions/16/gnome-logout.png" ) !important; background-position: 0px 0px !important; }
-.toolbar {float:left;}
 #file-list {float:left;}
 #file-list_info {float:left;}
 #file-list_paginate {float:left;}
 
-.outer-treediv { float:left;width:350px;border:1px solid #DDD; }
+/* set column widths for table */
+th.cmis-list-icon {width:18px;}
+th.cmis-list-actions {width:235px;}
 
-.treediv {float:left;width:95%;height:95%;overflow:auto;}
+/* Show pointer cursor in first two rows of table */
+.clickable-cell {cursor:pointer;}
+.clickable-row {cursor:pointer;}
 
-.outer-detail-pane {float:left;width:900px;height:500px;border:0px solid #DDD;margin-left:5px;}
 
-.detail-pane {float:left;width:100%;height:100%;overflow:auto;}            
+.mime-16 {cursor:pointer;display:block;min-height:16px; padding:2px 0 2px 20px;background-repeat:no-repeat;display:block;}
+.folder-16 { background-image: url("theme/icons/places/16/folder.png" ) ;}
+li.folder-16 a ins { background-image: url("theme/icons/places/16/folder.png" ) !important; background-position: 0px 0px !important; }
+
+#list-body { float:left;clear:both;}
+            
 .list-action {float:left;}
 
-/*div.body table {width:100%}*/
-/*div.body table tr td:first-child {width:300px;}*/
-/*div.outer-detail-pane {width:100%}*/
+
 div.list-body {width:100%}
 div.datatable {width:100%}
 
-div#smurfLogo { border-bottom:2px solid #3be; }
-div.page-body { padding:20px;}
-td.details {text-align:left;}
-td.thumbnail {width:50px;}
-img {border:none;}
-.action {min-height:16px; padding:2px 0 2px 24px;background-repeat:no-repeat;cursor:pointer;}
+.action {min-height:16px; padding:2px 0 2px 20px;background-repeat:no-repeat;cursor:pointer;}
 
 .action-edit {background-image:url("theme/icons/actions/16/details-16.png"); display:block;}
 .action-show {background-image:url("theme/icons/actions/16/view-in-browser-16.png"); display:block;}
@@ -54,109 +42,22 @@ img {border:none;}
 
 .action-checkout {background-image:url("theme/icons/actions/16/document-send.png"); display:block;}
 .action-checkin {background-image:url("theme/icons/actions/16/document-revert.png"); display:block;}
+.action-cancelcheckout {background-image:url("theme/icons/actions/16/gtk-undo-ltr.png"); display:block;}
 .action-newfolder {background-image:url("theme/icons/actions/16/folder-new.png"); display:block;}
 .action-newdocument {background-image:url("theme/icons/actions/16/document-new.png"); display:block;}
 
-.action-edit-online {background-image:url("theme/icons/actions/16/edit-online.png"); display:block;}
+.action-edit-online {background-image:url("theme/icons/actions/16/document-page-setup.png"); display:block;}
 
 
 .action-home {background-image:url("theme/icons/actions/16/gohome.png"); display:block;}
 .action-up {background-image:url("theme/icons/actions/16/go-up.png"); display:block;}
 
-
-/* TREE LAYOUT */ 
-.tree ul { margin:0 0 0 5px; padding:0 0 0 0; list-style-type:none; }
-.tree li { display:block; min-height:18px; line-height:18px; padding:0 0 0 15px; margin:0 0 0 0; /* Background fix */ clear:both; }
-.tree li ul { display:none; }
-.tree li a, .tree li span { display:inline-block;line-height:16px;height:16px;color:black;white-space:nowrap;text-decoration:none;padding:1px 4px 1px 4px;margin:0; }
-.tree li a:focus { outline: none; }
-.tree li a input, .tree li span input { margin:0;padding:0 0;display:inline-block;height:12px !important;border:1px solid white;background:white;font-size:10px;font-family:Verdana; }
-.tree li a input:not([class="xxx"]), .tree li span input:not([class="xxx"]) { padding:1px 0; }
-/* FOR DOTS */ 
-.tree .ltr li.last { float:left; }
-.tree > ul li.last { overflow:visible; }
-/* OPEN OR CLOSE */ 
-.tree li.open ul { display:block; }
-.tree li.closed ul { display:none !important; }
-/* FOR DRAGGING */ #jstree-dragged { position:absolute; top:-10px; left:-10px; margin:0; padding:0; }
-#jstree-dragged ul ul ul { display:none; }
-#jstree-marker { padding:0; margin:0; line-height:5px; font-size:1px; overflow:hidden; height:5px; position:absolute; left:-45px; top:-30px; z-index:1000; background-color:transparent; background-repeat:no-repeat; display:none; }
-#jstree-marker.marker { width:45px; background-position:-32px top; }
-#jstree-marker.marker_plus { width:5px; background-position:right top; }
-/* BACKGROUND DOTS */ 
-.tree li li { overflow:hidden; }
-.tree > .ltr > li { display:table; }
-/* ICONS */ 
-.tree ul ins { display:inline-block; text-decoration:none; width:16px; height:16px; }
-.tree .ltr ins { margin:0 4px 0 0px; }               
-.field a { font-weight: normal; }
-.file a { font-weight: normal; }
-
-
-
-//.jstree-file a .jstree-icon { background-position:0px -19px !important; }
-//.jstree-default a .jstree-icon { background-position:0px -19px !important; }
-
-//
-
-Fix dataTable header icons
-.ui-state-default .ui-icon {
-    background-image: url("images/ui-icons_6da8d5_256x240.png");
-}
-jquery...tom.css (line 95)
-.ui-icon-carat-2-n-s {
-    background-position: -128px 0;
-}
-jquery...tom.css (line 110)
-.ui-icon {
-    background-image: url("images/ui-icons_469bdd_256x240.png");
-    height: 16px;
-    width: 16px;
+.treediv {
+	font-size: 11px;
 }
 
-.DataTables_sort_wrapper .ui-icon { float:right;}
-.dataTables_filter { float: right;}
-.dataTables_length { width:200px;float:left;}
-
-/*
-.mime-16 {display:block;min-height:16px; padding:2px 0 2px 24px;background-repeat:no-repeat;display:block;}
-.folder-16 { background-image: url("theme/icons/places/16/folder.png" ) ;}
-li.folder-16 a ins { background-image: url("theme/icons/places/16/folder.png" ) !important; background-position: 0px 0px !important; }
-
-
-#list-toolbar {float:left;clear:both;height:20px;margin-top:3px;}
-#file-list {width:100%;}
-//#list-body { float:left;clear:both;width:1200px;}
-#list-body { float:left;clear:both;}
-.home { background-image: url("theme/icons/actions/16/gohome.png" ) !important; background-position: 0px 0px !important; }
-.logout { background-image: url("theme/icons/actions/16/gnome-logout.png" ) !important; background-position: 0px 0px !important; }
-.toolbar {float:left;}
-#file-list {float:left;}
-#file-list_info {float:left;}
-#file-list_paginate {float:left;}
-
-.outer-treediv { float:left;width:350px;border:1px solid #DDD; }
-
-.treediv {float:left;width:95%;height:95%;overflow:auto;}
-
-.outer-detail-pane {float:left;widthh:900px;heighth:500px;border:1px solid #DDD;margin-left:5px;}
-
-.detail-pane {float:left;width:100%;height:100%;overflow:auto;}            
-.list-action {float:left;}
-
-div.body table {width:90%}
-/*div.body table tr td:first-child {width:300px;}*/
-/*
-div.outer-detail-pane {width:100%}
-div.list-body {width:100%}
-div.datatable {width:100%}
-*/
-#main-toolbar {border:1px solid #888;background-color:#888;height:20px;margin-bottom:10px;}
-html * {
-    font-size: 11px;
-    margin: 0;
-}
 span.spp-link {font-weight:bold;color:#666;}
 
-th.cmis-list-icon {width:20px;}
-th.cmis-list-actions {width:235px;}
+/* fix jquery ui dialog padding */
+.ajaxdialogform { margin-left:10px;}
+div.dialog-message { font-size:14px;}

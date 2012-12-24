@@ -1,14 +1,17 @@
 package org.open_t.cmis
 import org.open_t.cmis.*;
+import org.open_t.cmis.services.*;
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.apache.chemistry.opencmis.commons.enums.BaseTypeId
+import org.apache.chemistry.opencmis.client.api.OperationContext
+
 import java.net.*
 
 class CmisBrowseController {
 
-	def cmisService
+	CmisService cmisService
 	def restService
-	
 	
 	def onlineEditMimetypes =
 	[
@@ -32,19 +35,17 @@ class CmisBrowseController {
     def index = {redirect(action:browse)}
 	
 	
-    def browse = {
-
-			def documents=[]
-           def cmisEntry
+	def browse = {
+		
+		def documents=[]
+		def cmisEntry
 			if (params.objectId=="checkedout") {
 				documents=cmisService.listCheckedOut()
 				cmisEntry=null
-			} else {
-			
+			} else {			
 				if (!params.objectId)								   
-					params.objectId=cmisService.repositories.rootFolderId
-				cmisEntry=cmisService.getEntry(params.objectId)
-				documents=cmisService.listDescendants(cmisEntry)
+					cmisEntry=cmisService.rootFolder					
+					documents=cmisEntry.children					
 			}
 			[documents:documents,cmisEntry:cmisEntry]		
     }
@@ -55,38 +56,41 @@ class CmisBrowseController {
 			def cmisEntry
 			def theParentPath
 			if (!params.id || params.id=="") {				
-				params.id=cmisService.repositories.rootFolderId
-				if (params.rootNode && params.rootNode.length()>0) {
-					cmisEntry=cmisService.getEntry(params.rootNode)
+				params.id=cmisService.cmisSession.rootFolder.id
+				if (params.rootNode && params.rootNode.length()>0) {					
+					cmisEntry=cmisService.cmisSession.getObject(params.rootNode)
 				} else {
-					cmisEntry=cmisService.getEntry(cmisService.repositories.rootFolderId)
+					cmisEntry=cmisService.cmisSession.rootFolder
 				}
 
-				CmisEntry checkedOutEntry= cmisService.getEntry("checkedout")
-				theParentPath=checkedOutEntry?.path
+				//misEntry checkedOutEntry= cmisService.getObject("checkedout")
+				//theParentPath=checkedOutEntry?.path
 				
-				documents=[cmisEntry,checkedOutEntry]	            
+				//documents=[cmisEntry,checkedOutEntry]
+				documents=[cmisEntry]
 			} else {
-				cmisEntry=cmisService.getEntry(params.id)
-				documents=cmisService.listDescendants(cmisEntry)
-				theParentPath=cmisEntry?.path
+				println "The id is ${params.id}"
+				def decodedid=URLDecoder.decode(params.id)
+				println "The decoded id is ${decodedid}"
+				cmisEntry=cmisService.getObject(decodedid)
+				documents=cmisService.listChildren(cmisEntry)
+				theParentPath=cmisEntry?.path				
 			}
 			
 			def doclist = { documents.collect { theDocument -> 
 			
-					def nodeRel = (theDocument.prop.baseTypeId=='cmis:folder') ? 'folder' : 'default'
+					def nodeRel = (theDocument.getProperty("baseTypeId")=='cmis:folder') ? 'folder' : 'default'
 					
 					def nodeClass="jstree-${nodeRel} ${theDocument.cssClassName}-16"
-					def nodeState =(theDocument.prop.baseTypeId=='cmis:folder') ? 'closed' : ''
-					//if(theDocument.title=='Company Home') {
-				//		nodeState='open'
-				//	}
+					
+					def nodeState =theDocument.isFolder ? 'closed' : ''
+					
 						
 					[
                     //attr: [id: theDocument.objectId,title:theDocument.title,class: nodeClass,rel:nodeRel],
-                    attr: [id: URLEncoder.encode(theDocument.uuid),title:theDocument.title,class: nodeClass,rel:nodeRel,parentPath:theParentPath],
-                 	data: theDocument.title,
-					title: theDocument.title,
+                    attr: [id: theDocument.id,title:theDocument.prop.'cmis:name',class: nodeClass,rel:nodeRel,parentPath:theParentPath],
+                 	data: theDocument.prop.name,
+					title: theDocument.prop.name,
 					state:nodeState,
 					
 					rel:nodeRel,
@@ -97,8 +101,8 @@ class CmisBrowseController {
 	}
 	
 	def detail = {
-			def cmisEntry=cmisService.getEntry(params.objectId)
-			if (cmisEntry.prop.baseTypeId=='cmis:folder') {
+			def cmisEntry=cmisService.getObject(params.objectId)
+			if (cmisEntry.isFolder) {
 				render(view:'list',model:list(params:params))
 			} else {
 				render(view:'document',model:document(params:params))
@@ -110,7 +114,7 @@ class CmisBrowseController {
 	 def list = {
 			if (!params.objectId)
 				params.objectId=cmisService.repositories.rootFolderId					
-			def cmisEntry=cmisService.getEntry(params.objectId)					
+			def cmisEntry=cmisService.getObject(params.objectId)					
 			def documents=cmisService.listDescendants(cmisEntry)
 			[documents:documents,cmisEntry:cmisEntry]
 	 
@@ -125,6 +129,15 @@ class CmisBrowseController {
 		 }		 
 		 return """<span class="action-${name} action list-action simpleDialog" rel="${href}" title="${title}" ${onclick} >&nbsp;</span>""" 
 	 }
+	 
+	 def createDialogAction = {name,id,nosubmit=false ->
+		 def href=g.createLink(controller:"cmisDocument",action:name,params:[objectId:id])		 
+		 def title=g.message(code:"cmisBrowse.jsonlist.${name}.help",default:'')
+		 def onclick="""onclick="dialog.formDialog('null','cmisDocument', {'dialogname':'${name}','nosubmit':${nosubmit}},{'getObjectId':'${id}'} ,null)" """
+		 		 
+		 return """<span class="action-${name} action list-action" title="${title}" ${onclick} >&nbsp;</span>""" 
+	 }
+	
 	 
 	 
 	 /*
@@ -148,79 +161,87 @@ class CmisBrowseController {
 		 cmisParams.orderBy="${orderName}%20${sortDir}"
 		 
 		 cmisParams.maxItems=params.iDisplayLength
-		 cmisParams.skipCount=params.iDisplayStart
+		 // TODO skipCount is interpreted as the page number by Alfresco !?
+		 cmisParams.skipCount=new Integer(params.iDisplayStart)/new Integer(params.iDisplayLength)
+		 int skipCount=new Integer(params.iDisplayStart)/new Integer(params.iDisplayLength)
 		 log.debug ("objectId:${params.objectId}")
-	     def cmisEntry=cmisService.getEntry(params.objectId)
-		 def parentPath=cmisEntry.prop.path
-		 log.debug ("cmisEntry:${cmisEntry}")
-		 def res=cmisService.listChildren(cmisEntry,cmisParams)   
-		 def documents=res.documents
-		 def response=res.response	
+	     def cmisObject=cmisService.getObject(params.objectId)
+		 def parentPath=cmisObject.prop.path
+		 log.debug ("cmisObject:${cmisObject}")
+   		 
+		 def documents=cmisService.listChildren(cmisObject,[orderBy:orderName,sortDir:sortDir,skipCount:skipCount,maxItemsPerPage:params.iDisplayLength])
 		 
-		 def iTotalRecords=response.numItems.text()
-		 def iTotalDisplayRecords=response.numItems.text()
+		 def response	
+		 
+		 def iTotalRecords=documents.totalNumItems
+		 
+
+		 def iTotalDisplayRecords=documents.totalNumItems
 		 
 		 
 		 def aaData=[]
+		 
 		 documents.each { doc ->
-			 def id=doc.prop.objectId
+			 def id=doc.id
 			 def icon
-			 if (doc.isDocument()) {
-			  icon="""<span href='#' class='mime-16 ${doc.cssClassName}-16'>&nbsp;</span>"""
+			 def namespan
+			 
+			 if (doc.isDocument) {
+				 icon="""<span class='mime-16 ${doc.cssClassName}-16'>&nbsp;</span>"""
+				 namespan="""<span class='mime-16 ${doc.cssClassName}'>${doc.name}</span>"""
 			 } else {
-			  icon="""<span href='#' onclick="gotoFolder('${doc.prop.objectId}');event.returnValue=false; return false;" class='mime-16 ${doc.cssClassName}-16'>&nbsp;</span>"""
+			   	icon="""<span onclick="cmis.gotoFolder('${doc.id}');event.returnValue=false; return false;" class='mime-16 ${doc.cssClassName}-16 clickable-cell'>&nbsp;</span>"""
+				namespan="""<span onclick="cmis.gotoFolder('${doc.id}');event.returnValue=false; return false;" class='${doc.cssClassName} clickable-cell'>${doc.name}</span>"""
 			 }
-			 //def actions=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.showproperties')}","class":"action-show action list-action simpleDialog",controller:"cmisDocument",action:"props", params:[objectId:doc.prop.objectId])
-			 def actions=createAction("props",id)
+			 
+			 def actions=createDialogAction("props",id,true)
+			 
+
 			 if (params.readOnly!="true") {
-				 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.editproperties')}","class":"action-edit action list-action simpleDialog",controller:"cmisDocument",action:"edit", params:[objectId:doc.prop.objectId])
-				 actions+=createAction("edit",id)
+				 actions+=createDialogAction("edit",id)
 			 }
-			 if (doc.isDocument()) {
-				 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.showhistory')}","class":"action-history action list-action simpleDialog",controller:"cmisDocument",action:"history", params:[objectId:doc.prop.objectId])
-				 actions+=createAction("history",id)
-				 actions+=link(title:"${message(code:'cmis.list.download.tooltip')}","class":"action-download action list-action simpleDialog",controller:"cmisDocument",action:"download", params:[objectId:doc.prop.objectId])
-				 //actions+=createAction("download",id)
+			 
+			 if(doc.isDocument) {
+				 actions+=createDialogAction("history",id,true)
+				 actions+=link(title:"${message(code:'cmisBrowse.jsonlist.download.help')}","class":"action-download action list-action simpleDialog",controller:"cmisDocument",action:"download", params:[objectId:doc.id])
+				 				 
 				 if (params.readOnly!="true") {
-					 //actions+=link(onclick:"uploadDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.upload')}","class":"action-upload action list-action simpleDialog",controller:"cmisDocument",action:"updatedocument", params:[objectId:doc.prop.objectId])
-					 actions+=createAction("updatedocument",id,"OpenT.dialogs.uploadDialog")
-					 def spp=cmisService.getSppPath(doc,parentPath) 
-					 if (spp.path){
-						 actions+="""<span href='${spp.path}' title='${message(code:'cmis.actions.editonlinespp.tooltip')}' sppAppProgId='${spp.appProgId}' class='action-edit-online list-action action spp-link'>&nbsp;</span>"""
+					 actions+=createDialogAction("updatedocument",id)
+					 def spp=cmisService.getSpp(doc,parentPath) 
+					 if (spp?.path){
+						 actions+="""<span href='${spp.path}' title='${message(code:'cmisBrowse.jsonlist.editonlinespp.help')}' sppAppProgId='${spp.appProgId}' class='action-edit-online list-action action spp-link'>&nbsp;</span>"""
 					 }
 					 def webdavPath=cmisService.getWebdavPath(doc,parentPath)
-					 if(webdavPath) {
-						 actions+="""<a href='${webdavPath}' title='${message(code:'cmis.actions.editonlinewebdav.tooltip')}' class='action-edit-online list-action action' target='_blank'>&nbsp;</a>"""						 
-					 }
 					 
+					 if(webdavPath) {
+						 actions+="""<a href='${webdavPath}' title='${message(code:'cmisBrowse.jsonlist.editonlinewebdav.help')}' class='action-edit-online list-action action' target='_blank'>&nbsp;</a>"""						 
+					 }					 
 				 }
+				 
 				 if(params.cico!="false") {
-					 if (doc.isPwc()) {
-						 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.checkin')}","class":"action-checkin action list-action simpleDialog",controller:"cmisDocument",action:"checkin", params:[objectId:doc.prop.objectId])
-						 actions+=createAction("checkin",id)
+					 if (doc.isPwc) {
+						 actions+=createDialogAction("checkin",id)
+						 actions+=createDialogAction("cancelcheckout",id)
 					 } else {
-					 if (!doc.isCheckedOut()){
-						 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.checkout')}","class":"action-checkout action list-action simpleDialog",controller:"cmisDocument",action:"checkout", params:[objectId:doc.prop.objectId])
-						 actions+=createAction("checkout",id)
+					 if (!doc.isCheckedOut){
+						 actions+=createDialogAction("checkout",id)
+						 
 					 }
 					 }
 				 }
+				 
 			
 			 }
+			 
 			 if (params.readOnly!="true") {
-				 //actions+=link(onclick:"simpleDialog(this.href);event.returnValue=false; return false;",title:"${message(code:'cmis.list.delete')}","class":"action-delete action list-action simpleDialog",controller:"cmisDocument",action:"delete", params:[objectId:doc.prop.objectId])
-				 actions+=createAction("delete",id)
+
+				 actions+=createDialogAction("delete",id)
 			 }
 				 
-/*			 def actions="""<g:link onclick="simpleDialog(this.href);return false;"
-							title="${message(code:'cmis.list.showproperties')}" class="action-show action list-action simpleDialog"
-							controller="cmisDocument" action="props" params="[objectId:${doc.prop.objectId}]">&nbsp;
-							</g:link>			 
-			 			"""*/
-			 //def actions="${action}"
+
 			 actions=actions.replace('"', '\"')						 
-			 def inLine=[icon,doc.name,actions]			 
-			 def aaLine=[inLine]
+			 def aaLine=["DT_RowClass":"clickable-row","0":icon,"1":namespan,"2":actions]			 
+
 			 aaData+=(aaLine)
 		 }
 
@@ -233,31 +254,15 @@ class CmisBrowseController {
 	 
 	 
 	 
-	// Shows document defails in sidepane
+	// Shows document details in sidepane
 	def document = {
 		log.debug "params:${params}"
+		def cmisObject=cmisService.getObject(params.objectId)
+		
+		def spp=cmisService.getSpp(cmisObject)
+		def webdavPath=cmisService.getWebdavPath(cmisObject)
 
-		def cmisEntry=cmisService.getEntry(params.objectId)
-		
-		def sppPath=null
-		def sppBasePath=ConfigurationHolder.config.cmis.sppBasePath
-		
-		def sppAppProgId=onlineEditMimetypes[cmisEntry.prop.contentStreamMimeType]
-		
-		if (params.parentPath && sppBasePath && sppAppProgId) {
-			if (params.parentPath.startsWith("/Sites/")) {
-				def path=params.parentPath.replace("/Sites/","/")
-				sppPath=sppBasePath+path+"/"+cmisEntry.name
-			}			
-		}
-		
-		def webdavPath=null
-		def webdavBasePath=ConfigurationHolder.config.cmis.webdavBasePath
-		if (params.parentPath && webdavBasePath) {
-			webdavPath=webdavBasePath+params.parentPath+"/"+cmisEntry.name
-		}
-
-			[entry:cmisEntry,params:params,sppPath:sppPath,sppAppProgId:sppAppProgId,webdavPath:webdavPath]
+		[entry:cmisObject,cmisObject:cmisObject,params:params,sppPath:spp.path,sppAppProgId:spp.appProgId,webdavPath:webdavPath]
 	}
 	
 	def documentlist = {
@@ -267,20 +272,34 @@ class CmisBrowseController {
 	def jsonparent =  {		
 		if (!params.objectId)
 		  params.objectId=cmisService.repositories.rootFolderId
-		def entry=cmisService.getEntry(params.objectId)
-				
-		def response=restService.get(entry.link.up)
-		def parentEntry=new CmisEntry(response)
-		def res=[success:true,objectId:parentEntry.uuid]
+		def folder=cmisService.getObject(params.objectId)
+
+		def res=[success:true,objectId:folder.getFolderParent().id]
 		render res as JSON
 	}
 	
 	def jsonEntry =  {
-		if (!params.objectId)
-		  params.objectId=cmisService.repositories.rootFolderId
-		def entry=cmisService.getEntry(params.objectId)
+		def entry
+		if (!params.objectId) {
+		  //params.objectId=cmisService.repositories.rootFolderId
+		  entry=cmisService.getObjectByPath("/")
+		} else {
+			entry=cmisService.getObject(params.objectId)
+		}
 		
-		def res=[success:true,properties:entry.properties,links:entry.links]
+		def res=[success:true,objectId:entry.id,id:entry.id,properties:entry.props,isDocument:entry.isDocument,isFolder:entry.isFolder]
 		render res as JSON
-	}	
+	}
+	
+	def jsonFolderByPath =  {
+		def entry
+		if (!params.path) {
+			entry=cmisService.repositories.rootFolder
+		} else {
+			entry=cmisService.getObjectByPath(params.path)
+		}
+		def res=[success:true,objectId:entry.id,id:entry.id,properties:entry.props,isDocument:entry.isDocument,isFolder:entry.isFolder]
+		render res as JSON
+	}
+
 }

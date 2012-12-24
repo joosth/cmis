@@ -1,6 +1,7 @@
 package org.open_t.cmis
 import org.open_t.cmis.*;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.open_t.cmis.authentication.*
 
 class CmisAuthenticateController {
 
@@ -16,8 +17,8 @@ class CmisAuthenticateController {
     def loginsubmit = {
 		cmisService.init(ConfigurationHolder.config.cmis.url,params.username,params.password)
 		session["user"]=params.username
-		flash.message=message(code:'cmisauthenticate.loginsubmit.message',default:"User {0} logged in.",args:[session["user"]])
-		redirect(controller:'cmisBrowse',action:'browse')
+		flash.message=message(code:'cmisAuthenticate.loginsubmit.message',default:"User {0} logged in.",args:[session["user"]])
+		redirect(controller:'cmisBrowse',action:'documentlist')
     }
 	
 	

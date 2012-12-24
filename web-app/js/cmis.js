@@ -1,6 +1,6 @@
 /*
  * Grails CMIS Plugin
- * Copyright 2010-2011, Open-T B.V., and individual contributors as indicated
+ * Copyright 2010-2013, Open-T B.V., and individual contributors as indicated
  * by the @author tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -31,16 +31,32 @@ cmis.registerRefreshCallback =function registerRefreshCallback (callbackFunction
 }
 */
 cmis.refresh = function refresh (){
+	window.location.hash=cmis.currentFolderId;
 	$(".cmis-events").trigger("refresh");
 }
 
-function gotoFolder(folderId) {
-	cmis.parentFolderId=cmis.currentFolderId;
+cmis.gotoFolder = function gotoFolder(folderId) {
+	//cmis.parentFolderId=cmis.currentFolderId;
 	cmis.currentFolderId=folderId;
-	$.getJSON(cmis.baseUrl+"/cmisBrowse/jsonEntry?objectId="+cmis.currentFolderId, function (json) {
+	$.getJSON(cmis.baseUrl+'/cmisBrowse/jsonEntry?objectId='+cmis.currentFolderId, function (json) {
 		cmis.currentFolderEntry=json;
-		//alert(cmis.currentFolderEntry.properties["cmis:path"]);
 		cmis.refresh();	
+	}).error(function(event, jqXHR, ajaxSettings, thrownError) { 
+		window.location.reload();
+	});
+	
+	
+
+}
+
+cmis.gotoPath = function gotoPath(path) {
+	var rootPath=cmis.rootFolder.properties["cmis:path"];
+	$.getJSON(cmis.baseUrl+"/cmisBrowse/jsonFolderByPath?path="+rootPath+path, function (json) {
+		cmis.currentFolderEntry=json;
+		cmis.currentFolderId=json.id;
+		cmis.refresh();	
+	}).error(function(event, jqXHR, ajaxSettings, thrownError) { 
+		window.location.reload();
 	});
 }
 
@@ -54,31 +70,49 @@ cmis.gotoObject=function gotoObject(objectId) {
 			cmis.currentFolderEntry=cmis.currentObjectEntry;
 		}
 		cmis.refresh();	
+	}).error(function(event, jqXHR, ajaxSettings, thrownError) { 
+		window.location.reload();
 	});
 }
 
 
-function gotoParentFolder() {
+cmis.gotoParentFolder = function gotoParentFolder() {
 	if (cmis.currentFolderId!=cmis.rootFolderId) {
 		var res=$.getJSON(cmis.baseUrl+"/cmisBrowse/jsonparent?objectId="+cmis.currentFolderId, function (json) {
-			gotoFolder(json.objectId);
+			cmis.gotoFolder(json.objectId);
+		}).error(function(event, jqXHR, ajaxSettings, thrownError) { 
+			window.location.reload();
 		});
 	}
-
 }
 
-function gotoHomeFolder() {
-	gotoFolder(cmis.rootFolderId);
+cmis.gotoHomeFolder = function gotoHomeFolder() {
+	cmis.gotoFolder(cmis.rootFolderId);
 }
 
-function cmisReload() {
-    $("span.help").cluetip({
-		splitTitle: '|',  
-		cluezIndex: 2000
-	});
+cmis.reload = function reload() {
+    $("span.help").tooltip({});		
+    $("li.menu-item a").tooltip({});
             	          
 }
+
+
 	
 $(function() {
-	cmisReload()	
+	cmis.reload()
+	
+	// This allows us to click on a clickable row and execute the onclick handler that's in the span element of the first column
+	$(".clickable-row td").live("click", function() {
+		var clickable = $(this).find('span.clickable-cell:first')[0]
+		if (clickable) {
+			clickable.click()
+		}
+	});
+	if (cmis.restore) {
+		if (window.location.hash!="") {
+			var objectId=window.location.hash.substring(1);		
+			cmis.gotoObject(objectId);		
+		}
+	}
+
 });

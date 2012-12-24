@@ -18,7 +18,9 @@ cmis.simpleAlert=function simpleAlert(message) {
          }
 	 	},
          open: function(event, ui) {
-        	var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	//var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	var zindex=parseInt($(this.parentNode).css('z-index'));
+
         	zindex=zindex+1
       		$("span.help").cluetip({
       			splitTitle: '|'  ,
@@ -75,7 +77,15 @@ cmis.simpleDialog=function simpleDialog(dialogUrl) {
        	},
         open: function(event, ui) {
         	
-        	var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	var zindex=parseInt($(this.parentNode).css('z-index'));
+
+            //$(this).find(".help").cluetip({
+              //      splitTitle: '|',
+                //    cluezIndex: parentZIndex+1
+            //});
+
+        	
+        	//var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
         	zindex=zindex+1
        		$("span.help").cluetip({
        			splitTitle: '|' ,
@@ -123,7 +133,9 @@ cmis.uploadDialog=function uploadDialog(dialogUrl) {
       	},
        open: function(event, ui) {
     	    
-    	    var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+    	    //var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	var zindex=parseInt($(this.parentNode).css('z-index'));
+
         	zindex=zindex+1
       		$("span.help").cluetip({
       			splitTitle: '|',

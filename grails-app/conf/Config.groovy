@@ -4,9 +4,9 @@ log4j = {
     // Example of changing the log pattern for the default console
     // appender:
     //
-    //appenders {
-    //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
-    //}
+    appenders {
+        console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
+    }
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -18,25 +18,38 @@ log4j = {
            'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
            'org.springframework',
            'org.hibernate',
-           'net.sf.ehcache.hibernate'
+           'net.sf.ehcache.hibernate'		   
 
     warn   'org.mortbay.log'
-	debug  'grails.app'
+	warn   'grails.app'
+	debug  'org.open_t'
+	
+	
+	root {
+		info 'infoLog','warnLog','errorLog','custom', stdout
+		error()
+		additivity = true
+	}
 }
 
 cmis {
 	enabled=true
 	
-	url="http://localhost:8080/alfresco/service/cmis"
-//	url="http://cmis.alfresco.com:80/service/cmis"
-	//url="http://mercury:8080/alfresco/service/cmis"
+	url="http://localhost:8080/alfresco/wcservice/cmis"
+
 	
 	username="wfp"
 	password="wfp"
 	// Base path for SPP on-line editing
-	sppBasePath="http://mercury:7070/alfresco"
+	sppBasePath="http://localhost:7070/alfresco"
 	// Base path for WebDAV online editing
-	webdavBasePath="http://mercury:8080/alfresco/webdav"
+	webdavBasePath="http://localhost:8080/alfresco/webdav"
+	authenticationClass="org.open_t.cmis.authentication.ExternalAuthenticationProvider"
+	authenticationParameters = ['remote-username-header':"X-Alfresco-Remote-User",'shared-secret-name':"X-Zaaksysteem-Shared-Secret",'shared-secret-value':"CHANGETHIS"]
 }
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
+
+dialog {
+	bootstrap=true
+}

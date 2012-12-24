@@ -3,10 +3,12 @@ import java.io.File;
 import java.io.InputStream;
 
 import java.io.Reader;
+import org.apache.chemistry.opencmis.client.api.CmisObject
 import org.open_t.cmis.*;
 import groovy.xml.StreamingMarkupBuilder
 import java.net.URLEncoder;
 import grails.converters.*
+import org.open_t.cmis.command.*
 
 class CmisDocumentController {
 	def cmisService
@@ -20,201 +22,232 @@ class CmisDocumentController {
 			} else {
 			}
 	}
-	
-	
-	
-    def index = {redirect(action:list)}
-    // Show list of files in folder, if no objectId given use the root folder
-    def list = {		
-		if (!params.objectId)		
-			params.objectId=cmisService.repositories.rootFolderId
-		def cmisEntry=cmisService.getEntry(params.objectId)
-		def documents=cmisService.listDescendants(cmisEntry)
-		[documents:documents,cmisEntry:cmisEntry]
-    }
-	
-	// List checked out documents
-	def checkedout = {
-		[documents:cmisService.listCheckedOut()]
-	}
-	
+		
 	// Show document history
     def history = {					
-		def cmisEntry=cmisService.getEntry(params.objectId)					
-		def documents=cmisService.listHistory(cmisEntry)
-		[documents:documents,cmisEntry:cmisEntry]
+		//def cmisObject=cmisService.getObject(params.getObjectId)					
+		def documents=cmisService.listHistory(params.getObjectId)
+		[documents:documents]
     }
 	
-	
-	// Show document
-	def show = {
-		log.debug "PARAMS:${params}"
-		[entry:cmisService.getEntry(params.objectId)]
-	}
-
 	// Edit document properties
 	def edit = {
-			[entry:cmisService.getEntry(params.objectId),params:params]
+		def cmisObject=cmisService.getObject(params.getObjectId)
+		def cmisCommandObject = new CmisCommandObject([objectId:cmisObject.id,name:cmisObject.prop.name,description:cmisObject.prop.'cm:description'])		
+		[cmisCommandObject:cmisCommandObject]
 	}
 	
 	// Update document properties
-	def update = {
-		def cmisEntry=cmisService.getEntry(params.objectId)
+	def submitedit = { CmisCommandObject cmisCommandObject ->		
+		CmisObject cmisObject=cmisService.getObject(cmisCommandObject.objectId)
 		
-		cmisEntry.title=params.title
-		cmisEntry.summary=params.summary
-		
-		cmisService.update(cmisEntry)
-
-		//def theRefreshNodes=[ "${URLEncoder.encode(params.objectId)}" ]
-		// ugly workaround until we figure out why the above is wrong
+		// ugly ... 
 		def theRefreshNodes=[ "ALL" ]
-		//render(contentType:"text/json") {
-		def result = [
-					'success': true,
-					message:message(code:'cmisdocument.update.message',default:"Document {0} updated",args:[cmisEntry.title]),					
-					refreshNodes:theRefreshNodes
-				]
-		def res=[result:result]
-		render res as JSON	
-		//}
+		
+		def success=false
+		def msg=""
+		try {
+			cmisObject.updateProperties(['cmis:name':cmisCommandObject.name,'cm:description':cmisCommandObject.description])		
+			success=true
+			msg=message(code:'cmisDocument.submitedit.message',default:"Document {0} updated",args:[cmisCommandObject.name])
+		} catch (Exception e) {
+			success=false
+			msg=message(code:'cmisDocument.submitedit.errormessage',default:"Error while updating document {0}: {1}",args:[cmisCommandObject.name,e.message])
+		}
+		
+		render(contentType:"text/json") {
+			result(
+					'success': success,
+					message:msg,
+					refreshNodes:["ALL"]
+				)
+		}
+		
 	}
 
 	
 	// Show object properties
 	def props = {
-			[entry:cmisService.getEntry(params.objectId),params:params]
+			[cmisObject:cmisService.getObject(params.getObjectId),params:params]
 	}
-	
+		
 	// Delete object dialog
 	def delete = {
-		[entry:cmisService.getEntry(params.objectId),params:params]
+		[entry:cmisService.getObject(params.getObjectId),params:params]
 	}
 	// Subit delete object dialog
-	def deletesubmit = {
-			def cmisEntry=cmisService.getEntry(params.objectId)
-			restService.delete(cmisEntry.link.self);
-			render(contentType:"text/json") {
-				result(
-						'success': true,
-						message:message(code:'cmisdocument.deletesubmit.message',default:"Document {0} deleted",args:[cmisEntry.title]),
-						refreshNodes:["ALL"]						
-					)
-			}
+	def submitdelete = {
+		def cmisObject=cmisService.getObject(params.getObjectId)
+		def name=cmisObject.prop.name
+		def success=false
+		def msg=""
+		try {
+			cmisObject.delete()
+			success=true
+			msg=message(code:'cmisDocument.submitdelete.message',default:"Document {0} deleted",args:[name])
+		} catch (Exception e) {
+			success=false
+			msg=message(code:'cmisDocument.submitdelete.errormessage',default:"Error while deleting document {0}: {1}",args:[name,e.message])			
 		}
+		
+		render(contentType:"text/json") {
+			result(
+					'success': success,
+					message:msg,
+					refreshNodes:["ALL"]						
+				)
+		}
+		
+		
+	}
 	
 	// Cancel checkout dialog
 	def cancelcheckout = {
-			[entry:cmisService.getEntry(params.objectId),params:params]
+		def cmisObject=cmisService.getObject(params.getObjectId)
+		def cmisCommandObject = new CmisCommandObject([objectId:cmisObject.id,name:cmisObject.prop.name,description:cmisObject.prop.'cm:description'])		
+		[cmisCommandObject:cmisCommandObject]
 	}
 	
 	// Submit cancel checkout
-	def cancelcheckoutsubmit = {
-		def cmisEntry=cmisService.getEntry(params.objectId)
-		restService.delete(cmisEntry.link.self);
+	def submitcancelcheckout = { CmisCommandObject cmisCommandObject ->
+		def cmisObject=cmisService.getObject(params.objectId)
+		def msg=""
+		def success=true
+		try {
+			cmisObject.cancelCheckOut()
+			msg=message(code:'cmisDocument.submitcancelcheckout.message',default:"Checkout of {0} cancelled",args:[cmisObject.prop.name])
+		} catch (Exception e) {
+			success=false
+			msg=message(code:'cmisDocument.submitcancelcheckout.errormessage',default:"Error while cancelling checkout of document {0}: {1}",args:[cmisCommandObject.name,e.message])
+		}
 		render(contentType:"text/json") {
 			result(
-					'success': true,
-					message:message(code:'cmisdocument.cancelcheckoutsubmit.message',default:"Checkout of {0} cancelled",args:[cmisEntry.title])
+					'success': success,
+					message:msg,
+					refreshNodes:["ALL"]
 					
 				)
 		}
 	}
 	
 	
-	
 	// Check out document dialog
 	def checkout = {
-		[entry:cmisService.getEntry(params.objectId),params:params]
+		def cmisObject=cmisService.getObject(params.getObjectId)
+		def cmisCommandObject = new CmisCommandObject([objectId:cmisObject.objectId,name:cmisObject.prop.name,description:cmisObject.prop.description])
+		[cmisCommandObject:cmisCommandObject]		
 	}
 	
 	// Check out dialog submit
-	def checkoutsubmit = {
-			
-			def cmisEntry=cmisService.getEntry(params.objectId)			
-			def response=cmisService.checkout(params.objectId)			
-			render(contentType:"text/json") {
-				result(
-						'success': true,
-						message:message(code:'cmisdocument.checkoutsubmit.message',default:"Document {0} checked out",args:[cmisEntry.title])						
-					)
-			}
-		}
-	
-	def workingcopy = {
-		def pwcEntry=cmisService.workingCopy(params.objectId)
-		render (view:'show',model:[entry:pwcEntry])
-	}
-	// Check in dialog
-	def checkin = {
-		[entry:cmisService.getEntry(params.objectId)]
-	}
-	
-	// Submit check in dialog
-	def checkinsubmit = {		
-		boolean major = params.major ? true : false
-		def entry=cmisService.getEntry(params.objectId)
+	def submitcheckout = { CmisCommandObject cmisCommandObject ->			
+		def cmisObject=cmisService.getObject(cmisCommandObject.objectId)
 		
-		def response=cmisService.checkin(params.objectId,params.checkinComment,major)
+		def msg=""
+		def success=true
+		try {
+			cmisService.checkout(cmisCommandObject.objectId)
+			msg=message(code:'cmisDocument.submitcheckout.message',default:"Document {0} checked out",args:[cmisObject.prop.name])
+		} catch (Exception e) {
+			success=false
+			msg=message(code:'cmisDocument.submitcheckout.errormessage',default:"Error while checking out document {0}: {1}",args:[cmisCommandObject.name,e.message])
+		}
 		
 		render(contentType:"text/json") {
 			result(
-					'success': true,
-					message:message(code:'cmisdocument.checkinsubmit.message',default:"Document {0} checked in",args:[cmisEntry.title])
+					'success': success,
+					message:msg,
+					refreshNodes:["ALL"]
+					
 				)
 		}
+		
+	}
+	
 
+	// Check in dialog
+	def checkin = {  
+		def checkinCommandObject = new CheckinCommandObject([objectId:params.getObjectId])		
+		[checkinCommandObject:checkinCommandObject]
+	}
+	
+	// Submit check in dialog
+	def submitcheckin = { CheckinCommandObject checkinCommandObject ->
+		def name=cmisService.getObject(checkinCommandObject.objectId).prop.name					
+		
+		def msg=""
+		def success=true
+		try {
+			def cmisObjectId=cmisService.checkin(checkinCommandObject.objectId,checkinCommandObject.comment,checkinCommandObject.major)
+			msg=message(code:'cmisDocument.submitcheckin.message',default:"Document {0} checked in",args:[name])
+		} catch (Exception e) {
+			success=false
+			msg=message(code:'cmisDocument.submitcheckin.errormessage',default:"Error while checking in document {0}: {1}",args:[name,e.message])
+		}
+		
+		render(contentType:"text/json") {
+			result(
+					'success': success,
+					message:msg,
+					refreshNodes:["ALL"]
+					
+				)
+		}
+		
 	}
 	
 	// Create new folder dialog
 	def newfolder= {
-			[parentId:params.parentId]
+		[newFolderCommandObject:new NewFolderCommandObject ([parentId:params.getParentId])]
 	}
 	
 	// Submit new folder dialog
-	def newfoldersubmit = {	
-		def cmisresult=cmisService.createFolder(params.parentId,params.name,params.summary)
+	def submitnewfolder = { NewFolderCommandObject newFolderCommandObject ->	
+		def success=true
+		def msgs=[]
+		try {			
+			cmisService.createFolder(newFolderCommandObject.parentId,newFolderCommandObject.name,newFolderCommandObject.description)
+			msgs+=message(code:'cmisDocument.submitnewfolder.message',default:"{0} created",args:[newFolderCommandObject.name])
+		} catch (Exception e ) {
+			msgs+=message(code:'cmisDocument.submitnewfolder.errormessage',default:"Creating {0} failed: {1}",args:[newFolderCommandObject.name,e.message])
+			success=false
+		}
+		String msg=msgs.join(", ")
+		
 		render(contentType:"text/json") {
 			result(
-					success: true,
-					message:message(code:'cmisdocument.newfoldersubmit.message',default:"Folder {0} created",args:[params.name]),
+					success: success,
+					message:msg,
 					refreshNodes:["ALL"]
 				)
 		}
 	}
 	
 	def newdocument= {
-			[parentId:params.parentId]
+		session['files']=[:]		
+		def cmisCommandObject= new CmisCommandObject([objectId:params.getParentId])
+		[cmisCommandObject:cmisCommandObject]		
 	}
 	
-	def newdocumentsubmit = {
-		String msg=""
+	def submitnewdocument = { CmisCommandObject cmisCommandObject ->
+		def msgs=[]
 		def success=true
-		if (params.filename.class.name=="java.lang.String") {
-			if (cmisService.createDocument(params.parentId,session['files'][params.filename],params.filename,params.filename)) {
-					msg+=message(code:'cmisdocument.newdocumentsubmit.created',default:"{0} created",args:[params.filename])
-					
-			} else {
-				msg+=message(code:'cmisdocument.newdocumentsubmit.failed',default:"creating {0} failed",args:[params.filename])
+		
+		def filename=session['files'].each { filename,tmpFilename ->
+			try {
+				cmisService.createDocument(cmisCommandObject.objectId,tmpFilename,filename)
+				msgs+=message(code:'cmisDocument.submitnewdocument.message',default:"{0} created",args:[filename])
+			} catch (Exception e ) {
+				msgs+=message(code:'cmisDocument.submitnewdocument.errormessage',default:"An error occurred while creating {0}: {1}",args:[filename,e.message])
 				success=false
-			}
-			
-		} else {		
-			params.filename.each { filename ->
-			if(cmisService.createDocument(params.parentId,session['files'][filename],filename,filename)) {
-				msg+="<br />"+message(code:'cmisdocument.newdocumentsubmit.created',default:"{0} created",args:[filename]) 				
-			} else {
-				msg+="<br />"+message(code:'cmisdocument.newdocumentsubmit.failed',default:"creating {0} failed",args:[filename])
-				
-				success=false
-			}
+			}					
 		}
-		}
-		def theRefreshNodes=[URLEncoder.encode(params.parentId)]
+		String msg=msgs.join(", ")
+
+		def theRefreshNodes=[URLEncoder.encode(cmisCommandObject.objectId)]
 		
 		def result =[
 					'success': success,
-					'message':"${msg}",
+					'message':msg,
 					refreshNodes:theRefreshNodes
 				]
 		
@@ -227,34 +260,43 @@ class CmisDocumentController {
 	
 	def updatedocument= {
 			session['files']=[:]
-			[entry:cmisService.getEntry(params.objectId),params:params]
+			[entry:cmisService.getObject(params.getObjectId),params:params]
 	}
 	
-	def updatedocumentsubmit = {
-			String message=""
+	def submitupdatedocument = {
+			String msg=""
 			def success=true
 			
-			def entry=cmisService.getEntry(params.objectId)
-			
+			def entry=cmisService.getObject(params.objectId)
+			println "files: ${session['files']}"
 			if (session['files'].size()!=1) {
-				message="You should upload exactly one file"
-				message=message(code:'cmisdocument.updatedocumentsubmit.onefile',default:"You should upload exactly one file")
+				msg="You should upload exactly one file"
+				msg=message(code:'cmisDocument.submitupdatedocument.onefileerrormessage',default:"You should upload exactly one file")
 				success=false
 			} else {
 				def filename=session['files'].each { filename,tmpFilename ->
-					def file = new File(tmpFilename)					
-					restService.writeFile("PUT",entry.link.'edit-media',file);
-					message=message(code:'cmisdocument.updatedocumentsubmit.updated',default:"{0} updated",args:[entry.title])
+					try {					
+						cmisService.updateDocument(params.objectId,tmpFilename)
+						msg=message(code:'cmisDocument.submitupdatedocument.message',default:"{0} updated",args:[entry.name])
+					} catch (Exception e) {
+						msg=message(code:'cmisDocument.submitupdatedocument.errormessage',default:"An error occurred while updating {0}: {1}",args:[entry.name,e.message])
+						success=false
+					}										
+					
 				}
 			}
 			
-			// TODO remove uploaded files from temp
+			// remove uploaded files from temp
+			session['files'].each { filename,tmpFilename ->
+				new File(tmpFilename).delete()	
+			}
+			session['files']=[:]
 						
 			def theRefreshNodes=[params.objectId]
 			render(contentType:"text/json") {
 				result(
 						'success': success,
-						message:"${message}",
+						message:"${msg}",
 						refreshNodes:theRefreshNodes
 					)
 			}
@@ -263,21 +305,18 @@ class CmisDocumentController {
 	
 	
 	def download = {
-		def cmisEntry=cmisService.getEntry(params.objectId)		
-		def downloadUrl=cmisEntry.link.enclosure
-		def fileName=cmisEntry.prop.contentStreamFileName		
-		restService.streamFile(downloadUrl,fileName,response,cmisEntry.prop.contentStreamMimeType)	
+		def cmisObject=cmisService.getObject(params.objectId)
+		cmisService.streamFile(cmisObject.contentStream,response)
 	}
 	
 	def thumbnail = {
-		def url=cmisService.objectUrlById(params.objectId)
-		def cmisEntry=cmisService.getEntry(params.objectId)
-				
-		def iconUrl=cmisEntry.link.alternate_thumbnail
-		if (iconUrl.length()>0) {			
-			restService.streamFile(iconUrl,"thumbnail.png",response)
-		} 
-		
+		def cmisObject=cmisService.getObject(params.objectId)
+		def thumbnailRendition=cmisObject.getRendition("cmis:thumbnail")
+		if (thumbnailRendition) {
+			cmisService.streamFile(thumbnailRendition.contentStream,response)
+		} else {
+			redirect(uri:"/static/css/theme/images/generic-file-32.png")
+		}		
 	}
 	
 	
@@ -320,16 +359,9 @@ class CmisDocumentController {
 			session["files"][filename]=tempFile.getAbsolutePath()
 			session["mimetypes"][filename]=mimetype
 	
-			//def res = [success : true]
-			//render res as JSON
-			//text/html
 			
 			render(contentType:"text/html",text:"{success:true}")
 			
-			
-			
-	}
-	
-	
+	}	
 	
 }

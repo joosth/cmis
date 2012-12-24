@@ -17,20 +17,25 @@
  * along with this program.  If not, see http://www.gnu.org/licenses
  */
 
-function refreshDatatable() {
-	initDatatable();
-	cmis.datatable.fnDraw(-1);
+cmis.refreshDatatable = function refreshDatatable() {
+	cmis.initDatatable();
+	cmis.datatable.fnDraw(false);	 
 }
 
-function initDatatable() {
+cmis.initDatatable = function initDatatable() {
 	  if (!cmis.datatable) {
 	
-	  $(".cmis-datatable").bind("refresh",refreshDatatable);
+	  $(".cmis-datatable").bind("refresh",cmis.refreshDatatable);
+	  
+	  
 	  $(".cmis-datatable").addClass("cmis-events");
-			
+	
+	  $(".cmis-datatable").bind("dialog-refresh",cmis.refreshDatatable);
+	  $(".cmis-datatable").addClass("dialog-events");
+	  
 		  
 	  cmis.datatable=$(".cmis-datatable").dataTable( {
-	  		"bProcessing": true,
+	  		"bProcessing": false,
 	  		"bServerSide": true,		
 	  		"sAjaxSource": cmis.baseUrl+"/cmisBrowse/jsonlist",
 	  		 "fnServerData": function ( sSource, aoData, fnCallback ) {
@@ -38,13 +43,28 @@ function initDatatable() {
 	             aoData.push( { "name":"readOnly","value": window.cmis.readOnly } );
 	             aoData.push( { "name":"cico","value": window.cmis.cico } );
 	             $.getJSON( sSource, aoData, function (json) { 
-	                 fnCallback(json)
+	                 fnCallback(json);
+	                 $("span.action,a.action").tooltip();	                 
 	             } );
 	  		 },
+	 		/*
+			    sDom explanation:
+			    l - Length changing
+			    f - Filtering input
+			    t - The table!
+			    i - Information
+			    p - Pagination
+			    r - pRocessing
+			    < and > - div elements
+			    <"class" and > - div with a class
+			    Examples: <"wrapper"flipt>, <lf<t>ip>
+			*/
+			
+			"sDom": 'tlip',
 	  		
-	  		"sPaginationType": "full_numbers",
+	  		"sPaginationType": "bootstrap",
 	  		"bFilter": false,
-	  		"bJQueryUI": true,
+	  		"bJQueryUI": false,
 	  		 "oLanguage": {
 	     	      "sUrl": cmis.pluginPath+"/js/jquery/dataTables/localisation/dataTables."+cmis.language+".txt"
 	     	    },
@@ -53,13 +73,16 @@ function initDatatable() {
 	  		]
 	  		
 		
-	  		} );
+	  		} );	  		
 
 	}
+		
+
 
 }
         
 	
 $(function() {
-	initDatatable();	
+	cmis.initDatatable();
+	$("#list-toolbar a").tooltip();
 });

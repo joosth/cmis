@@ -7,7 +7,7 @@ class UrlMappings {
 			}
 		}
 
-		"/"(controller:'cmisBrowse',action:"browse")
+		"/"(controller:'cmisBrowse',action:"documentlist")
 		"500"(view:'/error')
 	}
 }

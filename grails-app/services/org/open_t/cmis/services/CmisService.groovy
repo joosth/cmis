@@ -32,12 +32,39 @@ import net.sf.jmimemagic.*;
 import groovy.xml.StreamingMarkupBuilder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
+
+import java.text.SimpleDateFormat
+import org.apache.chemistry.opencmis.client.api.CmisObject
+import org.apache.chemistry.opencmis.client.api.OperationContext
+import org.apache.chemistry.opencmis.client.api.Document
+import org.apache.chemistry.opencmis.client.api.Folder
+import org.apache.chemistry.opencmis.commons.data.ContentStream
+import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.data.ContentStream
+import org.apache.chemistry.opencmis.commons.enums.BaseTypeId
+import org.apache.chemistry.opencmis.commons.enums.*
+import org.apache.commons.lang.time.*
+import org.apache.commons.lang.*
+import org.apache.chemistry.opencmis.client.api.CmisObject;
+import org.apache.chemistry.opencmis.client.api.ItemIterable;
+import org.apache.chemistry.opencmis.client.api.Repository;
+import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.client.api.SessionFactory;
+import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
+import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.enums.BindingType;
+
+import org.open_t.cmis.authentication.*
+
+import net.sf.jmimemagic.*;
+
 class CmisService {
     
     static transactional = false
 	static scope="session"
 	def restService
-    Repositories repositories=null
+
+	List<Repository> repositories = new ArrayList<Repository>();
     def contextPath=""
     def url=""
     def initialized=false
@@ -46,6 +73,10 @@ class CmisService {
 	def grailsApplication
 	def sppBasePath=ConfigurationHolder.config.cmis.sppBasePath
 	def webdavBasePath=ConfigurationHolder.config.cmis.webdavBasePath
+	
+	CmisObject rootFolder
+	
+	Session cmisSession
 	
 	def onlineEditMimetypes =
 	[
@@ -56,17 +87,70 @@ class CmisService {
 	   "application/vnd.openxmlformats-officedocument.presentationml.presentation": "PowerPoint.Slide",
 	   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word.Document"
 	]
+	
+	
+	
+	
 
     /*
      * Initialize this CmisService bean, remember url, username,password
      */
+	
+	
+	
+	
+	
     def init(theUrl,username,password) {
 		log.debug "Initializing with url: ${theUrl}, username: ${username}, password: ${password}"
-    	url=theUrl
-    	restService.credentials(username,password)    	
-    	 if (!repositories) {    	
-			  repositories = new Repositories(this)
-    	 }
+		
+		Map<String, String> parameter = new HashMap<String, String>();
+		
+
+		// connection settings - we are connecting to a public cmis repo,
+		// using the AtomPUB binding
+		
+		parameter.put(SessionParameter.ATOMPUB_URL, theUrl);
+		parameter.put(SessionParameter.USER, username);
+		parameter.put(SessionParameter.PASSWORD, password);
+		
+		def authenticationClass=ConfigurationHolder.config.cmis.authenticationClass
+		def authenticationParameters=ConfigurationHolder.config.cmis.authenticationParameters
+		if (authenticationClass) {
+			println "authenticationClass=${authenticationClass}"
+			println "authenticationParameters=${authenticationParameters}"
+			parameter.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, authenticationClass);
+			authenticationParameters.each { key,value ->
+				parameter.put(key,value)
+			}
+		}
+
+		parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+		parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+		
+		SessionFactory sessionFactory = SessionFactoryImpl.newInstance();
+		
+
+		// find all the repositories at this URL - there should only be one.
+		repositories = sessionFactory.getRepositories(parameter);
+		
+		// create session with the first (and only) repository
+		Repository repository = repositories.get(0);
+		parameter.put(SessionParameter.REPOSITORY_ID, repository.getId());
+		cmisSession = sessionFactory.createSession(parameter);
+		
+		OperationContext oc = cmisSession.createOperationContext();
+		oc.setIncludePathSegments(true)
+		oc.setRenditionFilterString("cmis:thumbnail")
+		oc.setOrderBy("cmis:name ASC")
+		oc.setCacheEnabled(true)
+		cmisSession.setDefaultContext(oc)
+		
+		
+		//TODO make this configurable
+		rootFolder = cmisSession.getObjectByPath("/");
+		println "The root folder is ${rootFolder}"
+		
+		
     	initialized=true
     	enabled=true
 		
@@ -74,212 +158,101 @@ class CmisService {
 		
     }
 	
-	/*
-	 * Get the URL of a CMIS entry by ID
-	 */
-    
-    def objectUrlById(id){    	
-    	if (repositories) {
-	    	String template=repositories.templates.objectbyid
-	    	template=template.replace("{id}", id)    	
-	    	template=template.replace("{filter}", "")
-	    	template=template.replace("{includeAllowableActions}", "false")
-	    	template=template.replace("{includePolicyIds}", "false")
-	    	template=template.replace("{includeRelationships}", "false")
-	    	template=template.replace("{includeACL}", "false")
-	    	template=template.replace("{renditionFilter}", "cmis:thumbnail")
-    	return template
-    	}
-    	else {
-    		return ""
-    	}
-    }
 	
-	/*
-	 * Get the URL of a CMIS entry by path
-	 */
-	def objectUrlByPath(path){
-    	if (repositories) {
-	    	String template=repositories.templates.objectbypath
-	    	template=template.replace("{path}", path)    	
-	    	template=template.replace("{filter}", "")
-	    	template=template.replace("{includeAllowableActions}", "false")
-	    	template=template.replace("{includePolicyIds}", "false")
-	    	template=template.replace("{includeRelationships}", "false")
-	    	template=template.replace("{includeACL}", "false")
-	    	template=template.replace("{renditionFilter}", "cmis:thumbnail")
-    	return template
-    	}
-    	else {
-    		return ""
-    	}
-    }
-    
     /*
      * List all descendants of the given Entry
      * -- wrong - it lists the childrem only
      * TODO move to listChildren, then fix this
      */
     
-    def listDescendants(def cmisEntry) {
-    	
-    	def response=restService.get("${cmisEntry.link.down}?renditionFilter=cmis:thumbnail&orderBy=cmis:name%20ASC")    	
-		
-		def descendantList=response.entry.collect { entry -> 
-			new CmisEntry(entry)
-		}
-		return descendantList		
+    def listDescendants(obj) {
+    	Folder cmisFolder=obj.class==java.lang.String?getObject(obj):obj
+		return 	cmisFolder.getDescendants(1)
 	}
 	
 	/*
 	* List all descendants of the given Entry
 	*/
    
-   def listChildren(def cmisEntry,params=[:]) {
-	   //def g=grailsApplication.mainContext.getBean('org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib')
+   def listChildren(obj,params=[:]) {
+	   Folder cmisFolder=obj.class==java.lang.String?getObject(obj):obj
 	   
-	   if (!params.renditionFilter) params.renditionFilter="cmis:thumbnail"	   
-	   if (!params.orderBy) params.orderBy="cmis:name%20ASC"
-	   def paramsString=""
-	   params.each { key,value ->
-		   paramsString+="${key}=${value}&"
+	   OperationContext oc = cmisSession.createOperationContext();
+	   if (params?.orderBy) {
+		   def sortDir = params.sortDir?:"ASC"
+		   oc.orderBy="${params.orderBy} ${sortDir}"		   
+	   } else {
+	   	   oc.orderBy="cmis:name ASC"
 	   }
-	   def url="${cmisEntry.link.down}?${paramsString}"
-	   log.debug "URL: ${url}"
-	   def response=restService.get(url)
-	   log.debug("response: ${response}")	   
-	   def childList=response.entry.collect { entry ->
-		   new CmisEntry(entry)
-	   }	   
-	   return [documents:childList,response:response]
+	   def maxItemsPerPage=params.maxItemsPerPage?new Integer(params.maxItemsPerPage):10	   	   
+	   oc.setMaxItemsPerPage(maxItemsPerPage);
+
+	   oc.setIncludePathSegments(true)
+	   oc.setRenditionFilterString("cmis:thumbnail")
+	   if (params.skipCount) {
+		   return cmisFolder.getChildren(oc).skipTo(new Integer(params.skipCount)).getPage()
+	   } else {
+		   return cmisFolder.getChildren(oc).getPage()
+	   }
+
    }
 	
     
 	/*
 	 * List all checked out entries
 	 */
-    def listCheckedOut() {    	
-    	def response=restService.get("${repositories.collection.checkedout}?renditionFilter=cmis:thumbnail&orderBy=cmis:name%20ASC")    	
-		
-		def checkedOutList=response.entry.collect { entry -> 
-			new CmisEntry(entry)
-		}
-		return checkedOutList	
+    def listCheckedOut() {
+		cmisSession.getCheckedOutDocs()	
     }
     
 	/*
 	 * List the version history of this entry
 	 */
     
-    def listHistory(def cmisEntry) {
-    	
-		def response=restService.get("${cmisEntry.link.'version-history'}?renditionFilter=cmis:thumbnail&orderBy=cmis:creationDate%20DESC")    	
-		
-		def historyList=response.entry.collect { entry -> 
-			new CmisEntry(entry)
-		}
-		return historyList
+    def listHistory(obj) {
+    	CmisObject cmisObject=obj.class==java.lang.String?getObject(obj):obj
+		return cmisObject.getAllVersions()
 	}
 	
 	/*
-	 * Get entry by object ID
-	 * The special object ID "checkedout" returns the checked out documents collection
+	 * Get Object by object ID
 	 */
     
     
-    def getEntry(def objectId) {
-    	if (objectId=="checkedout") {
-
-			def checkedoutUrl=repositories.collection.checkedout
-			def checkedOutXML="""<?xml version="1.0" encoding="UTF-8"?>
-<entry xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app" xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/" xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/" xmlns:alf="http://www.alfresco.org">
-<author><name>System</name></author>
-<content src=""/><id>checkedout</id>
-<link rel="down" href="${checkedoutUrl}" type="application/atom+xml;type=feed"/>
-<link rel="down" href="${checkedoutUrl}" type="application/cmistree+xml"/>
-
-
-<published></published>
-<summary>Checked out documents</summary>
-<title>Checked out documents</title>
-<cmisra:object>
-<cmis:properties>
-<cmis:propertyString propertyDefinitionId="cmis:name" displayName="Name" queryName="cmis:name"><cmis:value>Checked out documents</cmis:value></cmis:propertyString>
-<cmis:propertyString propertyDefinitionId="cm:title" displayName="Title" queryName="cm:title"><cmis:value>Checked out documents</cmis:value></cmis:propertyString>
-<cmis:propertyId propertyDefinitionId="cmis:baseTypeId" displayName="Base Type Id" queryName="cmis:baseTypeId"><cmis:value>cmis:folder</cmis:value></cmis:propertyId>
-<cmis:propertyId propertyDefinitionId="cmis:objectId" displayName="Object Id" queryName="cmis:objectId"><cmis:value>checkedout</cmis:value></cmis:propertyId>
-
-</cmis:properties>
-
-</cmisra:object>
-
-</entry>
-			"""
-    
-			CmisEntry checkedOutEntry=new CmisEntry(new XmlSlurper().parseText(checkedOutXML))
-			return checkedOutEntry
-    	} else {
-    		def url=objectUrlById(objectId)    	
-        	def entry=restService.get(url)    	
-    		entry.declareNamespace(atom:'http://www.w3.org/2005/Atom',cmis:'http://docs.oasis-open.org/ns/cmis/core/200908/',cmisra:'http://docs.oasis-open.org/ns/cmis/restatom/200908/')
-    		return new CmisEntry(entry)
-    	}
-    	
-		
-		
+	def getObject(obj) {
+		CmisObject cmisObject=obj.class==java.lang.String?cmisSession.getObject(obj):obj		
 	}
+	
 	
 	/*
 	 * Get CMIS Entry by path
 	 */
     
-    def getEntryByPath(path) {
-    	def url=objectUrlByPath(path)    	
-    	def entry=restService.get(url)
-    	if(entry) {
-    		entry.declareNamespace(atom:'http://www.w3.org/2005/Atom',cmis:'http://docs.oasis-open.org/ns/cmis/core/200908/',cmisra:'http://docs.oasis-open.org/ns/cmis/restatom/200908/')
-    		return new CmisEntry(entry)
-    	} else {
-    		return null
-    	}
-    	
+    def getObjectByPath(path) {
+		cmisSession.getObjectByPath(path)    	
     }
 	
 	/*
 	 * Create a folder
 	 */
     
-    def createFolder(parentId,name,summary) {
-    	
-    	def parentEntry=getEntry(parentId)
-    	def downUrl=parentEntry.link.down
-    	
-    	
-   		def request="""<?xml version="1.0" encoding="UTF-8"?> 
-    	    <entry xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app" 
-    	    	xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/"
-    	    	xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/" > 
-    	    <!--<author><name>cmis</name></author>--> 
-    	    <summary>${summary}</summary> 
-    	    <title>${name}</title> 
-    	    <cmisra:object>
-    	    <cmis:properties>
-   				<cmis:propertyId propertyDefinitionId="cmis:objectTypeId" displayName="Object Type Id" queryName="cmis:objectTypeId"><cmis:value>cmis:folder</cmis:value></cmis:propertyId>    			
-   				<cmis:propertyString propertyDefinitionId="cmis:name" displayName="Name" queryName="cmis:name"><cmis:value>${name}</cmis:value></cmis:propertyString>
-    	    </cmis:properties>
-    	    </cmisra:object>
-    	    </entry>
-    	    </entry>
-    	    """	
-	
-    		
-    		
-    	def response=restService.post(downUrl,request)
-    	
+    def createFolder(parent,name,description=null) {
+    	def parentFolder=getObject(parent)		
+		def properties=[:]
+		properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder,P:cm:titled");
+		if (description) {			
+			properties.put("cm:description",description);
+		}
+		properties.put(PropertyIds.NAME, name);
+		Folder newFolder=parentFolder.createFolder(properties)				
     }
     
-    def createDocument(String parentId,String filename,String name,String summary) {	
-			
+	/*
+	 * Create a document in the CMIS repository
+	 */
+    def createDocument(parent,String filename,String name,String description=null) {
+    	def parentFolder=getObject(parent)
+		
     	Magic parser = new Magic() ;
     	// getMagicMatch accepts Files or byte[],
     	// which is nice if you want to test streams
@@ -292,89 +265,76 @@ class CmisService {
 		} catch (Exception e) {
     		// Quietly stay at the default if we can't find it ...
     	}
-
-    	def requestHeader="""<?xml version="1.0" encoding="UTF-8"?>
-    				<entry xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app" xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/" xmlns:alf="http://www.alfresco.org" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/">
-    			<author><name></name></author>
-    			<summary>${summary}</summary>
-    			<title>${name}</title>
-    			<content type="${mimetype}">"""
-
-    	def requestFooter="""
-    			</content>
-    			<cmisra:object>
-    			<cmis:properties>
-    			<cmis:propertyId propertyDefinitionId="cmis:objectTypeId"><cmis:value>cmis:document</cmis:value></cmis:propertyId>
-    			</cmis:properties>
-    			</cmisra:object></entry>"""
-		def parentEntry=getEntry(parentId)
-		def downUrl=parentEntry.link.down
 		
+		File f = new File(filename)
 		
-		restService.writeBase64WrappedFile ("POST",downUrl,new File(filename),requestHeader,requestFooter);
+		def is = new FileInputStream(f);
+		
+		ContentStream contentStream = cmisSession.getObjectFactory().createContentStream(name,f.size(), mimetype, is);
+		
+		def properties=[:]
+		properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document,P:cm:titled");
+		properties.put(PropertyIds.NAME, name);
+		if (description) {
+			properties.put("cm:description",description);
+		}
+		
+		Document doc = parentFolder.createDocument(properties, contentStream, VersioningState.NONE);
+		is.close();
+		
+		return doc
     	
     }
-    /*
-     * Update a CMIS entry
-     */
-    def update (cmisEntry) {
-    	def entryXml=cmisEntry.xml
-	
-    	def xml = new StreamingMarkupBuilder().bind{ mkp.yield entryXml }
-		def xmlText=xml.toString()
-		restService.put(cmisEntry.link.edit,xmlText)
-	}
 	
 	/*
-	 * Check out a CMIS entry
+	 * Create a document in the CMIS repository
 	 */
-    def checkout(objectId) {
-    	def request="""<?xml version="1.0" encoding="utf-8"?>
-		<entry xmlns="http://www.w3.org/2005/Atom"
-		xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/"
-		xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/">
-		<cmisra:object>
-		<cmis:properties>
-		<cmis:propertyId propertyDefinitionId="cmis:objectId"><cmis:value>${objectId}</cmis:value></cmis:propertyId>
-		</cmis:properties>
-		</cmisra:object>
-		</entry>"""
-    	return restService.post(repositories.collection.checkedout,request,"application/atom+xml;type=entry");
-
-    }
-    /*
-     * Get the working copy of a CMIS entry (from the entry ID)
-     */
-    def workingCopy(objectId) {
-		def entry=cmisService.getEntry(objectId)
-		def pwcxml=restService.get (entry.link.'working-copy')
-		return new CmisEntry(pwcxml)	
+	def updateDocument(obj,String filename) {
+		def cmisObject=getObject(obj)
+		
+		Magic parser = new Magic() ;
+		// getMagicMatch accepts Files or byte[],
+		// which is nice if you want to test streams
+		def mimetype="application/octet-stream"
+		try {
+			// The false means no extension hints.
+			MagicMatch match = parser.getMagicMatch(new File(filename),false);
+			mimetype=match.getMimeType();
+			log.debug "Hey, we have a mimetype match: ${mimetype}"
+		} catch (Exception e) {
+			// Quietly stay at the default if we can't find it ...
+		}
+		
+		File f = new File(filename)
+		
+		def is = new FileInputStream(f);
+		
+		ContentStream contentStream = cmisSession.getObjectFactory().createContentStream(f.name,f.size(), mimetype, is);
+		
+		def properties=[:]
+		cmisObject.setContentStream(contentStream,true)
+		is.close();
+		
+		return cmisObject
+	}
+		
+	/*
+	 * Check out a CMIS document
+	 */
+    def checkout(obj) {
+		Document cmisDocument=getObject(obj)
+    	return cmisDocument.checkOut()
     }
     
 	/*
 	 * Check in a CMIS Entry
 	 */
-    def checkin(objectId,comment,major=false) {
-    	def entry=getEntry(objectId)
-		def request="""<?xml version="1.0" encoding="utf-8"?>
-					<entry xmlns="http://www.w3.org/2005/Atom"
-					xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/"
-					xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/">					
-					</entry>"""
-		
-		String checkinComment=URLEncoder.encode(comment)		
-		def url="${entry.link.self}?checkin=true&major=${major}&checkinComment=${checkinComment}"
-		return restService.put(url,request)		
+    def checkin(obj,comment,major=false) {    	
+    	Document cmisDocument=getObject(obj)
+    	return cmisDocument.checkIn(major, null, null, comment)
+    	
     }
-	
-	def getFile(cmisEntry,file) {
-		def url=cmisEntry.link.enclosure
-		restService.getFile(url,file)
-		def lastModified=cmisEntry.prop.lastModificationDate
-		def lmDate=parseDate(lastModified)
-		file.setLastModified(lmDate.getTime())
-	}
-	
+	/*
 	Date parseDate(String dateString) {
 		dateString=dateString.trim()
 		
@@ -391,57 +351,104 @@ class CmisService {
 		
 		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").parse(dateString)
 	}
-	
+	*/
+    
+    /*
 	String formatDate(Date date) {
 		String DATE_FORMAT_8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 		return DateFormatUtils.format (date,DATE_FORMAT_8601);
 	}
-	
+	*/
 	def createPath(cmisPath) {
 		
 		def pathElements=cmisPath.split("/")
 	
-		def parent=getEntryByPath("/")
+		def parent=getObjectByPath("/")
 		
 		def path=""
 		pathElements.each { pathElement ->
 			if (pathElement.length()>0) {
 	
 				path+="/"+pathElement
-				def entry=getEntryByPath(path)
+				def entry=getObjectByPath(path)
 				if(!entry) {
 					createFolder(parent.objectId,pathElement,message(code:'cmisservice.createpath.message',default:"Created by CMIS service"))
-					parent=getEntryByPath(path)
+					parent=getObjectByPath(path)
 				} else {
 					parent=entry
 				}
 			}
 		}
-		return getEntryByPath(cmisPath)
+		return getObjectByPath(cmisPath)
 	}
 	
 	
 	
-	def getSppPath(def cmisEntry,parentPath) {
+	def getSpp(def obj,parentPath=null) {
+		def cmisObject=getObject(obj)
+		String path
+		if (parentPath) {
+			path=parentPath+"/"+obj.prop.name
+		} else {
+			//path=cmisObject.paths[0]
+		}
 		def sppPath=null	
-		def sppAppProgId=onlineEditMimetypes[cmisEntry.prop.contentStreamMimeType]
-		log.debug "SPP base path: ${sppBasePath} parentPath: ${parentPath} sppAppProgId: ${sppAppProgId}" 
-		
-		if (parentPath && sppBasePath && sppAppProgId) {
-			if (parentPath.startsWith("/Sites/")) {
-				def path=parentPath.replace("/Sites/","/")
-				sppPath=sppBasePath+path+"/"+cmisEntry.name
+		def sppAppProgId=onlineEditMimetypes[cmisObject.prop.contentStreamMimeType]
+		log.debug "SPP base path: ${sppBasePath} path: ${path} sppAppProgId: ${sppAppProgId}" 
+				
+		if (sppBasePath && sppAppProgId) {
+			if (path.startsWith("/Sites/")) {
+				def spath=path.replace("/Sites/","/")
+				sppPath=sppBasePath+spath
 			}
 		}
 		return [path:sppPath,appProgId:sppAppProgId]
+		
 	}
 	
-	def getWebdavPath(def cmisEntry,parentPath) {
+	def getWebdavPath(obj,parentPath=null) {
+		def cmisObject=getObject(obj)
+		String path
+		if (parentPath) {
+			path=parentPath+"/"+obj.prop.name
+		} else {
+			//path=cmisObject.paths[0]
+		}
 		def webdavPath=null		
-			if (parentPath && webdavBasePath) {
-				webdavPath=webdavBasePath+parentPath+"/"+cmisEntry.name
-			}
+		if (webdavBasePath) {
+			webdavPath=webdavBasePath+path
+		}
 		return webdavPath
+	}
+	
+	/*
+	 * Stream file from CMIS repository to client
+	 */
+	
+	def streamFile(ContentStream contentStream,response) {
+		
+		
+		response.setHeader("Content-disposition", "attachment; filename=\"" +contentStream.fileName+"\"")
+		
+		response.setHeader("Content-Type", contentStream.mimeType)
+		
+		def inputStream=contentStream.stream
+		
+		def bufsize=100000
+		byte[] bytes=new byte[(int)bufsize]
+
+		def offset=0
+		def len=1
+		while (len>0) {
+
+			len=inputStream.read(bytes, 0, bufsize)
+
+			if (len>0)
+			response.outputStream.write(bytes,0,len)
+			offset+=bufsize
+		}
+		   
+		response.outputStream.flush()
 	}
 	
 }

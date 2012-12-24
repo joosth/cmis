@@ -18,36 +18,59 @@
  */
  
 
-function refreshTree(id) {
+cmis.refreshTree = function refreshTree(id) {
 		if (id=="ALL") {
 			cmis.tree.jstree("refresh",-1)
 		} else {
 			var el=document.getElementById(id)		
 		
 			cmis.tree.jstree("refresh",el)
-			cmis.tree.jstree('select_node', el, false);
-		//	cmis.tree.jstree('open_node', el, true);			
+			cmis.tree.jstree('select_node', el, false);			
 		}
 }
 
-function refreshMe(){
-	var parentNode=document.getElementById(encodeURIComponent(cmis.parentFolder));
-	if (parentNode) {
-		//cmis.tree.jstree('open_node', parentNode, false);
-		cmis.tree.jstree('open_node', parentNode, null);
+cmis.refreshMe = function refreshMe(){
+	//
+	var currentFolderElement=document.getElementById(cmis.currentFolderId);
+
+	if (currentFolderElement) {	
+		cmis.tree.jstree('open_node', currentFolderElement, null);
 	}
-	var currentFolder=document.getElementById(encodeURIComponent(cmis.currentFolderId));
-	if (currentFolder) {
-	//	cmis.tree.jstree('open_node', currentFolder, true);
-		//cmis.tree.jstree('deselect_all');
-		//cmis.tree.jstree('select_node', currentFolder, false);
-		cmis.tree.jstree('open_node', currentFolder, null);
+	
+	var rootFolderElement=$("#treediv ul li")[0];
+	if (rootFolderElement!=null && cmis.currentFolderEntry!=null) {
+		cmis.tree.jstree('open_node', rootFolderElement, null);		
+		var path=cmis.currentFolderEntry.properties["cmis:path"];
+		
+		var pathElements=path.split('/');
+		var currentElement=rootFolderElement;
+		var currentPath=""
+		for (i in pathElements) {	
+			// Skip empty element
+			if (pathElements[i]) {
+				currentPath+="/"+pathElements[i];
+				var currentElement=$(currentElement).find("li[title='"+pathElements[i]+"']")[0];
+				if (currentElement){
+					cmis.tree.jstree('open_node', currentElement, null);
+					if (i==pathElements.length-1) {
+						cmis.tree.jstree('select_node', currentElement, null);
+					} else {
+						cmis.tree.jstree('deselect_node', currentElement, null);
+					}
+				}
+			}
+			
+		}		
 	}
+	
+	
+	
+	
 }
     
-function initTree() {
+cmis.initTree = function initTree() {
 	
-	$(".cmis-tree").bind("refresh",refreshMe);
+	$(".cmis-tree").bind("refresh",cmis.refreshMe);
 	$(".cmis-tree").addClass("cmis-events");
 	
 	
@@ -73,21 +96,48 @@ function initTree() {
   		//		"initially_select" : [ "workspace://SpacesStore/fe1528db-4a48-4495-8204-9a1bc56a0926" ]
   	    	"select_limit" : 1
   			},
-  	        
-         
-         "contextmenu" : {
-          	"items" : {
-          	
-          	  "rename" : {
-          		    // The item label
-          		    "label"             : "Rename"
-          }
-             }
-          
-          	
-          
-          },	
-          
+  	     
+  			"contextmenu" : {        
+  	        	"items": function ( node ) {
+  	        		
+
+
+  	            			var obj = {            					
+  	            					
+  									"properties" : {
+      									"label": 'Properties',
+      									"action" : function( node ) { 
+      					    		    	var id=node.attr("id");
+      					    		    	dialog.formDialog('null','cmisDocument', {'dialogname':'props','nosubmit':true},{'getObjectId':id} ,null)
+      					    		    
+      					    		    	}
+      								},
+      								"editproperties" : {
+      									"label": 'Edit properties',
+      									"action" : function( node ) { 
+      					    		    	var id=node.attr("id");
+      					    		    	dialog.formDialog('null','cmisDocument', {'dialogname':'edit'},{'getObjectId':id} ,null)
+      					    		    
+      					    		    	}
+      								},
+      								
+  									"delete" : {
+      									"label": 'Delete',
+      									"action" : function( node ) { 
+      					    		    	var id=node.attr("id");
+      					    		    	dialog.formDialog('null','cmisDocument', {'dialogname':'delete'},{'getObjectId':id} ,null)
+      					    		    	}
+
+      								},
+  	            			}
+  	            			return obj;
+  	            			
+  	            			
+  	            			
+  	        			}        			
+  	        },
+  			
+  		
           "themes" : {
         	  // Really, we don't need to load this again ...
         	  url: cmis.baseUrl+"/css/theme/theme.css"
@@ -102,31 +152,11 @@ function initTree() {
           $("#treediv").bind("select_node.jstree", function(e,data) {
         	  var node=data.rslt.obj[0];
         	  cmis.gotoObject(node.id);
-        	  cmis.refresh();
-        	  /*
-        	  // get entry info
-        	  if ($(node).hasClass("jstree-folder") && $(".file-list")[0]) {
-        		  gotoFolder(node.id);
-        	  } else {
-				  var parentPath=$(node).attr("parentPath");
-		      		  $(".detail-pane").load(cmis.baseUrl+"/cmisBrowse/detail/?objectId="+data.rslt.obj[0].id+'&parentPath='+escape(parentPath),'',function() {      			  
-		                  $(".detail-pane").find("span.help").cluetip({
-		        				splitTitle: '|'
-		        				});
-		                  cmis.currentFolderId=data.rslt.obj[0].id;
-		                  cmis.datatable=null;
-		                  initDatatable();
-		                  //cmis.datatable.fnDraw(-1);
-		                  //cmis.datatable.fnDraw(true);
-		                  var toolbar=$("#list-toolbar")
-		                  $(this).find('div.dataTables_length').prepend(toolbar);		           	
-		      		  });
-        	  }
-        	  */
+        	  cmis.refresh();        
           });     
 }
 
 	
 $(function() {	
-	initTree()	
+	cmis.initTree();
 });

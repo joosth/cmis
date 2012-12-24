@@ -48,7 +48,9 @@ OpenT.dialogs.simpleAlert=function simpleAlert(message) {
          }
 	 	},
          open: function(event, ui) {
-        	var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	//var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	var zindex=parseInt($(this.parentNode).css('z-index'));
+
         	zindex=zindex+1
       		$("span.help").cluetip({
       			splitTitle: '|'  ,
@@ -105,7 +107,9 @@ OpenT.dialogs.simpleDialog=function simpleDialog(dialogUrl) {
        	},
         open: function(event, ui) {
         	
-        	var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	//var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	var zindex=parseInt($(this.parentNode).css('z-index'));
+
         	zindex=zindex+1
        		$("span.help").cluetip({
        			splitTitle: '|' ,
@@ -153,7 +157,9 @@ OpenT.dialogs.uploadDialog=function uploadDialog(dialogUrl) {
       	},
        open: function(event, ui) {
     	    
-    	    var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+    	    //var zindex=parseInt($(event.currentTarget.activeElement).css('z-index'));
+        	var zindex=parseInt($(this.parentNode).css('z-index'));
+
         	zindex=zindex+1
       		$("span.help").cluetip({
       			splitTitle: '|',
@@ -190,8 +196,9 @@ OpenT.dialogs.uploadDialog=function uploadDialog(dialogUrl) {
 
 
 
-$(function() {	
-	$("a.simpleDialog").live("click",function() {
+$(function() {
+	// No longer needed ! Dialog plugin already does this.
+	$("xa.simpleDialog").live("click",function() {
 		OpenT.dialogs.simpleDialog(this.href);
 		return false;
 	});
