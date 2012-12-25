@@ -1,6 +1,6 @@
 /*
- * Grails CMIS Plugin
- * Copyright 2010-2011, Open-T B.V., and individual contributors as indicated
+ * CMIS Plugin for Grails
+ * Copyright 2010-2013, Open-T B.V., and individual contributors as indicated
  * by the @author tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -17,19 +17,38 @@
  * along with this program.  If not, see http://www.gnu.org/licenses
  */
 
+/**
+ * CMIS taglib
+ * 
+ * @author Joost Horward
+ */
+ 
 package org.open_t.cmis
 import org.codehaus.groovy.grails.commons.* 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.springframework.context.ApplicationContextAware
+import org.springframework.context.ApplicationContext
 
 import org.springframework.context.*
+
 class CmisTagLib  implements ApplicationContextAware {
-	def cmisServiceProxy
-	//def restService
+
 	static namespace = 'cmis'
 	ApplicationContext applicationContext
-	
-		
 
+	/**
+	 * cmis:head
+	 * Element to place in HTML page's <head> section
+	 * 
+	 * @param username
+	 * @param password
+	 * @param rootNode		id of root element, takes precedence over path
+	 * @param path			path of root element
+	 * @param cico			boolean, defines if check in/out should be presented to the user
+	 * @param readOnly		boolean, defines if this view should be read-only
+	 * @param restore		boolean, defines if this view should be restored from the URL hash (#id)
+	 * 
+	 */
 	def head = { attrs ->
 	  
 	  def cmismap=[:]
@@ -77,7 +96,6 @@ class CmisTagLib  implements ApplicationContextAware {
 	  			  
 	  			  cmis.currentObjectId="${request.cmis?.rootEntry?.id}";
   				  
-  				  cmis.language="${java.util.Locale.getDefault().getLanguage()}";
   				  cmis.readOnly=${readOnly};
   				  cmis.cico=${cico};
 				  cmis.restore=${restore};
@@ -91,6 +109,11 @@ class CmisTagLib  implements ApplicationContextAware {
 	  }
 	}
 	
+	/**
+	 * cmis:uploadHead
+	 * Element to place in HTML page's <head> section for the file uploader
+	 * 
+	 */
 	def uploadHead = { attrs ->
 		def html=""
 		if (applicationContext.cmisService.enabled) { 
@@ -120,26 +143,37 @@ class CmisTagLib  implements ApplicationContextAware {
 		
 	}
 	
-	
+	/**
+	 * cmis:tree
+	 * Generates tree view
+	 */	
 	def tree = { attrs ->
-			
-	def html="""<div id="outer-treediv" class="outer-treediv" >   
-		            <div id="treediv" class="treediv cmis-tree" >		             
-		            </div>
-				</div>"""
-		out << html
-	}
+		out << """<div id="outer-treediv" class="outer-treediv" >   
+			            <div id="treediv" class="treediv cmis-tree" >		             
+			            </div>
+					</div>"""
 
+	}
+	
+	/**
+	 * cmis:pane
+	 * Generates detail pane
+	 */
 	def pane = { attrs ->
 		def html="""<div id="outer-detail-pane" class="outer-detail-pane disabled" ></div>"""
 			if (applicationContext.cmisService.enabled) {
-				html="""
-						            <div id="detail-pane" class="detail-pane cmis-detailspane" >${g.message(code:'cmis.pane.body')}</div>
-							"""
+				html="""<div id="detail-pane" class="detail-pane cmis-detailspane" >${g.message(code:'cmis.pane.body')}</div>"""
 				}
 			out << html
 	}
 	
+	/**
+	 * cmis:list
+	 * Generates document/folder list
+	 * 
+	 * @param breadcrumb Enables breadcrumb (default true)
+	 * 
+	 */
 	def list = { attrs ->
 		def breadcrumb=""
 		if (!attrs.breadcrumb || attrs.breadcrumb=="true") {
@@ -189,6 +223,11 @@ class CmisTagLib  implements ApplicationContextAware {
 		}
 	}
 	
+	/**
+	 * cmis:thumbnail
+	 * Generates thumbnail element	 
+	 *
+	 */
 	def thumbnail = { attrs ->		
 		out << """<img src="${createLink(controller:'cmisDocument',action: 'thumbnail',params:[objectId:attrs.object.prop.objectId])}" />"""		
 	}

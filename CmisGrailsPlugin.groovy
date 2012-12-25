@@ -1,8 +1,8 @@
 class CmisGrailsPlugin {
     // the plugin version
-    def version = "0.1"
+    def version = "0.2"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.3.5 > *"
+    def grailsVersion = "2.1.1 > *"
     // the other plugins this plugin depends on
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
@@ -11,15 +11,15 @@ class CmisGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def author = "Your name"
-    def authorEmail = ""
-    def title = "Plugin summary/headline"
+    def author = "Joost Horward"
+    def authorEmail = "joost@open-t.nl"
+    def title = "CMIS plugin"
     def description = '''\\
-Brief description of the plugin.
+Provides CMIS services and views based on Apache Chemistry OpenCMIS, Twitter Bootstrap and the Dialog plugin for Grails.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/cmis"
+    def documentation = "http://www.open-t.nl/catviz/p/projects/cmis-plugin"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 
