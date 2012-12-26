@@ -292,7 +292,7 @@ class CmisDocumentController {
 			def success=true
 			
 			def entry=cmisService.getObject(params.objectId)
-			println "files: ${session['files']}"
+
 			if (session['files'].size()!=1) {
 				msg="You should upload exactly one file"
 				msg=message(code:'cmisDocument.submitupdatedocument.onefileerrormessage',default:"You should upload exactly one file")

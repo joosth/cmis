@@ -23,24 +23,29 @@
  * @author Joost Horward
  */
 
+
+if (!window.cmis) {
+	window.cmis={}
+}
+
 // Send message to inform other components that a refresh is needed. 
 // If the context changed the refresh should be a bit more drastic ie reset pagination on lists
 // This function also sets the hash value in the URL which can be used for bookmarking and allows users to hit F5
 cmis.refresh = function refresh (contextChange){
 	var cg=contextChange?true:false
-	window.location.hash=cmis.currentFolderId;
+	window.location.hash=cmis.currentFolder.id;
 	$(".cmis-events").trigger("refresh",{contextChange:cg});
 }
 
 // Change to the folder of the given ID.
-cmis.gotoFolder = function gotoFolder(folderId) {
-	cmis.currentFolderId=folderId;
-	$.getJSON(cmis.baseUrl+'/cmisBrowse/cmisEntryById?objectId='+cmis.currentFolderId, function (json) {
-		cmis.currentFolderEntry=json;
+cmis.gotoFolder = function gotoFolder(folderId) {	
+	$.getJSON(cmis.baseUrl+'/cmisBrowse/cmisEntryById?objectId='+folderId, function (json) {
+		cmis.currentFolder=json;
 		cmis.refresh(true);	
 	}).error(function(event, jqXHR, ajaxSettings, thrownError) { 
 		window.location.reload();
-	});	
+	});
+	
 }
 
 // Go to the given path (relative to the root path) and perform refresh
@@ -49,9 +54,8 @@ cmis.gotoPath = function gotoPath(path) {
 	if (rootPath!="/") {
 		path=rootPath+path
 	}
-	$.getJSON(cmis.baseUrl+"/cmisBrowse/cmisEntryByPath?path="+path, function (json) {
-		cmis.currentFolderEntry=json;
-		cmis.currentFolderId=json.id;
+	$.getJSON(cmis.baseUrl+"/cmisBrowse/cmisEntryByPath?path="+path,function (json) {
+		cmis.currentFolder=json;
 		cmis.refresh(true);	
 	}).error(function(event, jqXHR, ajaxSettings, thrownError) { 
 		window.location.reload();
@@ -60,12 +64,10 @@ cmis.gotoPath = function gotoPath(path) {
 
 //Go to the given object
 cmis.gotoObject=function gotoObject(objectId) {
-	cmis.currentObjectId=objectId;
-	$.getJSON(cmis.baseUrl+"/cmisBrowse/cmisEntryById?objectId="+cmis.currentObjectId, function (json) {
-		cmis.currentObjectEntry=json;
-		if(cmis.currentObjectEntry.properties["cmis:baseTypeId"]=="cmis:folder") {
-			cmis.currentFolderId=cmis.currentObjectId;
-			cmis.currentFolderEntry=cmis.currentObjectEntry;
+	$.getJSON(cmis.baseUrl+"/cmisBrowse/cmisEntryById?objectId="+objectId, function (json) {
+		cmis.currentObject=json;
+		if(cmis.currentObject.properties["cmis:baseTypeId"]=="cmis:folder") {
+			cmis.currentFolder=cmis.currentObject;
 		}
 		cmis.refresh(true);	
 	}).error(function(event, jqXHR, ajaxSettings, thrownError) { 
@@ -75,9 +77,10 @@ cmis.gotoObject=function gotoObject(objectId) {
 
 // go to the parent of the current folder 
 cmis.gotoParentFolder = function gotoParentFolder() {
-	if (cmis.currentFolderId!=cmis.rootFolderId) {
-		var res=$.getJSON(cmis.baseUrl+"/cmisBrowse/cmisParent?objectId="+cmis.currentFolderId, function (json) {
-			cmis.gotoFolder(json.objectId);
+	if (cmis.currentFolder.id!=cmis.rootFolder.id) {
+		var res=$.getJSON(cmis.baseUrl+"/cmisBrowse/cmisParent?objectId="+cmis.currentFolder.id,{}, function (json) {			
+			cmis.currentFolder=json;
+			cmis.refresh(true);	
 		}).error(function(event, jqXHR, ajaxSettings, thrownError) { 
 			window.location.reload();
 		});
@@ -86,7 +89,8 @@ cmis.gotoParentFolder = function gotoParentFolder() {
 
 // Go to the home folder
 cmis.gotoHomeFolder = function gotoHomeFolder() {
-	cmis.gotoFolder(cmis.rootFolderId);
+	cmis.gotoFolder(cmis.rootFolder.id);
+	return false;
 }
 
 // This is performed on a full page reload
@@ -103,9 +107,11 @@ $(function() {
 	$(".clickable-row td").live("click", function() {
 		var clickable = $(this).find('span.clickable-cell:first')[0]
 		if (clickable) {
-			clickable.click()
+			clickable.click();
+			return false;
 		}
 	});
+	
 	// When restoring is enabled we navigate to the object that is in the current hash
 	if (cmis.restore) {
 		if (window.location.hash!="") {

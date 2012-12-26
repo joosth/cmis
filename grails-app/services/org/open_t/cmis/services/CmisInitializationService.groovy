@@ -10,12 +10,10 @@ class CmisInitializationService implements org.springframework.beans.factory.Ini
 	
 
 	void afterPropertiesSet() {
-		println "Hey! here is the initialization bean!"
 		CmisObject.metaClass.getCssClassName = { ->
 			if (delegate.baseTypeId==BaseTypeId.CMIS_FOLDER) {
 				return "folder"
 			} else {
-				//println delegate.getProperties()			
 				delegate.getProperty("cmis:contentStreamMimeType")?.getValue().replace("/","-")?.replace(".","-")
 			}
 		}

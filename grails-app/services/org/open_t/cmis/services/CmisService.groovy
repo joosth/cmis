@@ -1,6 +1,6 @@
 /*
- * Grails CMIS Plugin
- * Copyright 2010-2011, Open-T B.V., and individual contributors as indicated
+ * CMIS Plugin for Grails
+ * Copyright 2010-2013, Open-T B.V., and individual contributors as indicated
  * by the @author tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -17,6 +17,12 @@
  * along with this program.  If not, see http://www.gnu.org/licenses
  */
 
+/**
+ * CMIS Service bean
+ * 
+ * @author Joost Horward
+ */
+ 
 package org.open_t.cmis.services
 
 import java.io.FileOutputStream;
@@ -88,26 +94,20 @@ class CmisService {
 	   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word.Document"
 	]
 	
-	
-	
-	
-
-    /*
+    /**
      * Initialize this CmisService bean, remember url, username,password
+     * 
+     * @param theUrl URL of the repository
+     * @param username Default username to use
+     * @param password Default password to use
      */
-	
-	
-	
-	
 	
     def init(theUrl,username,password) {
 		log.debug "Initializing with url: ${theUrl}, username: ${username}, password: ${password}"
 		
 		Map<String, String> parameter = new HashMap<String, String>();
-		
 
-		// connection settings - we are connecting to a public cmis repo,
-		// using the AtomPUB binding
+		// we are using the AtomPUB binding
 		
 		parameter.put(SessionParameter.ATOMPUB_URL, theUrl);
 		parameter.put(SessionParameter.USER, username);
@@ -115,9 +115,9 @@ class CmisService {
 		
 		def authenticationClass=ConfigurationHolder.config.cmis.authenticationClass
 		def authenticationParameters=ConfigurationHolder.config.cmis.authenticationParameters
+		
+		// Use our own authentication class if provided
 		if (authenticationClass) {
-			println "authenticationClass=${authenticationClass}"
-			println "authenticationParameters=${authenticationParameters}"
 			parameter.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, authenticationClass);
 			authenticationParameters.each { key,value ->
 				parameter.put(key,value)
@@ -129,7 +129,6 @@ class CmisService {
 		
 		SessionFactory sessionFactory = SessionFactoryImpl.newInstance();
 		
-
 		// find all the repositories at this URL - there should only be one.
 		repositories = sessionFactory.getRepositories(parameter);
 		
@@ -144,12 +143,10 @@ class CmisService {
 		oc.setOrderBy("cmis:name ASC")
 		oc.setCacheEnabled(true)
 		cmisSession.setDefaultContext(oc)
-		
-		
-		//TODO make this configurable
-		rootFolder = cmisSession.getObjectByPath("/");
-		println "The root folder is ${rootFolder}"
-		
+				
+		//This is the root path we fall back on when nothing is defined in a view 
+		def rootPath=ConfigurationHolder.config.cmis.authenticationParameters?:"/"
+		rootFolder = cmisSession.getObjectByPath(rootPath);
 		
     	initialized=true
     	enabled=true
@@ -159,54 +156,56 @@ class CmisService {
     }
 	
 	
-    /*
-     * List all descendants of the given Entry
-     * -- wrong - it lists the childrem only
-     * TODO move to listChildren, then fix this
-     */
-    
-    def listDescendants(obj) {
-    	Folder cmisFolder=obj.class==java.lang.String?getObject(obj):obj
-		return 	cmisFolder.getDescendants(1)
+	/**
+	 * List all children of the given object
+	 * 
+	 * @param obj CmisObject or CmisObject id
+	 * @param params Parameters for the operation context:
+	 * - orderBy default is cmis:name
+	 * - sortDir - ASC or DESC
+	 * - skipCount
+	 * - maxItemsPerPage - default is 10
+	 * 
+	 * @return page of results
+	 */
+   
+	def listChildren(obj,params=[:]) {
+		Folder cmisFolder=obj.class==java.lang.String?getObject(obj):obj
+	   
+		OperationContext oc = cmisSession.createOperationContext();
+		if (params?.orderBy) {
+			def sortDir = params.sortDir?:"ASC"
+			oc.orderBy="${params.orderBy} ${sortDir}"		   
+		} else {
+			oc.orderBy="cmis:name ASC"
+		}
+		def maxItemsPerPage=params.maxItemsPerPage?new Integer(params.maxItemsPerPage):10	   	   
+		oc.setMaxItemsPerPage(maxItemsPerPage);
+
+		oc.setIncludePathSegments(true)
+		oc.setRenditionFilterString("cmis:thumbnail")
+		if (params.skipCount) {
+			return cmisFolder.getChildren(oc).skipTo(new Integer(params.skipCount)).getPage()
+		} else {
+			return cmisFolder.getChildren(oc).getPage()
+		}
 	}
 	
-	/*
-	* List all descendants of the given Entry
-	*/
-   
-   def listChildren(obj,params=[:]) {
-	   Folder cmisFolder=obj.class==java.lang.String?getObject(obj):obj
-	   
-	   OperationContext oc = cmisSession.createOperationContext();
-	   if (params?.orderBy) {
-		   def sortDir = params.sortDir?:"ASC"
-		   oc.orderBy="${params.orderBy} ${sortDir}"		   
-	   } else {
-	   	   oc.orderBy="cmis:name ASC"
-	   }
-	   def maxItemsPerPage=params.maxItemsPerPage?new Integer(params.maxItemsPerPage):10	   	   
-	   oc.setMaxItemsPerPage(maxItemsPerPage);
-
-	   oc.setIncludePathSegments(true)
-	   oc.setRenditionFilterString("cmis:thumbnail")
-	   if (params.skipCount) {
-		   return cmisFolder.getChildren(oc).skipTo(new Integer(params.skipCount)).getPage()
-	   } else {
-		   return cmisFolder.getChildren(oc).getPage()
-	   }
-
-   }
-	
     
-	/*
+	/**
 	 * List all checked out entries
+	 * 
+	 * @return The checked out documents
 	 */
     def listCheckedOut() {
 		cmisSession.getCheckedOutDocs()	
     }
     
-	/*
+	/**
 	 * List the version history of this entry
+	 * 
+	 * @param obj CmisObject or CmisObject id
+	 * @return The version history
 	 */
     
     def listHistory(obj) {
@@ -214,26 +213,34 @@ class CmisService {
 		return cmisObject.getAllVersions()
 	}
 	
-	/*
+	/**
 	 * Get Object by object ID
-	 */
-    
-    
+	 *
+	 * @param obj CmisObject or CmisObject id
+	 * @return The CmisObject
+	 */    
 	def getObject(obj) {
 		CmisObject cmisObject=obj.class==java.lang.String?cmisSession.getObject(obj):obj		
 	}
 	
 	
-	/*
+	/**
 	 * Get CMIS Entry by path
+	 * 
+	 * @param path The path
+	 * @return The CmisObject 
 	 */
     
     def getObjectByPath(path) {
 		cmisSession.getObjectByPath(path)    	
     }
 	
-	/*
+	/**
 	 * Create a folder
+	 * 
+	 * @param parent CmisObject or CmisObject id
+	 * @param name The name of the folder
+	 * @param description Optional description
 	 */
     
     def createFolder(parent,name,description=null) {
@@ -247,8 +254,15 @@ class CmisService {
 		Folder newFolder=parentFolder.createFolder(properties)				
     }
     
-	/*
+	/**
 	 * Create a document in the CMIS repository
+	 * 
+	 * @param parent CmisObject or CmisObject id
+	 * @param filename Filename to be uploaded
+	 * @param name name in the repository
+	 * @param description Optional description
+	 * 
+	 * @return The CmisObject	  
 	 */
     def createDocument(parent,String filename,String name,String description=null) {
     	def parentFolder=getObject(parent)
@@ -286,8 +300,12 @@ class CmisService {
     	
     }
 	
-	/*
-	 * Create a document in the CMIS repository
+	/**
+	 * Update a document in the CMIS repository
+	 * 
+	 * @param obj CmisObject or CmisObject id
+	 * @param filename The file to be uploaded
+	 * @return The CmisObject 
 	 */
 	def updateDocument(obj,String filename) {
 		def cmisObject=getObject(obj)
@@ -318,47 +336,35 @@ class CmisService {
 		return cmisObject
 	}
 		
-	/*
+	/**
 	 * Check out a CMIS document
+	 * 
+	 * @param obj CmisObject or CmisObject id
+	 * @return The working copy
 	 */
     def checkout(obj) {
 		Document cmisDocument=getObject(obj)
     	return cmisDocument.checkOut()
     }
     
-	/*
+	/**
 	 * Check in a CMIS Entry
+	 * 
+	 * @param obj CmisObject or CmisObject id
+	 * @param comment The comment to be used
+	 * @param major Determines if this checkin will be a major new version (2.0, 3.0 ...)
 	 */
     def checkin(obj,comment,major=false) {    	
     	Document cmisDocument=getObject(obj)
     	return cmisDocument.checkIn(major, null, null, comment)
     	
-    }
-	/*
-	Date parseDate(String dateString) {
-		dateString=dateString.trim()
-		
-		int lastColon=dateString.lastIndexOf(":")
-		int len=dateString.length()
-		if ((dateString[len-6]=="+" || dateString[len-6]=="-") && (lastColon == len-3)){
-			dateString=dateString.substring(0,len-3)+dateString.substring(len-2)
-			//log.debug "converting ${dateString}"
-			
-		} else {
-			//log.debug " not converting"
-		}
-		
-		
-		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").parse(dateString)
-	}
-	*/
-    
-    /*
-	String formatDate(Date date) {
-		String DATE_FORMAT_8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
-		return DateFormatUtils.format (date,DATE_FORMAT_8601);
-	}
-	*/
+    }	
+	/**
+	 * Create an entire path in the repository
+	 * 
+	 * @param path The path to be created
+	 * @return the CMISObject at the path 
+	 */
 	def createPath(cmisPath) {
 		
 		def pathElements=cmisPath.split("/")
@@ -382,7 +388,15 @@ class CmisService {
 		return getObjectByPath(cmisPath)
 	}
 	
-	
+	/**
+	 * Get info needed to create a SPP link
+	 * 
+	 * @param obj CmisObject or CmisObject id
+	 * @param parentPath The path to the parent object. This speeds up generation by saving an extra CMIS call. Useful when generating a list of items that all need an SPP link.
+	 * @return SPP info map:
+	 * - path: The SPP path
+	 * - appProgId: The prog id needed for the SPP link
+	 */
 	
 	def getSpp(def obj,parentPath=null) {
 		def cmisObject=getObject(obj)
@@ -390,7 +404,7 @@ class CmisService {
 		if (parentPath) {
 			path=parentPath+"/"+obj.prop.name
 		} else {
-			//path=cmisObject.paths[0]
+			path=cmisObject.paths[0]
 		}
 		def sppPath=null	
 		def sppAppProgId=onlineEditMimetypes[cmisObject.prop.contentStreamMimeType]
@@ -406,13 +420,20 @@ class CmisService {
 		
 	}
 	
+	/**
+	 * Get WebDAV link for CmisObject
+	 * @param obj CmisObject or CmisObject id
+	 * @param parentPath The path to the parent object. This speeds up generation by saving an extra CMIS call. Useful when generating a list of items that all need an WebDAV link.
+	 * 
+	 * @return the WebDAV link 
+	 */
 	def getWebdavPath(obj,parentPath=null) {
 		def cmisObject=getObject(obj)
 		String path
 		if (parentPath) {
 			path=parentPath+"/"+obj.prop.name
 		} else {
-			//path=cmisObject.paths[0]
+			path=cmisObject.paths[0]
 		}
 		def webdavPath=null		
 		if (webdavBasePath) {
@@ -421,33 +442,29 @@ class CmisService {
 		return webdavPath
 	}
 	
-	/*
+	/**
 	 * Stream file from CMIS repository to client
+	 * 
+	 * @param contentstream The content stream
+	 * @param The servlet response to use
 	 */
 	
-	def streamFile(ContentStream contentStream,response) {
-		
-		
-		response.setHeader("Content-disposition", "attachment; filename=\"" +contentStream.fileName+"\"")
-		
+	def streamFile(ContentStream contentStream,response) {		
+		response.setHeader("Content-disposition", "attachment; filename=\"" +contentStream.fileName+"\"")		
 		response.setHeader("Content-Type", contentStream.mimeType)
 		
-		def inputStream=contentStream.stream
-		
+		def inputStream=contentStream.stream		
 		def bufsize=100000
 		byte[] bytes=new byte[(int)bufsize]
 
 		def offset=0
 		def len=1
 		while (len>0) {
-
 			len=inputStream.read(bytes, 0, bufsize)
-
 			if (len>0)
 			response.outputStream.write(bytes,0,len)
 			offset+=bufsize
-		}
-		   
+		}		   
 		response.outputStream.flush()
 	}
 	

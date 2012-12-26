@@ -45,7 +45,7 @@ cmis.initDatatable = function initDatatable() {
 			"bServerSide": true,		
 			"sAjaxSource": cmis.baseUrl+"/cmisBrowse/jsonlist",
 			"fnServerData": function ( sSource, aoData, fnCallback ) {
-				aoData.push( { "name":"objectId","value": window.cmis.currentFolderId } );
+				aoData.push( { "name":"objectId","value": window.cmis.currentFolder.id } );
 				aoData.push( { "name":"readOnly","value": window.cmis.readOnly } );
 				aoData.push( { "name":"cico","value": window.cmis.cico } );
 				$.getJSON( sSource, aoData, function (json) { 

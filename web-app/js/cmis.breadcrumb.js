@@ -24,11 +24,11 @@
  */
 
 /*
- * Refresh the breadcrumb. The path is taken from cmis.currentFolderEntry
+ * Refresh the breadcrumb. The path is taken from cmis.currentFolder
  */
 cmis.refreshBreadcrumb = function refreshBreadcrumb() {
-	if (cmis.currentFolderEntry) {
-		var path=cmis.currentFolderEntry.properties["cmis:path"];
+	if (cmis.currentFolder) {
+		var path=cmis.currentFolder.properties["cmis:path"];
 		var rootPath=cmis.rootFolder.properties["cmis:path"];
 		if (rootPath!='/') {
 			path=path.substring(rootPath.length+1);
@@ -39,14 +39,14 @@ cmis.refreshBreadcrumb = function refreshBreadcrumb() {
 			 homeLabel=$(".cmis-breadcrumb ul li").html()
 		}
 		var html='<ul class="breadcrumb">';
-		html+='<li><a href="#" onclick="cmis.gotoPath(\'/\');">'+homeLabel+'</a> <span class="divider">/</span></li>'
+		html+='<li><a href="#" onclick="cmis.gotoPath(\'/\');event.returnValue=false;return false;">'+homeLabel+'</a> <span class="divider">/</span></li>'
 		var pathElements=path.split('/');
 		var currentPath=""
 		for (i in pathElements) {
 			// Skip empty element
 			if (pathElements[i] && i<pathElements.length-1) {
 				currentPath+="/"+pathElements[i];
-				html+='<li><a href="#" onclick="cmis.gotoPath(\''+currentPath+'\')">'+pathElements[i]+'</a> <span class="divider">/</span></li>'		
+				html+='<li><a href="#" onclick="cmis.gotoPath(\''+currentPath+'\');event.returnValue=false;return false;">'+pathElements[i]+'</a> <span class="divider">/</span></li>'		
 			}
 		}
 		html+='<li class="active">'+pathElements[pathElements.length-1]+'</li>'

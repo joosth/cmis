@@ -35,17 +35,21 @@ log4j = {
 cmis {
 	enabled=true
 	
-	url="http://localhost:8080/alfresco/wcservice/cmis"
-
+	url="http://localhost:8080/alfresco/service/cmis"
 	
-	username="wfp"
-	password="wfp"
+	username="admin"
+	password="admin"
+	
 	// Base path for SPP on-line editing
 	sppBasePath="http://localhost:7070/alfresco"
-	// Base path for WebDAV online editing
+
+		// Base path for WebDAV online editing
 	webdavBasePath="http://localhost:8080/alfresco/webdav"
-	authenticationClass="org.open_t.cmis.authentication.ExternalAuthenticationProvider"
-	authenticationParameters = ['remote-username-header':"X-Alfresco-Remote-User",'shared-secret-name':"X-Zaaksysteem-Shared-Secret",'shared-secret-value':"CHANGETHIS"]
+	
+	// For external authentication, use settings in comments below (remove url setting above)
+	//url="http://localhost:8080/alfresco/wcservice/cmis"
+	//authenticationClass="org.open_t.cmis.authentication.ExternalAuthenticationProvider"
+	//authenticationParameters = ['remote-username-header':"X-Alfresco-Remote-User",'shared-secret-name':"X-Alfresco-Shared-Secret",'shared-secret-value':"CHANGETHIS"]
 }
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"

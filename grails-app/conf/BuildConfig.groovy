@@ -1,4 +1,3 @@
-
 grails.plugin.location.'dialog' = "../dialog"
 
 grails.project.class.dir = "target/classes"

@@ -87,60 +87,22 @@ class CmisTagLib  implements ApplicationContextAware {
 	  def html="""<!-- CMIS variables -->
 		  		  <script type="text/javascript">
 	  		      var cmis={};  				    				  
+
   				  cmis.baseUrl="${request.contextPath}";
   				  cmis.pluginPath="${resource(absolute:false,plugin:'cmis')}";
-  				  cmis.rootFolderId="${request.cmis?.rootEntry?.id}";
-				  cmis.rootFolder=${rootFolderEntry.encodeAsJSON()};
-  				    				  
-  				  cmis.currentFolderId="${request.cmis?.rootEntry?.id}";
-	  			  
-	  			  cmis.currentObjectId="${request.cmis?.rootEntry?.id}";
-  				  
+
+  				  cmis.rootFolder=${rootFolderEntry.encodeAsJSON()};
+				  cmis.currentFolder=${rootFolderEntry.encodeAsJSON()};
+				  cmis.currentObject=${rootFolderEntry.encodeAsJSON()};
+
   				  cmis.readOnly=${readOnly};
   				  cmis.cico=${cico};
 				  cmis.restore=${restore};
   				  
-  				  var uploader={}
-  				  uploader.uploadMessage="${message(code:'cmis.uploader.uploadafile')}";
-  				  uploader.dropfilesMessage="${message(code:'cmis.uploader.dropfileshere')}"; 				    				    				  
   				  </script>"""
 	  out << html
 	 
 	  }
-	}
-	
-	/**
-	 * cmis:uploadHead
-	 * Element to place in HTML page's <head> section for the file uploader
-	 * 
-	 */
-	def uploadHead = { attrs ->
-		def html=""
-		if (applicationContext.cmisService.enabled) { 
-		html="""
-         <script  type="text/javascript">       
-        \$(function() {		 
-        var uploader = new qq.FileUploader({      			
-      			element: document.getElementById('file-uploader'),
-      			// path to server-side upload script
-      			action: cmis.baseUrl+'/cmisDocument/fileupload',
-      			params: {      	
-      				},
-      			onComplete: function(id, fileName, responseJSON){
-  					\$("#form").append('<input type=\"hidden\" name=\"filename\" value=\"'+fileName+'\" />');
-      			},
-      			template: '<div class="qq-uploader">' + 
-                '<div class="qq-upload-drop-area"><span>${message(code:'cmis.uploader.dropfileshere')}</span></div>' +
-                '<div class="qq-upload-button">${message(code:'cmis.uploader.uploadafile')}</div>' +
-                '<ul class="qq-upload-list"></ul>' + 
-             	'</div>'
-   			});
-   			});
-		</script> 
-		"""
-		}
-		out << html
-		
 	}
 	
 	/**
@@ -186,10 +148,10 @@ class CmisTagLib  implements ApplicationContextAware {
 
 		def html="""
 		<div id="list-toolbar" class="navbar btn-group" >
-			<a href="#" onclick="cmis.gotoHomeFolder();return false;" title="${g.message(code:'cmis.list.homefolder.help')}" class="btn btn-small" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'gohome.png')}" /></a>
-			<a href="#" onclick="cmis.gotoParentFolder();return false;" title="${g.message(code:'cmis.list.parentfolder.help')}" class="btn btn-small" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'go-up.png')}" /></a>
-			<a onclick="dialog.formDialog(null,'cmisDocument',{'dialogname':'newfolder'},{'getParentId':cmis.currentFolderId});return false;" title="${g.message(code:'cmis.list.newfolder.help')}" class="btn btn-small" href="${createLink(controller:'cmisDocument',action: 'newfolder')}" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'folder-new.png')}" /></a>
-			<a onclick="dialog.formDialog(null,'cmisDocument',{'dialogname':'newdocument'},{'getParentId':cmis.currentFolderId});return false;" title="${g.message(code:'cmis.list.newdocument.help')}" class="btn btn-small" href="${createLink(controller:'cmisDocument',action: 'newdocument')}" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'document-new.png')}" /></a>
+			<span href="#" onclick="cmis.gotoHomeFolder();event.returnValue=false;return false;" title="${g.message(code:'cmis.list.homefolder.help')}" class="btn btn-small" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'gohome.png')}" /></span>
+			<a href="#" onclick="cmis.gotoParentFolder();event.returnValue=false;return false;" title="${g.message(code:'cmis.list.parentfolder.help')}" class="btn btn-small" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'go-up.png')}" /></a>
+			<a onclick="dialog.formDialog(null,'cmisDocument',{'dialogname':'newfolder'},{'getParentId':cmis.currentFolder.id});event.returnValue=false;return false;" title="${g.message(code:'cmis.list.newfolder.help')}" class="btn btn-small" href="${createLink(controller:'cmisDocument',action: 'newfolder')}" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'folder-new.png')}" /></a>
+			<a onclick="dialog.formDialog(null,'cmisDocument',{'dialogname':'newdocument'},{'getParentId':cmis.currentFolder.id});event.returnValue=false;return false;" title="${g.message(code:'cmis.list.newdocument.help')}" class="btn btn-small" href="${createLink(controller:'cmisDocument',action: 'newdocument')}" ><img src="${resource(dir:'css/theme/icons/actions/16', file:'document-new.png')}" /></a>
 		</div>
 		<div id="list-body" class="datatable">
 			${breadcrumb}

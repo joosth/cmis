@@ -39,16 +39,16 @@ cmis.refreshTree = function refreshTree(id) {
 // Refresh function that responds to generic CMIS refresh events
 cmis.refreshMe = function refreshMe(){
 	//
-	var currentFolderElement=document.getElementById(cmis.currentFolderId);
+	var currentFolderElement=document.getElementById(cmis.currentFolder.id);
 
 	if (currentFolderElement) {	
 		cmis.tree.jstree('open_node', currentFolderElement, null);
 	}
 	
 	var rootFolderElement=$("#treediv ul li")[0];
-	if (rootFolderElement!=null && cmis.currentFolderEntry!=null) {
+	if (rootFolderElement!=null && cmis.currentFolder!=null) {
 		cmis.tree.jstree('open_node', rootFolderElement, null);		
-		var path=cmis.currentFolderEntry.properties["cmis:path"];
+		var path=cmis.currentFolder.properties["cmis:path"];
 		
 		var pathElements=path.split('/');
 		var currentElement=rootFolderElement;

@@ -25,11 +25,11 @@
 
 // event handler for refresh events. This either reloads the pane or instructs the AJAX based list view to refresh itself.
 cmis.refreshDetailsPane = function refreshDetailsPane(){	
-	if (cmis.currentObjectEntry.properties["cmis:baseTypeId"]=="cmis:folder" && $(".file-list")[0]) {		
+	if (cmis.currentObject.properties["cmis:baseTypeId"]=="cmis:folder" && $(".file-list")[0]) {		
 		cmis.initDatatable();
 	} else {
-		var parentPath=cmis.currentObjectEntry.properties["cmis:path"];
-		var objectId=cmis.currentObjectEntry.properties["cmis:objectId"];
+		var parentPath=cmis.currentObject.properties["cmis:path"];
+		var objectId=cmis.currentObject.properties["cmis:objectId"];
 			
 		$(".detail-pane").load(cmis.baseUrl+"/cmisBrowse/detail/?objectId="+objectId+'&parentPath='+escape(parentPath),'',function() {      			  
             cmis.datatable=null;

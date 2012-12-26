@@ -7,10 +7,11 @@ modules = {
 		resource url:'/js/cmis.datatable.js'
 		resource url:'/js/cmis.detailspane.js'
 		resource url:'/js/cmis.breadcrumb.js'
-		
+
 		resource url:'/css/cmis.css'
 		resource url:'/images/favicon.ico'
-		resource url:'/css/theme/mimetypes.css'		
+		resource url:'/css/theme/mimetypes.css'
+		resource url:'/css/theme/images/generic-file-32.png'
 		
 	}
 		

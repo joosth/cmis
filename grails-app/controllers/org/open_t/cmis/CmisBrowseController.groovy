@@ -240,24 +240,29 @@ class CmisBrowseController {
 	}
 	
 	// get parent id, this is used by the 'up' button in the toolbar
-	def cmisParent =  {		
-		if (!params.objectId)
-		  params.objectId=cmisService.repositories.rootFolderId
-		def folder=cmisService.getObject(params.objectId)
-
-		def res=[success:true,objectId:folder.getFolderParent().id]
+	def cmisParent =  {
+		def folder
+		def entry=cmisService.rootFolder		
+		if (params.objectId) {
+			try {		
+				folder=cmisService.getObject(params.objectId)
+				entry=folder.getFolderParent()
+			} catch (Exception e) {
+				entry=cmisService.rootFolder
+			}
+		}		
+		def res=[success:true,objectId:entry.id,id:entry.id,properties:entry.props,isDocument:entry.isDocument,isFolder:entry.isFolder]
 		render res as JSON
 	}
 	
 	// get CMIS object for given id
 	def cmisEntryById =  {
 		def entry
-		if (!params.objectId) {
-		  entry=cmisService.getObjectByPath("/")
-		} else {
+		try {
 			entry=cmisService.getObject(params.objectId)
+		} catch (Exception e) {
+			entry=cmisService.rootFolder
 		}
-		
 		def res=[success:true,objectId:entry.id,id:entry.id,properties:entry.props,isDocument:entry.isDocument,isFolder:entry.isFolder]
 		render res as JSON
 	}

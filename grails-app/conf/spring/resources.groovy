@@ -1,4 +1,3 @@
-// Place your Spring DSL code here
 /*
  * Proxy bean which helps singletons to access the CmisService
  */
