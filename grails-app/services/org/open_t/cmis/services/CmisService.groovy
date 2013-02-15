@@ -69,6 +69,7 @@ class CmisService {
     static transactional = false
 	static scope="session"
 	def restService
+	def messageSource
 
 	List<Repository> repositories = new ArrayList<Repository>();
     def contextPath=""
@@ -232,7 +233,15 @@ class CmisService {
 	 */
     
     def getObjectByPath(path) {
-		cmisSession.getObjectByPath(path)    	
+		CmisObject cmisObject
+		try {
+				 cmisObject=cmisSession.getObjectByPath(path)
+		} catch (Exception e) {
+				cmisObject=null
+		}
+
+		
+		    	
     }
 	
 	/**
@@ -378,7 +387,7 @@ class CmisService {
 				path+="/"+pathElement
 				def entry=getObjectByPath(path)
 				if(!entry) {
-					createFolder(parent.objectId,pathElement,message(code:'cmisservice.createpath.message',default:"Created by CMIS service"))
+					createFolder(parent.objectId,pathElement,"Created by CMIS service")
 					parent=getObjectByPath(path)
 				} else {
 					parent=entry
