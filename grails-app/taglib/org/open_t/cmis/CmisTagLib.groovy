@@ -55,14 +55,19 @@ class CmisTagLib  implements ApplicationContextAware {
 	  def rootEntry
 	  
 	  if (ConfigurationHolder.config.cmis.enabled) {
+		  println "AAAA"
 		  if (!applicationContext.cmisService.initialized) {
+			  println "BBB"
 			  if (attrs.username) {
-				  applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)			  
+				  println "CCCC"
+				  applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)
+				  println "DDD"
 			  } else {
+			  println "EEE"
 			  	applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
 			  }
 		  }
-		  
+		  println "ZZZZZ"
 		  if (attrs.rootNode) {
 			  rootEntry=applicationContext.cmisService.getObject(attrs.rootNode)		 
 		  } else if (attrs.path) {

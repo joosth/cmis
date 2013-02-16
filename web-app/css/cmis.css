@@ -29,28 +29,28 @@ div.datatable {width:100%}
 
 .action {min-height:16px; padding:2px 0 2px 20px;background-repeat:no-repeat;cursor:pointer;}
 
-.action-edit {background-image:url("theme/icons/actions/16/details-16.png"); display:block;}
-.action-show {background-image:url("theme/icons/actions/16/view-in-browser-16.png"); display:block;}
-.action-props {background-image:url("theme/icons/actions/16/document-properties.png"); display:block;}
-.action-edit {background-image:url("theme/icons/actions/16/editcopy.png"); display:block;}
-.action-history {background-image:url("theme/icons/actions/16/document-history.png"); display:block;}
-.action-delete {background-image:url("theme/icons/actions/16/remove.png"); display:block;}
+.action-edit {background-image:url("theme/icons/actions/16/details-16.png"); display:inline-block;}
+.action-show {background-image:url("theme/icons/actions/16/view-in-browser-16.png"); display:inline-block;}
+.action-props {background-image:url("theme/icons/actions/16/document-properties.png"); display:inline-block;}
+.action-edit {background-image:url("theme/icons/actions/16/editcopy.png"); display:inline-block;}
+.action-history {background-image:url("theme/icons/actions/16/document-history.png"); display:inline-block;}
+.action-delete {background-image:url("theme/icons/actions/16/remove.png"); display:inline-block;}
 
-.action-download {background-image:url("theme/icons/actions/16/document-save.png"); display:block;}
-.action-updatedocument {background-image:url("theme/icons/actions/16/extract-archive.png"); display:block;}
-.action-upload {background-image:url("theme/icons/actions/16/extract-archive.png"); display:block;}
+.action-download {background-image:url("theme/icons/actions/16/document-save.png"); display:inline-block;}
+.action-updatedocument {background-image:url("theme/icons/actions/16/extract-archive.png"); display:inline-block;}
+.action-upload {background-image:url("theme/icons/actions/16/extract-archive.png"); display:inline-block;}
 
-.action-checkout {background-image:url("theme/icons/actions/16/document-send.png"); display:block;}
-.action-checkin {background-image:url("theme/icons/actions/16/document-revert.png"); display:block;}
-.action-cancelcheckout {background-image:url("theme/icons/actions/16/gtk-undo-ltr.png"); display:block;}
-.action-newfolder {background-image:url("theme/icons/actions/16/folder-new.png"); display:block;}
-.action-newdocument {background-image:url("theme/icons/actions/16/document-new.png"); display:block;}
+.action-checkout {background-image:url("theme/icons/actions/16/document-send.png"); display:inline-block;}
+.action-checkin {background-image:url("theme/icons/actions/16/document-revert.png"); display:inline-block;}
+.action-cancelcheckout {background-image:url("theme/icons/actions/16/gtk-undo-ltr.png"); display:inline-block;}
+.action-newfolder {background-image:url("theme/icons/actions/16/folder-new.png"); display:inline-block;}
+.action-newdocument {background-image:url("theme/icons/actions/16/document-new.png"); display:inline-block;}
 
-.action-edit-online {background-image:url("theme/icons/actions/16/document-page-setup.png"); display:block;}
+.action-edit-online {background-image:url("theme/icons/actions/16/document-page-setup.png"); display:inline-block;}
 
 
-.action-home {background-image:url("theme/icons/actions/16/gohome.png"); display:block;}
-.action-up {background-image:url("theme/icons/actions/16/go-up.png"); display:block;}
+.action-home {background-image:url("theme/icons/actions/16/gohome.png"); display:inline-block;}
+.action-up {background-image:url("theme/icons/actions/16/go-up.png"); display:inline-block;}
 
 .treediv {
 	font-size: 11px;

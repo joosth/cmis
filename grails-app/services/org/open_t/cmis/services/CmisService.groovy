@@ -63,6 +63,9 @@ import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.open_t.cmis.authentication.*
 
 import net.sf.jmimemagic.*;
+import org.apache.tika.Tika;
+import org.apache.tika.io.TikaInputStream;
+
 
 class CmisService {
     
@@ -116,7 +119,7 @@ class CmisService {
 		
 		def authenticationClass=ConfigurationHolder.config.cmis.authenticationClass
 		def authenticationParameters=ConfigurationHolder.config.cmis.authenticationParameters
-		
+		println "AAAA ..."
 		// Use our own authentication class if provided
 		if (authenticationClass) {
 			parameter.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, authenticationClass);
@@ -124,35 +127,37 @@ class CmisService {
 				parameter.put(key,value)
 			}
 		}
-
+		println "BBBB ..."
 		parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
 		parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
 		
 		SessionFactory sessionFactory = SessionFactoryImpl.newInstance();
-		
+		println "CCCx ..."
 		// find all the repositories at this URL - there should only be one.
 		repositories = sessionFactory.getRepositories(parameter);
-		
+		println "CCCa ..."
 		// create session with the first (and only) repository
 		Repository repository = repositories.get(0);
 		parameter.put(SessionParameter.REPOSITORY_ID, repository.getId());
 		cmisSession = sessionFactory.createSession(parameter);
-		
+		println "DDD ..."
 		OperationContext oc = cmisSession.createOperationContext();
 		oc.setIncludePathSegments(true)
 		oc.setRenditionFilterString("cmis:thumbnail")
 		oc.setOrderBy("cmis:name ASC")
 		oc.setCacheEnabled(true)
 		cmisSession.setDefaultContext(oc)
-				
+		println "EEE ..."
 		//This is the root path we fall back on when nothing is defined in a view 
-		def rootPath=ConfigurationHolder.config.cmis.authenticationParameters?:"/"
+		def rootPath=ConfigurationHolder.config.cmis.rootPath?:"/"
 		rootFolder = cmisSession.getObjectByPath(rootPath);
 		
     	initialized=true
     	enabled=true
 		
 		contextPath=org.open_t.util.SpringUtil.applicationContext.id+pluginManager.getPluginPath("cmis")
+		
+		println "Done initializing CMIS"
 		
     }
 	
@@ -262,6 +267,35 @@ class CmisService {
 		properties.put(PropertyIds.NAME, name);
 		Folder newFolder=parentFolder.createFolder(properties)				
     }
+	
+	
+	public String getMimeType(File file) {
+		
+				String mimeType = null;
+		
+				try {
+		
+					Tika tika = null;
+					TikaInputStream is = null;
+		
+					// Creating new Instance of org.apache.tika.Tika
+					tika = new Tika();
+		
+					// Detecting MIME Type of the File
+					mimeType = tika.detect(file);
+		
+				} catch (FileNotFoundException e) {
+					log.warning "Specified File not found"
+				} catch (IOException e) {
+					log.warning "IO Error"
+				}
+		
+				// returning detected MIME Type
+				return mimeType;
+		
+			}
+		
+	
     
 	/**
 	 * Create a document in the CMIS repository
@@ -276,14 +310,14 @@ class CmisService {
     def createDocument(parent,String filename,String name,String description=null) {
     	def parentFolder=getObject(parent)
 		
-    	Magic parser = new Magic() ;
+    	
     	// getMagicMatch accepts Files or byte[],
     	// which is nice if you want to test streams
     	def mimetype="application/octet-stream"
     	try {
     		// The false means no extension hints.
-    		MagicMatch match = parser.getMagicMatch(new File(filename),false);
-    		mimetype=match.getMimeType();
+    		
+			mimetype = getMimeType(new File(filename))
     		log.debug "Hey, we have a mimetype match: ${mimetype}"
 		} catch (Exception e) {
     		// Quietly stay at the default if we can't find it ...
@@ -318,15 +352,11 @@ class CmisService {
 	 */
 	def updateDocument(obj,String filename) {
 		def cmisObject=getObject(obj)
-		
-		Magic parser = new Magic() ;
-		// getMagicMatch accepts Files or byte[],
-		// which is nice if you want to test streams
+
 		def mimetype="application/octet-stream"
 		try {
-			// The false means no extension hints.
-			MagicMatch match = parser.getMagicMatch(new File(filename),false);
-			mimetype=match.getMimeType();
+
+			mimetype = getMimeType(new File(filename))
 			log.debug "Hey, we have a mimetype match: ${mimetype}"
 		} catch (Exception e) {
 			// Quietly stay at the default if we can't find it ...
