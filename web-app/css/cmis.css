@@ -14,6 +14,7 @@ th.cmis-list-actions {width:235px;}
 .clickable-cell {cursor:pointer;}
 .clickable-row {cursor:pointer;}
 
+.mime-16 { background-image: url("theme/icons/mimetypes/16/document.png") }
 
 .mime-16 {cursor:pointer;display:block;min-height:16px; padding:2px 0 2px 20px;background-repeat:no-repeat;display:block;}
 .folder-16 { background-image: url("theme/icons/places/16/folder.png" ) ;}
