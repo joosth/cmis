@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationContext
 
 import org.springframework.context.*
+import org.open_t.dialog.DialogException
 
 class CmisTagLib  implements ApplicationContextAware {
 
@@ -55,19 +56,21 @@ class CmisTagLib  implements ApplicationContextAware {
 	  def rootEntry
 	  
 	  if (ConfigurationHolder.config.cmis.enabled) {
-		  println "AAAA"
+		  
 		  if (!applicationContext.cmisService.initialized) {
-			  println "BBB"
-			  if (attrs.username) {
-				  println "CCCC"
-				  applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)
-				  println "DDD"
-			  } else {
-			  println "EEE"
-			  	applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
+			  try {
+				  if (attrs.username) {
+				
+					  applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,attrs.username,attrs.password)
+				
+				  } else {			
+				  	applicationContext.cmisService.init(ConfigurationHolder.config.cmis.url,ConfigurationHolder.config.cmis.username,ConfigurationHolder.config.cmis.password)
+				  }
+			  } catch (Exception e) {
+			  	throw new DialogException("cmistaglib.head.initialization.failed")
 			  }
 		  }
-		  println "ZZZZZ"
+		  
 		  if (attrs.rootNode) {
 			  rootEntry=applicationContext.cmisService.getObject(attrs.rootNode)		 
 		  } else if (attrs.path) {
