@@ -59,7 +59,7 @@ jQuery.fn.sppLink = function () {
             }
             else
             {
-            	alert("Onliene editing failed");               
+            	alert("Online editing failed");               
             }			
 		}
 			
