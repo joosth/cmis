@@ -6,7 +6,7 @@
 		<cmis:head path="/" readOnly="false" cico="true" restore="true"/>
     </head>    
     <body>
-		<div class="row">
+		<div class="row-fluid">
 			<div class="span12" >    
 				<cmis:list />
 			</div>
