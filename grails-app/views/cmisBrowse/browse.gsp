@@ -6,7 +6,7 @@
 		<cmis:head path="/" cico="true" restore="true"/>
     </head>    
     <body>
-    	<div class="row">
+    	<div class="row-fluid">
     		<div class="span4">        			    		
 				<%-- File tree --%>
 				<cmis:tree />
