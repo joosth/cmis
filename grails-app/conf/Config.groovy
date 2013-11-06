@@ -57,3 +57,4 @@ grails.views.gsp.encoding="UTF-8"
 dialog {
 	bootstrap=true
 }
+

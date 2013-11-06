@@ -1,27 +1,33 @@
-<plugin name='cmis' version='0.1' grailsVersion='1.3.5 &gt; *'>
-  <author>Your name</author>
-  <title>Plugin summary/headline</title>
+<plugin name='cmis' version='0.2' grailsVersion='2.1.1 &gt; *'>
+  <author>Joost Horward</author>
+  <authorEmail>joost@open-t.nl</authorEmail>
+  <title>CMIS plugin</title>
   <description>\
-Brief description of the plugin.
+Provides CMIS services and views based on Apache Chemistry OpenCMIS, Twitter Bootstrap and the Dialog plugin for Grails.
 </description>
-  <documentation>http://grails.org/plugin/cmis</documentation>
+  <documentation>http://www.open-t.nl/catviz/p/projects/cmis-plugin</documentation>
   <type>CmisGrailsPlugin</type>
   <resources>
     <resource>BootStrap</resource>
+    <resource>CmisResources</resource>
     <resource>spring.resources</resource>
     <resource>org.open_t.cmis.CmisAuthenticateController</resource>
     <resource>org.open_t.cmis.CmisBrowseController</resource>
     <resource>org.open_t.cmis.CmisDocumentController</resource>
+    <resource>org.open_t.cmis.services.CmisInitializationService</resource>
     <resource>org.open_t.cmis.services.CmisService</resource>
-    <resource>org.open_t.cmis.services.RestService</resource>
     <resource>org.open_t.cmis.CmisTagLib</resource>
   </resources>
   <repositories>
     <repository name='grailsCentral' url='http://grails.org/plugins' />
-    <repository name='http://repo.grails.org/grails/core' url='http://repo.grails.org/grails/core/' />
+    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
   </repositories>
   <dependencies />
-  <plugins />
+  <plugins>
+    <build>
+      <plugin group='org.grails.plugins' name='tomcat' version='2.2.4' />
+    </build>
+  </plugins>
   <runtimePluginRequirements />
   <behavior />
 </plugin>
