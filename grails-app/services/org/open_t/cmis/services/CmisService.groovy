@@ -119,7 +119,6 @@ class CmisService {
 		
 		def authenticationClass=ConfigurationHolder.config.cmis.authenticationClass
 		def authenticationParameters=ConfigurationHolder.config.cmis.authenticationParameters
-		println "AAAA ..."
 		// Use our own authentication class if provided
 		if (authenticationClass) {
 			parameter.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, authenticationClass);
@@ -127,27 +126,22 @@ class CmisService {
 				parameter.put(key,value)
 			}
 		}
-		println "BBBB ..."
 		parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
 		parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
 		
 		SessionFactory sessionFactory = SessionFactoryImpl.newInstance();
-		println "CCCx ..."
 		// find all the repositories at this URL - there should only be one.
 		repositories = sessionFactory.getRepositories(parameter);
-		println "CCCa ..."
 		// create session with the first (and only) repository
 		Repository repository = repositories.get(0);
 		parameter.put(SessionParameter.REPOSITORY_ID, repository.getId());
 		cmisSession = sessionFactory.createSession(parameter);
-		println "DDD ..."
 		OperationContext oc = cmisSession.createOperationContext();
 		oc.setIncludePathSegments(true)
 		oc.setRenditionFilterString("cmis:thumbnail")
 		oc.setOrderBy("cmis:name ASC")
 		oc.setCacheEnabled(true)
 		cmisSession.setDefaultContext(oc)
-		println "EEE ..."
 		//This is the root path we fall back on when nothing is defined in a view 
 		def rootPath=ConfigurationHolder.config.cmis.rootPath?:"/"
 		rootFolder = cmisSession.getObjectByPath(rootPath);
@@ -157,7 +151,7 @@ class CmisService {
 		
 		contextPath=org.open_t.util.SpringUtil.applicationContext.id+pluginManager.getPluginPath("cmis")
 		
-		println "Done initializing CMIS"
+		log.debug "Done initializing CMIS"
 		
     }
 	

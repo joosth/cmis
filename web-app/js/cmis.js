@@ -95,7 +95,8 @@ cmis.gotoHomeFolder = function gotoHomeFolder() {
 
 // This is performed on a full page reload
 cmis.reload = function reload() {
-    $("span.help").tooltip({});		
+    //$("span.help").tooltip({});
+    $("span.help").tooltip({container:'body',placement:'right'});
     $("li.menu-item a").tooltip({});            	          
 }
 

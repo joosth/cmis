@@ -1,4 +1,4 @@
-/* 
+/*
  * CMIS Plugin for Grails
  * Copyright 2010-2013, Open-T B.V., and individual contributors as indicated
  * by the @author tag. See the copyright.txt in the distribution for a
@@ -19,38 +19,38 @@
 
 /**
  * CMIS plugin Javascript for datatables list
- * 
+ *
  * @author Joost Horward
  */
 
 // Handle refresh event
 cmis.refreshDatatable = function refreshDatatable(event,eventData) {
 	cmis.initDatatable();
-	cmis.datatable.fnDraw(eventData.contextChange);	 
+	cmis.datatable.fnDraw(eventData.contextChange);
 }
 
 // Initialize the datatable
 cmis.initDatatable = function initDatatable() {
 	if (!cmis.datatable) {
-	
-		$(".cmis-datatable").bind("refresh",cmis.refreshDatatable);	  
+
+		$(".cmis-datatable").bind("refresh",cmis.refreshDatatable);
 		$(".cmis-datatable").addClass("cmis-events");
-	
+
 		$(".cmis-datatable").bind("dialog-refresh",cmis.refreshDatatable);
 		$(".cmis-datatable").addClass("dialog-events");
-	  
-		  
+
+
 		cmis.datatable=$(".cmis-datatable").dataTable( {
 			"bProcessing": false,
-			"bServerSide": true,		
+			"bServerSide": true,
 			"sAjaxSource": cmis.baseUrl+"/cmisBrowse/jsonlist",
 			"fnServerData": function ( sSource, aoData, fnCallback ) {
 				aoData.push( { "name":"objectId","value": window.cmis.currentFolder.id } );
 				aoData.push( { "name":"readOnly","value": window.cmis.readOnly } );
 				aoData.push( { "name":"cico","value": window.cmis.cico } );
-				$.getJSON( sSource, aoData, function (json) { 
+				$.getJSON( sSource, aoData, function (json) {
 					fnCallback(json);
-					$("span.action,a.action").tooltip();	                 
+					$("span.action,a.action").tooltip();
 				});
 			},
 	 		/*
@@ -64,8 +64,8 @@ cmis.initDatatable = function initDatatable() {
 				< and > - div elements
 				<"class" and > - div with a class
 				Examples: <"wrapper"flipt>, <lf<t>ip>
-			*/			
-			"sDom": 'tlip',	  		
+			*/
+			"sDom": 'tlip',
 			"sPaginationType": "bootstrap",
 			"bFilter": false,
 			"bJQueryUI": false,
@@ -76,8 +76,8 @@ cmis.initDatatable = function initDatatable() {
 		});
 	}
 }
-        
-//Initialization	
+
+//Initialization
 $(function() {
 	cmis.initDatatable();
 	$("#list-toolbar a").tooltip();
